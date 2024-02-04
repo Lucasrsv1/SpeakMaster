@@ -1,0 +1,42 @@
+{
+	"name": "speakmaster",
+	"version": "0.0.1",
+	"description": "SpeakMaster: realizando tarefas via comandos de voz em múltiplos idiomas",
+	"main": "index.js",
+	"scripts": {
+		"start": "nodemon index.js",
+		"front": "cd front-end && npm start",
+		"db_create": "sequelize db:create",
+		"db_drop": "sequelize db:drop",
+		"db_migrate": "sequelize db:migrate"
+	},
+	"author": "Lucas Rassilan Vilanova",
+	"license": "ISC",
+	"dependencies": {
+		"chalk": "^4.1.2",
+		"console-stamp": "^3.1.0",
+		"cors": "^2.8.5",
+		"dayjs": "^1.11.9",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"express-validator": "^6.14.2",
+		"js-sha512": "^0.8.0",
+		"jsonwebtoken": "^9.0.0",
+		"morgan": "^1.10.0",
+		"pg": "8.8.0",
+		"sequelize": "^6.6.5"
+	},
+	"devDependencies": {
+		"eslint": "^8.27.0",
+		"nodemon": "^2.0.20",
+		"sequelize-cli": "^6.2.0"
+	},
+	"nodemonConfig": {
+		"ignore": [
+			".git",
+			"node_modules/",
+			"front-end/",
+			"public/"
+		]
+	}
+}

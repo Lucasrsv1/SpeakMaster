@@ -1,0 +1,59 @@
+// ========================================================================
+// Esquema do banco de dados do SpeakMaster.
+// Para visualiza-lo acesse https://dbdiagram.io/d/64ea7a1702bd1c4a5e7618ce
+// ========================================================================
+
+Table user {
+  id_user int [pk, increment]
+  name varchar(200) [not null]
+  email varchar(100) [not null]
+  password varchar(256) [not null]
+  mic_on_by_default boolean [not null, default: `false`]
+  interface_language varchar(20) [not null, default: `pt-BR`]
+  language_commands jsonb [not null, default: `'[]'`]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  deleted_at timestamp [null]
+}
+
+Table module {
+  id_module int [pk, increment]
+  name varchar(200) [not null]
+  preferences_definition jsonb [not null, default: `'[]'`]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  deleted_at timestamp [null]
+}
+
+Table module_default_commands {
+  id_module_default_commands int [pk, increment]
+  id_module int [not null, ref: > module.id_module]
+  language varchar(20) [not null]
+  commands jsonb [not null, default: `'[]'`]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  deleted_at timestamp [null]
+}
+
+Table user_module {
+  id_user_module int [pk, increment]
+  id_user int [not null, ref: > user.id_user]
+  id_module int [not null, ref: > module.id_module]
+  is_active boolean [not null, default: `true`]
+  prefix varchar [null]
+  is_prefix_mandated boolean [not null, default: `false`]
+  preferences jsonb [not null, default: `'[]'`]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  deleted_at timestamp [null]
+}
+
+Table user_module_commands {
+  id_user_module_commands int [pk, increment]
+  id_user_module int [not null, ref: > user_module.id_user_module]
+  language varchar(20) [not null]
+  commands jsonb [not null, default: `'[]'`]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  deleted_at timestamp [null]
+}
