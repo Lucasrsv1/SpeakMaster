@@ -1,0 +1,25 @@
+.navbar {
+	background-color: white;
+}
+
+.navbar-brand {
+	color: #30981B;
+
+	h1 {
+		font-size: 36px;
+	}
+
+	img {
+		height: 54px;
+	}
+}
+
+.menu-toggle, .menu-toggle mat-icon {
+	height: 48px;
+	width: 48px;
+}
+
+.menu-toggle mat-icon {
+	color: #30981B;
+	font-size: 48px;
+}

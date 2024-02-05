@@ -1,0 +1,17 @@
+<div class="background"></div>
+
+<block-ui message="Carregando...">
+	<app-header (collapseChange)="collapseChange($event)"></app-header>
+
+	<div class="d-flex w-100">
+		<app-side-menu [class.menu-collapsed]="menuCollapsed" [class.is-login]="isLogin"></app-side-menu>
+
+		<div class="flex-fill">
+			<div class="route-content">
+				<router-outlet></router-outlet>
+			</div>
+
+			<app-footer></app-footer>
+		</div>
+	</div>
+</block-ui>

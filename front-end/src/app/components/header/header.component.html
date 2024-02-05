@@ -1,0 +1,12 @@
+<nav class="navbar">
+	<div class="d-flex align-items-center">
+		<button class="menu-toggle btn btn-link p-0 mx-3" type="button" (click)="collapse()" aria-controls="menu" [attr.aria-expanded]="!isMenuCollapsed" aria-label="Abrir menu">
+			<mat-icon fontIcon="menu"></mat-icon>
+		</button>
+
+		<a class="navbar-brand d-flex align-items-center" title="SpeakMaster" [routerLink]="['/']">
+			<h1 class="m-0 me-3">SpeakMaster</h1>
+			<img src="../../../assets/logo.png"/>
+		</a>
+	</div>
+</nav>

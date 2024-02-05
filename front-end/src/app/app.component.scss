@@ -1,0 +1,24 @@
+.route-content {
+	background-color: whitesmoke;
+	min-height: 430px;
+	min-height: calc(100vh - 80px - 158px);
+}
+
+app-side-menu {
+	color: white;
+	background-color: #30981B;
+	min-width: 300px;
+	min-height: calc(100vh - 80px);
+	margin-left: 0px;
+	transition-property: margin-left;
+	transition-duration: 550ms;
+}
+
+app-side-menu.menu-collapsed {
+	margin-left: -300px;
+	transition-duration: 650ms;
+}
+
+app-side-menu.is-login {
+	margin-left: -300px;
+}
