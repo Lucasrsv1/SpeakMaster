@@ -1,0 +1,54 @@
+<div class="container py-5" align="center">
+	<div class="card text-start">
+		<div class="card-header p-3 bg-primary text-white">
+			<h5 class="mb-0">Bem-vindo ao SpeakMaster!</h5>
+		</div>
+
+		<div class="card-body">
+			<form [formGroup]="form">
+				<div class="mb-3">
+					<label for="email" class="form-label">E-mail</label>
+					<app-visual-validator [config]="validations" field="email">
+						<input
+							#emailInput
+							id="email"
+							type="email"
+							class="form-control"
+							formControlName="email"
+							placeholder="Digite seu e-mail aqui"
+							autofocus
+						>
+					</app-visual-validator>
+				</div>
+
+				<div class="mb-3">
+					<label for="password" class="form-label">Senha</label>
+					<app-visual-validator [config]="validations" field="password">
+						<div class="input-group">
+							<input
+								id="password"
+								[type]="showPassword ? 'text' : 'password'"
+								class="form-control"
+								formControlName="password"
+								placeholder="Digite sua senha"
+							>
+							<button class="btn text-secondary" id="eye-btn" type="button" (click)="showPassword = !showPassword">
+								<mat-icon *ngIf="showPassword" fontIcon="visibility"></mat-icon>
+								<mat-icon *ngIf="!showPassword" fontIcon="visibility_off"></mat-icon>
+							</button>
+						</div>
+					</app-visual-validator>
+				</div>
+
+				<div class="form-buttons">
+					<button class="btn btn-secondary mb-3" type="button" (click)="clear()">Limpar</button>
+					<button class="btn btn-primary mb-3" type="submit" (click)="login()" [disabled]="form.invalid">Login</button>
+				</div>
+			</form>
+
+			<div class="text-center">
+				<a [routerLink]="['/signUp']">Não tem usuário? Cadastre-se aqui!</a>
+			</div>
+		</div>
+	</div>
+</div>

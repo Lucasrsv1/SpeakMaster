@@ -55,7 +55,7 @@ export class AuthenticationService {
 				if (blockUI) blockUI.stop();
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["about"]);
+				this.router.navigate(["profile"]);
 				this.$loggedClient.next(this.getLoggedUser());
 			},
 
@@ -82,7 +82,7 @@ export class AuthenticationService {
 				if (blockUI) blockUI.stop();
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["about"]);
+				this.router.navigate(["profile"]);
 				this.$loggedClient.next(this.getLoggedUser());
 			},
 
@@ -110,7 +110,7 @@ export class AuthenticationService {
 				if (blockUI) blockUI.stop();
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["about"]);
+				this.router.navigate(["profile"]);
 				this.$loggedClient.next(this.getLoggedUser());
 			},
 

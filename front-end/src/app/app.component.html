@@ -1,10 +1,10 @@
 <div class="background"></div>
 
 <block-ui message="Carregando...">
-	<app-header (collapseChange)="collapseChange($event)"></app-header>
+	<app-header [disableMenu]="disableMenu" (collapseChange)="collapseChange($event)"></app-header>
 
 	<div class="d-flex w-100">
-		<app-side-menu [class.menu-collapsed]="menuCollapsed" [class.is-login]="isLogin"></app-side-menu>
+		<app-side-menu *ngIf="!disableMenu" [class.menu-collapsed]="menuCollapsed"></app-side-menu>
 
 		<div class="flex-fill">
 			<div class="route-content">

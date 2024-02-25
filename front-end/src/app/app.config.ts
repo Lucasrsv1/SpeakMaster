@@ -1,9 +1,9 @@
-import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import localePt from "@angular/common/locales/pt";
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 import { provideRouter } from "@angular/router";
 import { registerLocaleData } from "@angular/common";
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from "@angular/core";
+import { HTTP_INTERCEPTORS, provideHttpClient } from "@angular/common/http";
 
 import { BlockUIModule } from "ng-block-ui";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
@@ -17,10 +17,11 @@ registerLocaleData(localePt);
 
 export const appConfig: ApplicationConfig = {
 	providers: [
-		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
-		{ provide: LOCALE_ID, useValue: "pt-BR" },
+		provideHttpClient(),
 		provideRouter(routes),
 		provideAnimationsAsync(),
-		importProvidersFrom(BlockUIModule.forRoot())
+		importProvidersFrom(BlockUIModule.forRoot()),
+		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
+		{ provide: LOCALE_ID, useValue: "pt-BR" }
 	]
 };
