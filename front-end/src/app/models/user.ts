@@ -1,11 +1,11 @@
+import { LanguageCode } from "./languages";
+
 export interface IUser {
 	idUser: number;
 	name: string;
 	email: string;
 	micOnByDefault: boolean;
-
-	// TODO: criar uma enumeração para os idiomas suportados
-	interfaceLanguage: string;
+	interfaceLanguage: LanguageCode;
 
 	// TODO: criar uma interface para os comandos de cada linguagem
 	languageCommands: object[];

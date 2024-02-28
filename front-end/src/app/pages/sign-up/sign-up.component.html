@@ -1,1 +1,67 @@
-<p>sign-up works!</p>
+<div class="container py-5" align="center">
+	<div class="card text-start">
+		<div class="card-header p-3 bg-primary text-white">
+			<h5 class="mb-0">Crie seu cadastro no SpeakMaster!</h5>
+		</div>
+
+		<div class="card-body">
+			<form [formGroup]="form">
+				<div class="mb-3">
+					<label for="name" class="form-label">Nome Completo</label>
+					<app-visual-validator [config]="validations" field="name">
+						<input
+							#nameInput
+							id="name"
+							type="text"
+							class="form-control"
+							formControlName="name"
+							placeholder="Digite seu nome"
+							autofocus
+						>
+					</app-visual-validator>
+				</div>
+
+				<div class="mb-3">
+					<label for="email" class="form-label">E-mail</label>
+					<app-visual-validator [config]="validations" field="email">
+						<input
+							id="email"
+							type="email"
+							class="form-control"
+							formControlName="email"
+							placeholder="Digite seu e-mail"
+						>
+					</app-visual-validator>
+				</div>
+
+				<div class="mb-3">
+					<label for="password" class="form-label">Senha</label>
+					<app-visual-validator [config]="validations" field="password">
+						<div class="input-group">
+							<input
+								id="password"
+								[type]="showPassword ? 'text' : 'password'"
+								class="form-control"
+								formControlName="password"
+								placeholder="Digite sua senha"
+							>
+							<button class="btn text-secondary" id="eye-btn" type="button" (click)="showPassword = !showPassword">
+								<mat-icon *ngIf="showPassword" fontIcon="visibility"></mat-icon>
+								<mat-icon *ngIf="!showPassword" fontIcon="visibility_off"></mat-icon>
+							</button>
+						</div>
+					</app-visual-validator>
+				</div>
+
+				<div class="form-buttons">
+					<button class="btn btn-secondary mb-3" type="reset" (click)="clear()">Limpar</button>
+					<button class="btn btn-primary mb-3" type="submit" (click)="signUp()" [disabled]="form.invalid">Cadastrar</button>
+				</div>
+			</form>
+
+			<div class="text-center">
+				<a [routerLink]="['/login']">Já tem usuário? Faça login aqui!</a>
+			</div>
+		</div>
+	</div>
+</div>

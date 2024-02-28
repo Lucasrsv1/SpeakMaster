@@ -39,15 +39,13 @@ $SpeakMaster-theme: mat.define-light-theme((
 /* Finished setting up Angular Material */
 
 $primary: #30981B;
-// $secondary: #4f55fc;
-// $dark: #6C757D;
+// $secondary: #696969;
 
 $min-contrast-ratio: 2.5;
 
 :root {
 	--primary: $primary;
 	// --secondary: $secondary;
-	// --dark: $dark;
 }
 
 /* Importing Bootstrap SCSS file. */

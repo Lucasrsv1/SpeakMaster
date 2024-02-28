@@ -23,3 +23,47 @@
 	color: #30981B;
 	font-size: 48px;
 }
+
+.navbar-nav {
+	.btn-link {
+		text-decoration: none;
+	}
+
+	.btn-link:not(.active):hover span {
+		text-decoration: underline;
+	}
+
+	.btn-link,
+	.btn.text-secondary {
+		border-color: transparent !important;
+	}
+
+	.btn-outline-primary {
+		&:not(:hover):not(:focus-visible) {
+			background-color: var(--bs-primary);
+		}
+
+		mat-icon {
+			width: 46px;
+			height: 46px;
+			line-height: 46px;
+			font-size: 36px;
+		}
+	}
+
+	.btn {
+		span {
+			font-size: 18px;
+		}
+	}
+}
+
+.dropdown-toggle::after {
+	display: none !important;
+}
+
+@media (min-width: 768px) {
+	.navbar-nav .btn-outline-primary:not(:hover):not(:focus-visible) {
+		background-color: #97CB8C;
+	}
+}

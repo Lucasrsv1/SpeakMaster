@@ -16,7 +16,7 @@ import { LocalStorageKey, LocalStorageService } from "../local-storage/local-sto
 
 @Injectable({ providedIn: "root" })
 export class AuthenticationService {
-	public $loggedClient = new BehaviorSubject<IUser | null>(null);
+	public $loggedUser = new BehaviorSubject<IUser | null>(null);
 
 	constructor (
 		private readonly http: HttpClient,
@@ -26,7 +26,7 @@ export class AuthenticationService {
 	) {
 		// Usa usuário já logado por meio do token armazenado (caso exista)
 		const user = this.getLoggedUser();
-		this.$loggedClient.next(user);
+		this.$loggedUser.next(user);
 	}
 
 	public isLoggedIn (): boolean {
@@ -56,7 +56,7 @@ export class AuthenticationService {
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
 				this.router.navigate(["profile"]);
-				this.$loggedClient.next(this.getLoggedUser());
+				this.$loggedUser.next(this.getLoggedUser());
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -71,7 +71,7 @@ export class AuthenticationService {
 		});
 	}
 
-	public signUp (user: IUser & { password: string }, blockUI?: NgBlockUI): void {
+	public signUp (user: Partial<IUser> & { password: string }, blockUI?: NgBlockUI): void {
 		user.password = sha512(user.password);
 
 		this.http.post<{ token: string }>(
@@ -83,7 +83,7 @@ export class AuthenticationService {
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
 				this.router.navigate(["profile"]);
-				this.$loggedClient.next(this.getLoggedUser());
+				this.$loggedUser.next(this.getLoggedUser());
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -111,7 +111,7 @@ export class AuthenticationService {
 
 				this.localStorage.set(LocalStorageKey.USER, response.token);
 				this.router.navigate(["profile"]);
-				this.$loggedClient.next(this.getLoggedUser());
+				this.$loggedUser.next(this.getLoggedUser());
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -128,7 +128,7 @@ export class AuthenticationService {
 
 	public signOut (): void {
 		this.localStorage.delete(LocalStorageKey.USER);
-		this.$loggedClient.next(null);
+		this.$loggedUser.next(null);
 		this.router.navigate(["login"]);
 	}
 }

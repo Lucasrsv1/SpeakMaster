@@ -1,0 +1,48 @@
+#eye-btn {
+	border: var(--bs-border-width) solid var(--bs-border-color);
+	border-radius: var(--bs-border-radius);
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+
+	mat-icon {
+		padding-top: 3px;
+	}
+}
+
+input.is-invalid ~ #eye-btn {
+	border-color: var(--bs-form-invalid-border-color);
+}
+
+input.is-valid ~ #eye-btn {
+	border-color: var(--bs-form-valid-border-color);
+}
+
+.card {
+	max-width: 650px;
+
+	mat-form-field {
+		width: 100%;
+	}
+
+	.form-buttons {
+		display: flex;
+		justify-content: center;
+		gap: 16px;
+
+		button {
+			height: 42px;
+			width: 100%;
+		}
+	}
+}
+
+@media (min-height: 768px) {
+	:host {
+		display: flex;
+		height: calc(100vh - 80px - 158px);
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		width: 100%;
+	}
+}
