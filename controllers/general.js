@@ -18,4 +18,5 @@ class General {
 	}
 }
 
-module.exports = new General();
+const generalController = new General();
+module.exports = generalController;

@@ -37,7 +37,7 @@ export class SignUpComponent {
 		this.form = this.formBuilder.group({
 			name: [null, [Validators.required, Validators.maxLength(200)]],
 			email: [null, [Validators.required, Validators.email]],
-			password: [null, Validators.required]
+			password: [null, [Validators.required, Validators.minLength(8)]]
 		});
 
 		this.validations = {
@@ -45,7 +45,10 @@ export class SignUpComponent {
 			fields: {
 				name: [{ key: "required" }, { key: "maxlength" }],
 				email: [{ key: "required" }, { key: "email" }],
-				password: [{ key: "required" }]
+				password: [
+					{ key: "required" },
+					{ key: "minlength", message: "A senha deve ter no mínimo 8 caracteres." }
+				]
 			}
 		};
 	}
