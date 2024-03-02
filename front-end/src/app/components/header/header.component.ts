@@ -1,13 +1,16 @@
 import { MatIcon } from "@angular/material/icon";
 import { RouterLink } from "@angular/router";
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { NgFor, NgIf } from "@angular/common";
 
 import { BsDropdownModule } from "ngx-bootstrap/dropdown";
 
+import { Subscription } from "rxjs";
+
 import { getDefaultLanguage, ILanguage, languages } from "../../models/languages";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
+import { TitleService } from "../../services/title/title.service";
 
 @Component({
 	selector: "app-header",
@@ -16,7 +19,7 @@ import { AuthenticationService } from "../../services/authentication/authenticat
 	templateUrl: "./header.component.html",
 	styleUrls: ["./header.component.scss"]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 	@Input()
 	public disableMenu: boolean = false;
 
@@ -28,29 +31,45 @@ export class HeaderComponent implements OnInit {
 	public isMicOn: boolean = false;
 	public isLoggedIn: boolean = false;
 
+	public pageTitle = "";
 	public isMenuCollapsed = false;
 	public languages: ILanguage[] = languages;
 
+	private subscriptions: Subscription[] = [];
+
 	constructor (
+		private readonly titleService: TitleService,
 		private readonly authenticationService: AuthenticationService
 	) {
-		this.authenticationService.$loggedUser.subscribe(user => {
-			this.isLoggedIn = this.authenticationService.isLoggedIn();
+		this.subscriptions.push(
+			this.authenticationService.$loggedUser.subscribe(user => {
+				this.isLoggedIn = this.authenticationService.isLoggedIn();
 
-			if (this.isLoggedIn && user) {
-				this.username = this.getShortName(user.name);
-				this.currentLanguage = user.interfaceLanguage;
-				this.isMicOn = user.micOnByDefault;
-			} else {
-				this.username = "";
-				this.currentLanguage = getDefaultLanguage();
-				this.isMicOn = false;
-			}
-		});
+				if (this.isLoggedIn && user) {
+					this.username = this.getShortName(user.name);
+					this.currentLanguage = user.interfaceLanguage;
+					this.isMicOn = user.micOnByDefault;
+				} else {
+					this.username = "";
+					this.currentLanguage = getDefaultLanguage();
+					this.isMicOn = false;
+				}
+			})
+		);
+
+		this.subscriptions.push(
+			this.titleService.$title.subscribe(title => {
+				this.pageTitle = title;
+			})
+		);
 	}
 
 	public ngOnInit (): void {
 		this.collapseChange.emit(this.isMenuCollapsed);
+	}
+
+	public ngOnDestroy (): void {
+		this.subscriptions.forEach(subscription => subscription.unsubscribe());
 	}
 
 	public collapse (): void {

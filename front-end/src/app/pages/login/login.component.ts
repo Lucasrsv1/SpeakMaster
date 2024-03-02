@@ -10,6 +10,7 @@ import { IValidations, VisualValidatorComponent } from "../../components/visual-
 
 import { AlertsService } from "../../services/alerts/alerts.service";
 import { AuthenticationService } from "../../services/authentication/authentication.service";
+import { TitleService } from "../../services/title/title.service";
 
 @Component({
 	selector: "app-login",
@@ -32,8 +33,11 @@ export class LoginComponent {
 	constructor (
 		private readonly formBuilder: FormBuilder,
 		private readonly alertsService: AlertsService,
-		private readonly authenticationService: AuthenticationService
+		private readonly authenticationService: AuthenticationService,
+		private readonly titleService: TitleService
 	) {
+		this.titleService.setTitle("Login");
+
 		this.form = this.formBuilder.group({
 			email: [null, [Validators.required, Validators.email]],
 			password: [null, Validators.required]

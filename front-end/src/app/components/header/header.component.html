@@ -16,6 +16,12 @@
 			<h1 class="m-0 me-3" [class.ms-3]="disableMenu">SpeakMaster</h1>
 			<img src="../../../assets/logo.png" class="d-none d-sm-block"/>
 		</a>
+
+		<div class="d-none d-xl-block" *ngIf="pageTitle">
+			<h1 class="m-0 ps-3 text-secondary fw-light border-start border-2 border-secondary">
+				{{ pageTitle }}
+			</h1>
+		</div>
 	</div>
 
 	<div>
