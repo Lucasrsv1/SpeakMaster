@@ -6,6 +6,7 @@ import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from "@angular/core
 import { HTTP_INTERCEPTORS, provideHttpClient } from "@angular/common/http";
 
 import { BlockUIModule } from "ng-block-ui";
+import { provideScrollbarOptions } from "ngx-scrollbar";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
 
 import { routes } from "./app.routes";
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
 		provideRouter(routes),
 		provideAnimationsAsync(),
 		importProvidersFrom(BlockUIModule.forRoot()),
+		provideScrollbarOptions({ visibility: "hover" }),
 		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
 		{ provide: LOCALE_ID, useValue: "pt-BR" }
 	]

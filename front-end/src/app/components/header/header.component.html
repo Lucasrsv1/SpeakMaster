@@ -14,7 +14,7 @@
 
 		<a class="navbar-brand d-flex align-items-center" title="SpeakMaster" [routerLink]="['/']">
 			<h1 class="m-0 me-3" [class.ms-3]="disableMenu">SpeakMaster</h1>
-			<img src="../../../assets/logo.png"/>
+			<img src="../../../assets/logo.png" class="d-none d-sm-block"/>
 		</a>
 	</div>
 
@@ -68,8 +68,8 @@
 					class="btn btn-outline-primary text-white mx-1 p-1 d-flex align-items-center"
 					[routerLink]="['/profile']"
 				>
-					<mat-icon class="bg-primary rounded me-md-2" fontIcon="person_outline"></mat-icon>
-					<span class="me-2 d-none d-md-block">{{ username }}</span>
+					<mat-icon class="bg-primary rounded me-lg-2" fontIcon="person_outline"></mat-icon>
+					<span class="me-2 d-none d-lg-block">{{ username }}</span>
 				</button>
 			</li>
 			<li class="nav-item">

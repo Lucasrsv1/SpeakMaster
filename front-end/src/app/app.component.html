@@ -6,12 +6,12 @@
 	<div class="d-flex w-100">
 		<app-side-menu *ngIf="!disableMenu" [class.menu-collapsed]="menuCollapsed"></app-side-menu>
 
-		<div class="flex-fill">
+		<ng-scrollbar class="flex-fill">
 			<div class="route-content">
 				<router-outlet></router-outlet>
 			</div>
 
 			<app-footer></app-footer>
-		</div>
+		</ng-scrollbar>
 	</div>
 </block-ui>

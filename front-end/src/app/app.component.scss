@@ -2,19 +2,26 @@
 	background-color: whitesmoke;
 	min-height: 430px;
 	min-height: calc(100vh - 80px - 158px);
+	margin-right: -24px;
+}
+
+ng-scrollbar {
+	max-height: calc(100vh - 80px);
 }
 
 app-side-menu {
 	color: white;
 	background-color: #30981B;
-	min-width: 300px;
+	min-width: 350px;
+	max-width: 350px;
 	min-height: calc(100vh - 80px);
+	max-height: calc(100vh - 80px);
 	margin-left: 0px;
 	transition-property: margin-left;
 	transition-duration: 550ms;
 }
 
 app-side-menu.menu-collapsed {
-	margin-left: -300px;
+	margin-left: -350px;
 	transition-duration: 650ms;
 }

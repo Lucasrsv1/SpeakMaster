@@ -1,1 +1,65 @@
-<p>side-menu works!</p>
+<ng-scrollbar>
+	<nav class="d-flex flex-column h-100 py-3 px-2">
+		<ul class="navbar-nav flex-fill">
+			<li class="nav-item mb-1">
+				<a class="link-light py-1 px-2 rounded" routerLink="/new-module" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<span class="flex-fill">Instalar Novos Módulos</span>
+					<mat-icon fontIcon="local_mall"></mat-icon>
+				</a>
+			</li>
+			<li class="nav-item mb-1">
+				<a class="link-light py-1 px-2 rounded" routerLink="/new-module" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<span class="flex-fill">Criar Novo Módulo</span>
+					<mat-icon fontIcon="draw"></mat-icon>
+				</a>
+			</li>
+			<li class="nav-item mb-1">
+				<a class="link-light py-1 px-2 rounded" routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<span class="flex-fill">Preferências de Usuário</span>
+					<mat-icon fontIcon="person"></mat-icon>
+				</a>
+			</li>
+			<li class="nav-item mb-1">
+				<a class="link-light py-1 px-2 rounded" routerLink="/about" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<span class="flex-fill">Sobre o SpeakMaster</span>
+					<mat-icon fontIcon="info"></mat-icon>
+				</a>
+			</li>
+
+			<hr class="border border-1 opacity-100"/>
+
+			<li class="nav-item mb-1">
+				<a class="link-light py-1 px-2 rounded" routerLink="/my-modules" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<span class="flex-fill">Módulos Instalados</span>
+					<mat-icon fontIcon="data_saver_on"></mat-icon>
+				</a>
+			</li>
+
+			<li class="nav-item mb-1 module" *ngFor="let module of userModules">
+				<a class="link-light py-1 px-2 rounded" routerLink="/module" routerLinkActive="active" ariaCurrentWhenActive="page">
+					<button
+						type="button"
+						class="btn btn-link text-white p-0 me-1"
+						(click)="toggleModule($event, module)"
+					>
+						<mat-icon *ngIf="module.isActive" fontIcon="check"></mat-icon>
+						<mat-icon fontIcon="check_box_outline_blank"></mat-icon>
+					</button>
+
+					<span class="flex-fill">{{ module.name }}</span>
+
+					<span *ngIf="module.hasNotifications" class="bg-warning rounded-circle p-2 ms-2"></span>
+					<button
+						type="button"
+						class="btn btn-link text-white p-0 ms-1"
+						(click)="goToModuleSettings($event, module)"
+					>
+						<mat-icon fontIcon="settings"></mat-icon>
+					</button>
+				</a>
+			</li>
+		</ul>
+
+		<footer class="text-center mt-2">SpeakMaster v{{ version }}</footer>
+	</nav>
+</ng-scrollbar>
