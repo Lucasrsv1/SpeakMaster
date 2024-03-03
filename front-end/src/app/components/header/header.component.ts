@@ -15,7 +15,7 @@ import { TitleService } from "../../services/title/title.service";
 @Component({
 	selector: "app-header",
 	standalone: true,
-	imports: [NgFor, NgIf, MatIcon, RouterLink, BsDropdownModule],
+	imports: [BsDropdownModule, MatIcon, NgFor, NgIf, RouterLink],
 	templateUrl: "./header.component.html",
 	styleUrls: ["./header.component.scss"]
 })

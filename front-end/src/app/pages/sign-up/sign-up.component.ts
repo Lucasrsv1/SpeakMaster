@@ -15,9 +15,9 @@ import { TitleService } from "../../services/title/title.service";
 @Component({
 	selector: "app-sign-up",
 	standalone: true,
-	imports: [NgIf, FormsModule, ReactiveFormsModule, RouterLink, MatIcon, VisualValidatorComponent],
+	imports: [FormsModule, MatIcon, NgIf, ReactiveFormsModule, RouterLink, VisualValidatorComponent],
 	templateUrl: "./sign-up.component.html",
-	styleUrl: "./sign-up.component.scss"
+	styleUrls: ["./sign-up.component.scss", "../../shared/eye-btn.scss"]
 })
 export class SignUpComponent {
 	@BlockUI()

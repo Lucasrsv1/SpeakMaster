@@ -15,9 +15,9 @@ import { TitleService } from "../../services/title/title.service";
 @Component({
 	selector: "app-login",
 	standalone: true,
-	imports: [NgIf, FormsModule, ReactiveFormsModule, RouterLink, MatIcon, VisualValidatorComponent],
+	imports: [FormsModule, MatIcon, NgIf, ReactiveFormsModule, RouterLink, VisualValidatorComponent],
 	templateUrl: "./login.component.html",
-	styleUrl: "./login.component.scss"
+	styleUrls: ["./login.component.scss", "../../shared/eye-btn.scss"]
 })
 export class LoginComponent {
 	@BlockUI()

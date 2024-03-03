@@ -1,5 +1,5 @@
-import { AbstractControl, FormGroup } from "@angular/forms";
 import { AfterContentInit, Component, ElementRef, Input } from "@angular/core";
+import { FormGroup, ValidationErrors } from "@angular/forms";
 import { NgFor, NgIf } from "@angular/common";
 
 export interface IValidations {
@@ -9,7 +9,7 @@ export interface IValidations {
 			key: string
 			message?: string
 		}>
-	}
+	};
 }
 
 @Component({
@@ -26,54 +26,83 @@ export class VisualValidatorComponent implements AfterContentInit {
 	@Input()
 	public field?: string;
 
-	private input?: HTMLElement;
+	@Input()
+	public fields?: string[];
+
+	private inputs: HTMLElement[] = [];
 
 	constructor (private readonly elementRef: ElementRef) { }
 
-	get isInputInvalid (): boolean {
-		return Boolean(this.input && this.input.classList.contains("is-invalid"));
+	public get targetFields (): string[] {
+		return this.fields || (this.field && [this.field]) || [];
 	}
 
-	public ngAfterContentInit (): void {
-		for (const node of this.elementRef.nativeElement.childNodes) {
-			if (node.nodeName === "INPUT") {
-				this.input = node as HTMLElement;
-				break;
-			}
+	public get isInputInvalid (): boolean {
+		return this.inputs.some(i => i.classList.contains("is-invalid"));
+	}
 
-			const childInput = node.querySelector("input");
-			if (childInput) {
-				this.input = childInput as HTMLElement;
+	public ngAfterContentInit () {
+		this.inputs = [
+			this.elementRef.nativeElement.childNodes[0],
+			...this.elementRef.nativeElement.querySelectorAll("input")
+		];
+
+		for (const input of this.inputs) {
+			if (!input.classList.contains("form-control"))
+				input.classList.add("form-field");
+		}
+	}
+
+	public get formControlErrors (): ValidationErrors | undefined {
+		let validationErrors: ValidationErrors | undefined;
+		for (const field of this.targetFields) {
+			const fieldErrors = this.config?.form.controls[field]?.errors;
+			if (fieldErrors) {
+				validationErrors = fieldErrors;
 				break;
 			}
 		}
 
-		if (this.input && !this.input.classList.contains("form-control"))
-			this.input.classList.add("form-field");
-	}
-
-	public get formControl (): AbstractControl | { value: null, errors: null } {
-		const control = this.field && this.config && this.config.form ? this.config.form.controls[this.field] : { value: null, errors: null };
-		if (this.input) {
+		for (const input of this.inputs) {
 			if (this.controlIsDirty) {
-				if (control.errors) {
-					this.input.classList.add("is-invalid");
-					this.input.classList.remove("is-valid");
+				if (validationErrors) {
+					input.classList.add("is-invalid");
+					input.classList.remove("is-valid");
 				} else {
-					this.input.classList.add("is-valid");
-					this.input.classList.remove("is-invalid");
+					input.classList.add("is-valid");
+					input.classList.remove("is-invalid");
 				}
 			} else {
-				this.input.classList.remove("is-valid", "is-invalid");
+				input.classList.remove("is-valid", "is-invalid");
 			}
 		}
 
-		return control;
+		return validationErrors;
+	}
+
+	public get errorsField (): string {
+		for (const field of this.targetFields) {
+			if (this.config?.form.controls[field]?.errors)
+				return field;
+		}
+
+		return "";
 	}
 
 	public get controlIsDirty (): boolean {
-		const control = this.field && this.config && this.config.form ? this.config.form.controls[this.field] : { value: false };
-		return this.input ? this.input.classList.contains("ng-dirty") || Boolean(control.value) : false;
+		// Control is dirty if any of the target fields has a value.
+		for (const field of this.targetFields) {
+			if (this.config?.form.controls[field]?.value)
+				return true;
+		}
+
+		// Control is dirty if any of the inputs is dirty.
+		for (const input of this.inputs) {
+			if (input.classList.contains("ng-dirty"))
+				return true;
+		}
+
+		return false;
 	}
 
 	public getDefaultMessage (key: string): string {
