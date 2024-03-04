@@ -27,6 +27,10 @@ export const languages: ILanguage[] = [
 	(a, b) => a.name.localeCompare(b.name)
 );
 
+export function getLanguageNameByCode (code: LanguageCode): string | undefined {
+	return languages.find(l => l.code === code)?.name;
+}
+
 export function getDefaultLanguage (): LanguageCode {
 	// Get browser language
 	const browserLanguage = navigator.language || (navigator as any).userLanguage;

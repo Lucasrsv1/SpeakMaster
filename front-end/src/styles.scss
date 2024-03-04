@@ -52,6 +52,7 @@ $min-contrast-ratio: 2.5;
 @import "bootstrap/scss/bootstrap";
 
 @import "@ng-select/ng-select/themes/default.theme.css";
+@import 'ngx-toastr/toastr';
 
 body {
 	margin: 0;
@@ -114,4 +115,17 @@ body {
 	background-color: $primary;
 	border-top-left-radius: 2px;
 	border-bottom-left-radius: 2px;
+}
+
+/* Data Tables Style */
+
+.table > thead > * > * {
+	background-color: #F8F9FA !important;
+	padding-top: 1rem !important;
+	padding-bottom: 1rem !important;
+	font-weight: 500 !important;
+}
+
+.table > tbody > tr > td {
+	vertical-align: middle !important;
 }

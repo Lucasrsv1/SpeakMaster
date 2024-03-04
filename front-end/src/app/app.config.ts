@@ -7,6 +7,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient } from "@angular/common/http";
 
 import { BlockUIModule } from "ng-block-ui";
 import { provideScrollbarOptions } from "ngx-scrollbar";
+import { provideToastr } from "ngx-toastr";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
 
 import { routes } from "./app.routes";
@@ -23,6 +24,7 @@ export const appConfig: ApplicationConfig = {
 		provideAnimationsAsync(),
 		importProvidersFrom(BlockUIModule.forRoot()),
 		provideScrollbarOptions({ visibility: "hover" }),
+		provideToastr({ timeOut: 3000, progressBar: true }),
 		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
 		{ provide: LOCALE_ID, useValue: "pt-BR" }
 	]

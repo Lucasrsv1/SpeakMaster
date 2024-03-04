@@ -4,6 +4,7 @@
 		"dayjs",
 		"maxlength",
 		"speakmaster",
-		"theming"
+		"theming",
+		"toastr"
 	]
 }

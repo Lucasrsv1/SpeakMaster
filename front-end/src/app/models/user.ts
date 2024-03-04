@@ -1,3 +1,4 @@
+import { ILanguageCommands } from "./languageCommand";
 import { LanguageCode } from "./languages";
 
 export interface IUser {
@@ -6,7 +7,5 @@ export interface IUser {
 	email: string;
 	micOnByDefault: boolean;
 	interfaceLanguage: LanguageCode;
-
-	// TODO: criar uma interface para os comandos de cada linguagem
-	languageCommands: object[];
+	languageCommands: ILanguageCommands;
 }

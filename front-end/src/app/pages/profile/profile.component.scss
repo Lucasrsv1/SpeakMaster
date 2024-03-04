@@ -1,3 +1,23 @@
 .form-switch {
 	margin-top: 38px;
 }
+
+button.checkbox {
+	height: 32px;
+
+	&:first-child mat-icon {
+		margin-left: -3px;
+	}
+
+	mat-icon {
+		width: 32px;
+		height: 32px;
+		font-size: 32px;
+	}
+
+	mat-icon[fontIcon="check"] {
+		position: absolute;
+		font-size: 20px;
+		line-height: 32px;
+	}
+}
