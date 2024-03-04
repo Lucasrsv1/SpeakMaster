@@ -114,7 +114,7 @@
 					<div class="col-12 col-md-6">
 						<label for="selectedLanguage" class="form-label">Configurar Comandos do Idioma:</label>
 						<ng-select
-							[items]="languages"
+							[items]="spokenLanguages"
 							bindLabel="name"
 							bindValue="code"
 							placeholder="Selecione o idioma falado"
@@ -135,7 +135,7 @@
 					<ng-template #toggleBtn let-data="adtData">
 						<button
 							type="button"
-							class="btn btn-link text-primary checkbox p-0 me-1"
+							class="btn btn-link text-primary checkbox p-0"
 							(click)="toggleCommand(data)"
 						>
 							<mat-icon *ngIf="data.isActive" fontIcon="check"></mat-icon>

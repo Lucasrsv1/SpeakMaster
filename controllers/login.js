@@ -1,12 +1,8 @@
 const { body } = require("express-validator");
 const { sha512 } = require("js-sha512");
-const { sign, verify } = require("jsonwebtoken");
 
-const models = require("../database/models");
+const loginService = require("../services/login");
 const { isRequestInvalid } = require("../utils/http-validation");
-
-const KEY_TOKEN = ".A!i^~V}w*6j&&PIcJm&S*}p>(9e'6wq";
-const EXPIRATION_TIME = 3 * 24 * 60 * 60;
 
 class Login {
 	constructor () {
@@ -22,34 +18,6 @@ class Login {
 	}
 
 	/**
-	 * Middleware para verificar se o usuário está autenticado e autorizado a acessar o sistema.
-	 * @param {import("express").Request} req
-	 * @param {import("express").Response} res
-	 * @param {import("express").NextFunction} next
-	 */
-	ensureAuthorized (req, res, next) {
-		const token = req.headers.Authentication;
-		if (!token) {
-			res.status(403).json({ message: "Access denied.", expired: true });
-			return res.end();
-		}
-
-		verify(token, KEY_TOKEN, (error, user) => {
-			if (error) {
-				res.status(403).json({
-					message: "Access denied.",
-					expired: error.name === "TokenExpiredError",
-					error
-				});
-				return res.end();
-			}
-
-			res.locals.user = user;
-			next(null);
-		});
-	}
-
-	/**
 	 * Rota de autenticação do usuário.
 	 * @param {import("express").Request} req
 	 * @param {import("express").Response} res
@@ -61,18 +29,14 @@ class Login {
 			// Faz o hash da senha antes de fazer o login
 			const password = sha512(req.body.password);
 
-			const user = await models.User.findOne({
-				attributes: ["idUser", "name", "email", "micOnByDefault", "interfaceLanguage", "languageCommands"],
-				where: {
-					email: req.body.email,
-					password
-				}
+			const token = await loginService.signToken({
+				email: req.body.email,
+				password
 			});
 
-			if (!user)
+			if (!token)
 				return res.status(403).json({ message: "Wrong email or password." });
 
-			const token = sign(user.toJSON(), KEY_TOKEN, { expiresIn: EXPIRATION_TIME });
 			res.status(200).json({ token });
 		} catch (error) {
 			console.error(error);

@@ -20,7 +20,7 @@ export class RequestInterceptor implements HttpInterceptor {
 		if (this.authenticationService.isLoggedIn()) {
 			const token = this.localStorage.get(LocalStorageKey.USER);
 			req = req.clone({
-				setHeaders: { Authentication: token }
+				setHeaders: { authentication: token }
 			});
 		}
 

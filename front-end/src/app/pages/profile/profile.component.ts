@@ -5,24 +5,26 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 
 import { ADTSettings } from "angular-datatables/src/models/settings";
 import { CollapseModule } from "ngx-bootstrap/collapse";
-import { ToastrService } from "ngx-toastr";
 import { BlockUI, NgBlockUI } from "ng-block-ui";
 import { DataTableDirective, DataTablesModule } from "angular-datatables";
 import { NgSelectConfig, NgSelectModule } from "@ng-select/ng-select";
 
-import { Subject } from "rxjs";
+import { debounceTime, Subject, Subscription } from "rxjs";
+
+import deepEqual from "deep-equal";
 
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
 import { ICommand } from "../../models/command";
 import { IUser } from "../../models/user";
+import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } from "../../models/languageCommand";
 import { getLanguageNameByCode, ILanguage, LanguageCode, languages } from "../../models/languages";
-import { ILanguageCommand, ILanguageCommands } from "../../models/languageCommand";
 
 import { AlertsService } from "../../services/alerts/alerts.service";
-import { AuthenticationService } from "../../services/authentication/authentication.service";
 import { DtTranslationService } from "../../services/dt-translation/dt-translation.service";
+import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
 import { TitleService } from "../../services/title/title.service";
+import { AuthenticationService, IUserUpdate } from "../../services/authentication/authentication.service";
 
 @Component({
 	selector: "app-profile",
@@ -51,7 +53,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		language: this.dtTranslationService.getDataTablesPortugueseTranslation(),
 		columns: [
 			{ title: "Comandos", data: "command", className: "p-2" },
-			{ title: "Ação", data: "actionDescription", className: "p-2" },
+			{
+				title: "Ação",
+				data: "targetLanguageCode",
+				className: "p-2",
+				ngPipeInstance: {
+					transform (value: LanguageCode): string {
+						return "Ouvir no idioma " + getLanguageNameByCode(value);
+					}
+				}
+			},
 			{
 				title: "Ativo",
 				data: "isActive",
@@ -79,25 +90,19 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 	public languages: ILanguage[] = languages;
 
 	public selectedLanguage?: LanguageCode;
-	public languageCommands: ILanguageCommands = {
-		languagesToListen: [],
-		[LanguageCode.PT_BR]: [
-			{ targetLanguageCode: LanguageCode.EN_US, command: "(ouvir [em], trocar [idioma] [para]) inglês", isActive: true },
-			{ targetLanguageCode: LanguageCode.DE_DE, command: "(ouvir [em], trocar [idioma] [para]) alemão", isActive: true }
-		],
-		[LanguageCode.EN_US]: [
-			{ targetLanguageCode: LanguageCode.PT_BR, command: "(listen [to], switch [language] [to]) portuguese", isActive: true },
-			{ targetLanguageCode: LanguageCode.DE_DE, command: "(listen [to], switch [language] [to]) german", isActive: false }
-		]
-	};
+	public languageCommands: ILanguageCommands | null = null;
+	public spokenLanguages: ILanguage[] = [];
+
+	private subscriptions: Subscription[] = [];
+	private $saveTrigger: Subject<void> = new Subject();
 
 	constructor (
 		private readonly formBuilder: FormBuilder,
 		private readonly ngSelectConfig: NgSelectConfig,
-		private readonly toastr: ToastrService,
 		private readonly alertsService: AlertsService,
 		private readonly authenticationService: AuthenticationService,
 		private readonly dtTranslationService: DtTranslationService,
+		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly titleService: TitleService
 	) {
 		this.titleService.setTitle("Preferências de Usuário");
@@ -127,10 +132,34 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		};
 
 		this.resetForm();
+
+		const user = this.authenticationService.loggedUser as IUser;
+		this.selectedLanguage = user.interfaceLanguage;
+
+		this.subscriptions.push(
+			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+				this.languageCommands = languageCommands;
+				this.form.get("languagesToListen")!.setValue(
+					languageCommands?.languagesToListen || []
+				);
+
+				const spokenLanguagesCodes = this.languageCommands?.languagesToListen || [];
+				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
+
+				if (this.spokenLanguages.length && !this.spokenLanguages.find(l => l.code === this.selectedLanguage))
+					this.selectedLanguage = this.spokenLanguages[0].code;
+
+				this.loadLanguageCommands();
+			})
+		);
+
+		this.$saveTrigger
+			.pipe(debounceTime(1000))
+			.subscribe(() => this.saveLanguageCommands());
 	}
 
 	public get currentLanguageCommands (): ILanguageCommand[] {
-		if (!this.selectedLanguage)
+		if (!this.selectedLanguage || !this.languageCommands)
 			return [];
 
 		return this.languageCommands[this.selectedLanguage] || [];
@@ -144,6 +173,66 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.dtTrigger.unsubscribe();
+		this.subscriptions.forEach(subscription => subscription.unsubscribe());
+	}
+
+	public save (): void {
+		if (this.form.invalid)
+			return this.alertsService.show("Preenchimento Inválido", "Nome, e-mail ou senha inválidos.", "error");
+
+		const updatedUser: IUserUpdate = {
+			name: this.form.get("name")!.value,
+			email: this.form.get("email")!.value,
+			micOnByDefault: this.form.get("micOnByDefault")!.value,
+			interfaceLanguage: this.form.get("interfaceLanguage")!.value,
+			password: this.form.get("password")!.value,
+			languageCommands: generateLanguageCommandsForUser(
+				this.languageCommandsService,
+				this.form.get("languagesToListen")!.value
+			)
+		};
+
+		this.blockUI.start("Salvando Perfil...");
+		this.authenticationService.updateProfile(updatedUser, this.blockUI);
+	}
+
+	public clearForm (): void {
+		this.form.reset();
+	}
+
+	public resetForm (): void {
+		const user = this.authenticationService.loggedUser as IUser;
+
+		this.form.get("name")!.setValue(user.name);
+		this.form.get("email")!.setValue(user.email);
+		this.form.get("password")!.setValue(null);
+		this.form.get("micOnByDefault")!.setValue(user.micOnByDefault);
+		this.form.get("interfaceLanguage")!.setValue(user.interfaceLanguage);
+		this.form.get("languagesToListen")!.setValue(
+			this.languageCommandsService.languageCommands?.languagesToListen || []
+		);
+	}
+
+	public loadLanguageCommands (): void {
+		if (deepEqual(this.dtOptions.data, this.currentLanguageCommands))
+			return;
+
+		this.dtOptions.data = this.currentLanguageCommands;
+		this.rerenderDataTables();
+	}
+
+	public editCommand (command: ICommand): void {
+		console.log("Edit", command);
+	}
+
+	public toggleCommand (command: ICommand): void {
+		command.isActive = !command.isActive;
+		this.$saveTrigger.next();
+	}
+
+	private saveLanguageCommands (): void {
+		if (this.languageCommands)
+			this.languageCommandsService.update(this.languageCommands);
 	}
 
 	private rerenderDataTables (): void {
@@ -154,54 +243,5 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 			// Call the dtTrigger to rerender again
 			this.dtTrigger.next(this.dtOptions);
 		});
-	}
-
-	public save (): void {
-		if (this.form.invalid)
-			return this.alertsService.show("Preenchimento Inválido", "Nome, e-mail ou senha inválidos.", "error");
-
-		this.blockUI.start("Salvando Perfil...");
-		// TODO
-	}
-
-	public clearForm (): void {
-		this.form.reset();
-	}
-
-	public resetForm (): void {
-		const user = this.authenticationService.getLoggedUser() as IUser;
-
-		this.form.get("name")!.setValue(user.name);
-		this.form.get("email")!.setValue(user.email);
-		this.form.get("password")!.setValue(null);
-		this.form.get("micOnByDefault")!.setValue(user.micOnByDefault);
-		this.form.get("interfaceLanguage")!.setValue(user.interfaceLanguage);
-		this.form.get("languagesToListen")!.setValue([user.interfaceLanguage]);
-
-		this.selectedLanguage = LanguageCode.PT_BR;
-		this.loadLanguageCommands();
-	}
-
-	public loadLanguageCommands (): void {
-		const data: ICommand[] = this.currentLanguageCommands.map(
-			command => ({
-				command: command.command,
-				actionDescription: "Ouvir no idioma " + getLanguageNameByCode(command.targetLanguageCode),
-				isActive: command.isActive
-			})
-		);
-
-		this.dtOptions.data = data;
-		this.rerenderDataTables();
-	}
-
-	public editCommand (command: ICommand): void {
-		console.log("Edit", command);
-	}
-
-	public toggleCommand (command: ICommand): void {
-		console.log("Toggle", command);
-		command.isActive = !command.isActive;
-		this.toastr.success("Comando alterado.");
 	}
 }

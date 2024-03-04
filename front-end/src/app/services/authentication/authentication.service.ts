@@ -4,15 +4,24 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 
 import { BehaviorSubject } from "rxjs";
 
-import { jwtDecode } from "jwt-decode";
 import { NgBlockUI } from "ng-block-ui";
+import { ToastrService } from "ngx-toastr";
+
+import { jwtDecode } from "jwt-decode";
 import { sha512 } from "js-sha512";
 
 import { environment } from "../../../environments/environment";
+import { ILanguageCommands } from "../../models/languageCommand";
 import { IUser } from "../../models/user";
 
 import { AlertsService } from "../alerts/alerts.service";
+import { LanguageCommandsService } from "../language-commands/language-commands.service";
 import { LocalStorageKey, LocalStorageService } from "../local-storage/local-storage.service";
+
+export interface IUserUpdate extends Omit<IUser, "idUser"> {
+	password?: string;
+	languageCommands: ILanguageCommands;
+}
 
 @Injectable({ providedIn: "root" })
 export class AuthenticationService {
@@ -21,7 +30,9 @@ export class AuthenticationService {
 	constructor (
 		private readonly http: HttpClient,
 		private readonly router: Router,
+		private readonly toastr: ToastrService,
 		private readonly alertsService: AlertsService,
+		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly localStorage: LocalStorageService
 	) {
 		// Usa usuário já logado por meio do token armazenado (caso exista)
@@ -29,18 +40,13 @@ export class AuthenticationService {
 		this.$loggedUser.next(user);
 	}
 
+	public get loggedUser (): IUser | null {
+		return this.$loggedUser.value;
+	}
+
 	public isLoggedIn (): boolean {
 		const user = this.getLoggedUser();
 		return Boolean(user && user.idUser && user.idUser > 0);
-	}
-
-	public getLoggedUser (): IUser | null {
-		const token = this.localStorage.get(LocalStorageKey.USER);
-		try {
-			return (token ? jwtDecode(token) : null) as IUser;
-		} catch (error) {
-			return null;
-		}
 	}
 
 	public login (email: string, password: string, blockUI?: NgBlockUI): void {
@@ -52,16 +58,12 @@ export class AuthenticationService {
 			{ email, password }
 		).subscribe({
 			next: response => {
-				if (blockUI) blockUI.stop();
-
-				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["profile"]);
-				this.$loggedUser.next(this.getLoggedUser());
+				this.updateUserToken(response.token);
+				this.languageCommandsService.load(blockUI);
 			},
 
 			error: (error: HttpErrorResponse) => {
-				if (blockUI) blockUI.stop();
-
+				blockUI?.stop();
 				this.alertsService.httpErrorAlert(
 					"Falha ao Entrar",
 					"Não foi possível fazer login, tente novamente.",
@@ -79,16 +81,12 @@ export class AuthenticationService {
 			user
 		).subscribe({
 			next: response => {
-				if (blockUI) blockUI.stop();
-
-				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["profile"]);
-				this.$loggedUser.next(this.getLoggedUser());
+				this.updateUserToken(response.token);
+				this.languageCommandsService.load(blockUI);
 			},
 
 			error: (error: HttpErrorResponse) => {
-				if (blockUI) blockUI.stop();
-
+				blockUI?.stop();
 				this.alertsService.httpErrorAlert(
 					"Falha ao Cadastrar",
 					"Não foi possível fazer o cadastro, tente novamente.",
@@ -98,7 +96,7 @@ export class AuthenticationService {
 		});
 	}
 
-	public updateProfile (user: IUser & { password?: string }, blockUI?: NgBlockUI): void {
+	public updateProfile (user: IUserUpdate, blockUI?: NgBlockUI): void {
 		if (user.password)
 			user.password = sha512(user.password);
 
@@ -107,18 +105,15 @@ export class AuthenticationService {
 			user
 		).subscribe({
 			next: response => {
-				if (blockUI) blockUI.stop();
-
-				this.localStorage.set(LocalStorageKey.USER, response.token);
-				this.router.navigate(["profile"]);
-				this.$loggedUser.next(this.getLoggedUser());
+				this.updateUserToken(response.token);
+				this.languageCommandsService.load(blockUI);
+				this.toastr.success("Perfil atualizado.", "Sucesso!");
 			},
 
 			error: (error: HttpErrorResponse) => {
-				if (blockUI) blockUI.stop();
-
+				blockUI?.stop();
 				this.alertsService.httpErrorAlert(
-					"Falha ao Atualizar perfil",
+					"Falha ao Atualizar Perfil",
 					"Não foi possível fazer a atualização, tente novamente.",
 					error
 				);
@@ -130,5 +125,20 @@ export class AuthenticationService {
 		this.localStorage.delete(LocalStorageKey.USER);
 		this.$loggedUser.next(null);
 		this.router.navigate(["login"]);
+	}
+
+	private getLoggedUser (): IUser | null {
+		const token = this.localStorage.get(LocalStorageKey.USER);
+		try {
+			return (token ? jwtDecode(token) : null) as IUser;
+		} catch (error) {
+			return null;
+		}
+	}
+
+	private updateUserToken (token: string): void {
+		this.localStorage.set(LocalStorageKey.USER, token);
+		this.$loggedUser.next(this.getLoggedUser());
+		this.router.navigate(["profile"]);
 	}
 }

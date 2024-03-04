@@ -129,3 +129,18 @@ body {
 .table > tbody > tr > td {
 	vertical-align: middle !important;
 }
+
+/* Block UI Override Styles */
+
+div.block-ui-wrapper .loader {
+	/* Circle color */
+	border-color: #FFF;
+
+	/* Spinning section in circle color */
+	border-left-color: $primary;
+}
+
+div.block-ui-spinner .message {
+	/* Loading text color */
+	color: #FFF;
+}

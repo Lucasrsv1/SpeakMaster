@@ -1,9 +1,11 @@
 import { LanguageCode } from "./languages";
 
+import { LanguageCommandsService } from "../services/language-commands/language-commands.service";
+
 export interface ILanguageCommand {
-	targetLanguageCode: LanguageCode;
 	command: string;
 	isActive: boolean;
+	targetLanguageCode: LanguageCode;
 }
 
 export interface ILanguageCommands extends Partial<{
@@ -130,4 +132,39 @@ export function getDefaultCommandForLanguage (fromLanguage: LanguageCode, toLang
 	}
 
 	return "";
+}
+
+export function generateLanguageCommandsForUser (
+	languageCommandsService: LanguageCommandsService,
+	languagesToListen: LanguageCode[]
+): ILanguageCommands {
+	const languageCommands = languageCommandsService.languageCommands || { languagesToListen };
+
+	// Update list of languages to listen
+	languageCommands.languagesToListen = languagesToListen;
+
+	// Generate commands for new languages
+	for (const fromLanguage of languagesToListen) {
+		if (!languageCommands[fromLanguage])
+			languageCommands[fromLanguage] = [];
+
+		for (const toLanguage of languagesToListen) {
+			// Can't switch to the same language
+			if (fromLanguage === toLanguage)
+				continue;
+
+			// Generate default command to switch languages
+			const hasSwitchCommand = languageCommands[fromLanguage]!.find(lc => lc.targetLanguageCode === toLanguage);
+			if (!hasSwitchCommand) {
+				const command = getDefaultCommandForLanguage(fromLanguage, toLanguage);
+				languageCommands[fromLanguage]!.push({
+					command,
+					isActive: Boolean(command),
+					targetLanguageCode: toLanguage
+				});
+			}
+		}
+	}
+
+	return languageCommands;
 }

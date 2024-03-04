@@ -48,7 +48,7 @@ function initUser (sequelize) {
 		languageCommands: {
 			type: DataTypes.JSONB,
 			allowNull: false,
-			defaultValue: "[]"
+			defaultValue: { "pt-BR": [], languagesToListen: ["pt-BR"] }
 		}
 	}, {
 		sequelize,

@@ -3,7 +3,7 @@ import { provideAnimationsAsync } from "@angular/platform-browser/animations/asy
 import { provideRouter } from "@angular/router";
 import { registerLocaleData } from "@angular/common";
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from "@angular/core";
-import { HTTP_INTERCEPTORS, provideHttpClient } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 
 import { BlockUIModule } from "ng-block-ui";
 import { provideScrollbarOptions } from "ngx-scrollbar";
@@ -19,7 +19,9 @@ registerLocaleData(localePt);
 
 export const appConfig: ApplicationConfig = {
 	providers: [
-		provideHttpClient(),
+		provideHttpClient(
+			withInterceptorsFromDi()
+		),
 		provideRouter(routes),
 		provideAnimationsAsync(),
 		importProvidersFrom(BlockUIModule.forRoot()),

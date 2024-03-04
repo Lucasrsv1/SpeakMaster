@@ -10,7 +10,7 @@ Table user {
   password varchar(256) [not null]
   mic_on_by_default boolean [not null, default: `false`]
   interface_language varchar(20) [not null, default: `pt-BR`]
-  language_commands jsonb [not null, default: `'[]'`]
+  language_commands jsonb [not null, default: `'{ "pt-BR": [], "languagesToListen": ["pt-BR"] }'`]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
   deleted_at timestamp [null]
