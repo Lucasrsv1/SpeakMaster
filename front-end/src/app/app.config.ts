@@ -6,6 +6,7 @@ import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from "@angular/core
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 
 import { BlockUIModule } from "ng-block-ui";
+import { CodeEditorModule } from "@ngstack/code-editor";
 import { provideScrollbarOptions } from "ngx-scrollbar";
 import { provideToastr } from "ngx-toastr";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
@@ -24,7 +25,12 @@ export const appConfig: ApplicationConfig = {
 		),
 		provideRouter(routes),
 		provideAnimationsAsync(),
-		importProvidersFrom(BlockUIModule.forRoot()),
+		importProvidersFrom(
+			BlockUIModule.forRoot(),
+			CodeEditorModule.forRoot({
+				baseUrl: "assets/monaco"
+			})
+		),
 		provideScrollbarOptions({ visibility: "hover" }),
 		provideToastr({ timeOut: 3000, progressBar: true }),
 		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },

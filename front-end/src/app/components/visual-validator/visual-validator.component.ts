@@ -44,7 +44,7 @@ export class VisualValidatorComponent implements AfterContentInit {
 	public ngAfterContentInit () {
 		this.inputs = [
 			this.elementRef.nativeElement.childNodes[0],
-			...this.elementRef.nativeElement.querySelectorAll("input")
+			...this.elementRef.nativeElement.querySelectorAll("input, .NgxEditor")
 		];
 
 		for (const input of this.inputs) {

@@ -60,9 +60,10 @@ body {
 	background-color: white;
 }
 
-/* ng-select Visual Validation */
+/* Visual Validation for ng-select and NgxEditor */
 
 .form-field.is-invalid .ng-select-container,
+.form-field.is-invalid.NgxEditor,
 .form-field.is-invalid > span > input {
 	border-color: #dc3545 !important;
 	padding-right: calc(.75em + .75rem);
@@ -73,6 +74,7 @@ body {
 }
 
 .form-field.is-invalid .ng-select-container:focus,
+.form-field.is-invalid.NgxEditor:has(.NgxEditor__Content:focus),
 .form-field.is-invalid.ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container,
 .form-field.is-invalid > span > input:focus {
 	border-color: #dc3545;
@@ -84,6 +86,7 @@ body {
 }
 
 .form-field.is-valid .ng-select-container,
+.form-field.is-valid.NgxEditor,
 .form-field.is-valid > span > input {
 	border-color: #28a745 !important;
 	padding-right: calc(.75em + .75rem);
@@ -94,6 +97,7 @@ body {
 }
 
 .form-field.is-valid .ng-select-container:focus,
+.form-field.is-valid.NgxEditor:has(.NgxEditor__Content:focus),
 .form-field.is-valid.ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container,
 .form-field.is-valid > span > input:focus {
 	border-color: #28a745;
@@ -143,4 +147,10 @@ div.block-ui-wrapper .loader {
 div.block-ui-spinner .message {
 	/* Loading text color */
 	color: #FFF;
+}
+
+/* Monaco Style */
+
+.dataTable .monaco-editor.editor {
+	min-height: 60px;
 }

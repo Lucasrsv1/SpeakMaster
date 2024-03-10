@@ -132,6 +132,16 @@
 				<div [hidden]="!currentLanguageCommands.length">
 					<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="w-100 row-border table table-bordered"></table>
 
+					<ng-template #commandEditor let-data="adtData">
+						<ngs-code-editor
+							[readOnly]="true"
+							[theme]="'crlTheme'"
+							[codeModel]="codeModels.get(data.targetLanguageCode)!"
+							[options]="options"
+							(loaded)="editorLoaded($event)"
+						></ngs-code-editor>
+					</ng-template>
+
 					<ng-template #toggleBtn let-data="adtData">
 						<button
 							type="button"

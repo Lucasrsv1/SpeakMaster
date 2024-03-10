@@ -3,6 +3,8 @@
 		"chronos",
 		"dayjs",
 		"maxlength",
+		"monaco",
+		"ngstack",
 		"speakmaster",
 		"theming",
 		"toastr"
