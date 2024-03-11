@@ -1,0 +1,32 @@
+.optional {
+	color: #ed7d31;
+}
+
+.list {
+	color: #5ea16b;
+}
+
+.variable {
+	color: #569cd6;
+}
+
+.source {
+	color: #212529;
+}
+
+.invalid {
+	color: #dc3545;
+}
+
+.optional, .list, .variable, .source, .invalid {
+	background-color: white;
+	padding: 3px;
+}
+
+.legend {
+	padding: 3px;
+}
+
+ng-scrollbar {
+	max-height: 270px;
+}

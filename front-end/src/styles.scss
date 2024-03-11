@@ -151,6 +151,14 @@ div.block-ui-spinner .message {
 
 /* Monaco Style */
 
+.monaco-editor.editor {
+	min-height: 100px;
+}
+
 .dataTable .monaco-editor.editor {
 	min-height: 60px;
+}
+
+.variable-text {
+	color: #569cd6;
 }

@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ADTSettings } from "angular-datatables/src/models/settings";
 import { CollapseModule } from "ngx-bootstrap/collapse";
 import { BlockUI, NgBlockUI } from "ng-block-ui";
+import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
 import { DataTableDirective, DataTablesModule } from "angular-datatables";
 import { NgSelectConfig, NgSelectModule } from "@ng-select/ng-select";
 
@@ -16,9 +17,9 @@ import { debounceTime, Subject, Subscription } from "rxjs";
 
 import deepEqual from "deep-equal";
 
+import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
-import { ICommand } from "../../models/command";
 import { IUser } from "../../models/user";
 import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } from "../../models/languageCommand";
 import { getLanguageNameByCode, ILanguage, LanguageCode, languages } from "../../models/languages";
@@ -42,6 +43,7 @@ import { AuthenticationService, IUserUpdate } from "../../services/authenticatio
 		NgIf,
 		NgSelectModule,
 		ReactiveFormsModule,
+		CommandEditorModalComponent,
 		VisualValidatorComponent
 	],
 	templateUrl: "./profile.component.html",
@@ -107,6 +109,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 			}
 		],
 		data: [],
+		order: [[1, "asc"]],
 		preDrawCallback: () => {
 			for (const row of this.dtOptions.data || []) {
 				// Destroy previous editors for the current command (URI file)
@@ -140,6 +143,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		scrollBeyondLastColumn: 0
 	};
 
+	private bsModalRef?: BsModalRef;
 	private editorComponents: CodeEditorComponent[] = [];
 
 	private subscriptions: Subscription[] = [];
@@ -147,6 +151,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 	private $saveTrigger: Subject<void> = new Subject();
 
 	constructor (
+		private readonly modalService: BsModalService,
 		private readonly formBuilder: FormBuilder,
 		private readonly ngSelectConfig: NgSelectConfig,
 		private readonly alertsService: AlertsService,
@@ -290,11 +295,31 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		this.rerenderDataTables();
 	}
 
-	public editCommand (command: ICommand): void {
-		console.log("Edit", command);
+	public editCommand (command: ILanguageCommand): void {
+		const originalCommand = command.command;
+		const initialState: ModalOptions = {
+			initialState: { command },
+			class: "modal-lg"
+		};
+
+		this.bsModalRef = this.modalService.show(CommandEditorModalComponent, initialState);
+
+		this.subscriptions.push(
+			this.bsModalRef.onHide!.subscribe(() => {
+				if (originalCommand !== command.command) {
+					this.$saveTrigger.next();
+
+					const codeModel = this.codeModels.get(command.targetLanguageCode);
+					if (codeModel)
+						this.monacoCrlService.setEditorContent(codeModel.uri, command.command);
+				}
+
+				this.bsModalRef = undefined;
+			})
+		);
 	}
 
-	public toggleCommand (command: ICommand): void {
+	public toggleCommand (command: ILanguageCommand): void {
 		command.isActive = !command.isActive;
 		this.$saveTrigger.next();
 	}

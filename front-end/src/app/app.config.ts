@@ -7,6 +7,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@a
 
 import { BlockUIModule } from "ng-block-ui";
 import { CodeEditorModule } from "@ngstack/code-editor";
+import { ModalModule } from "ngx-bootstrap/modal";
 import { provideScrollbarOptions } from "ngx-scrollbar";
 import { provideToastr } from "ngx-toastr";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
@@ -27,6 +28,7 @@ export const appConfig: ApplicationConfig = {
 		provideAnimationsAsync(),
 		importProvidersFrom(
 			BlockUIModule.forRoot(),
+			ModalModule.forRoot(),
 			CodeEditorModule.forRoot({
 				baseUrl: "assets/monaco"
 			})

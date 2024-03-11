@@ -170,6 +170,24 @@ export class MonacoCrlService {
 		if (editor) editor.dispose();
 	}
 
+	public setEditorContent (uri: string, content: string): void {
+		const model = this.monaco.editor.getModel(this.monaco.Uri.parse(uri));
+		model?.setValue(content);
+	}
+
+	public getEditorContent (uri: string): string | undefined {
+		const model = this.monaco.editor.getModel(this.monaco.Uri.parse(uri));
+		return model?.getValue();
+	}
+
+	public isEditorContentInvalid (uri: string): boolean {
+		const markers = this.monaco.editor.getModelMarkers({
+			resource: this.monaco.Uri.parse(uri)
+		});
+
+		return markers.some(m => m.severity === this.monaco.MarkerSeverity.Error);
+	}
+
 	public validate (uri: string): void {
 		const model = this.monaco.editor.getModel(this.monaco.Uri.parse(uri));
 		if (model)

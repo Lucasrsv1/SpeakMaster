@@ -1,0 +1,99 @@
+<div class="modal-header">
+	<h4 class="modal-title pull-left">Edição de Comandos</h4>
+	<button type="button" class="btn-close close pull-right" aria-label="Close" (click)="bsModalRef.hide()">
+		<span aria-hidden="true" class="visually-hidden">&times;</span>
+	</button>
+</div>
+
+<div class="modal-body">
+	<ngs-code-editor
+		[theme]="'crlTheme'"
+		[codeModel]="codeModel"
+		[options]="options"
+		(loaded)="editorLoaded($event)"
+		(valueChanged)="onValueChanged($event)"
+	></ngs-code-editor>
+
+	<div class="d-none d-sm-flex justify-content-between align-items-center my-2">
+		<h6 class="mb-0 legend">Legenda:</h6>
+		<div class="optional">[Opcional]</div>
+		<div class="list">(Lista)</div>
+		<div class="variable">&lcub;VARIÁVEL&rcub;</div>
+		<div class="variable">&lcub;VARIÁVEL <span class="list">(Restrição)</span>&rcub;</div>
+		<div class="invalid">Erro</div>
+		<div class="source">Obrigatório</div>
+	</div>
+
+	<div class="d-flex d-sm-none justify-content-between align-items-end my-2">
+		<div>
+			<h6 class="mb-0 legend">Legenda:</h6>
+			<div class="optional">[Opcional]</div>
+			<div class="list">(Lista)</div>
+			<div class="variable">&lcub;VARIÁVEL&rcub;</div>
+		</div>
+		<div>
+			<div class="variable">&lcub;VARIÁVEL <span class="list">(Restrição)</span>&rcub;</div>
+			<div class="invalid">Erro</div>
+			<div class="source">Obrigatório</div>
+		</div>
+	</div>
+
+	<div class="alert alert-info" role="alert">
+		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="areInstructionsCollapsed = !areInstructionsCollapsed">
+			<mat-icon class="me-2">info</mat-icon>
+			Instruções
+			<span class="ms-auto">
+				<mat-icon class="me-2" [fontIcon]="areInstructionsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
+			</span>
+		</h4>
+		<div class="mt-2" [collapse]="areInstructionsCollapsed" [isAnimated]="true">
+			<h6>Estruture o comando que deverá ser falado usando as seguintes funcionalidades:</h6>
+			<div>
+				<p class="mb-2">
+					<span class="optional">[Termos opcionais]</span>:
+					colchetes são usados para denotar termos opcionais que podem ou não ser falados;
+				</p>
+				<p class="mb-2">
+					<span class="list">(Opção 1, Opção 2)</span>:
+					parênteses são usados para denotar uma lista de possíveis termos, separados por vírgula, que podem ser falados;
+				</p>
+				<p class="mb-2">
+					<span class="variable">&lcub;VARIÁVEL&rcub;</span>:
+					chaves são usadas para denotar variáveis que reconhecem qualquer sequência de termos falados;
+				</p>
+				<p class="mb-2">
+					<span class="variable">&lcub;VARIÁVEL <span class="list">(Opção 1, Opção 2)</span>&rcub;</span>:
+					é possível restringir o reconhecimento de variáveis adicionando uma lista de opções de termos à sua definição;
+				</p>
+				<p class="mb-2">
+					<span class="invalid">Caracteres inválidos</span>:
+					conteúdos sinalizados de vermelho indicam a presença de um erro na definição do comando e precisa ser corrigido;
+				</p>
+				<p class="mb-0">
+					<span class="source">Demais palavras</span>:
+					o restante são termos obrigatórios que terão de ser falados.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="alert alert-light cmd-list" role="alert">
+		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="arePossibleCommandsCollapsed = !arePossibleCommandsCollapsed">
+			<mat-icon class="me-2">record_voice_over</mat-icon>
+			Lista de Comandos Reconhecidos:
+			<span class="ms-auto">
+				<mat-icon class="me-2" [fontIcon]="arePossibleCommandsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
+			</span>
+		</h4>
+		<ng-scrollbar class="mt-2" [collapse]="arePossibleCommandsCollapsed" [isAnimated]="true">
+			<ul class="list-group">
+				<li class="list-group-item" *ngFor="let cmd of possibleCommands" [innerHTML]="cmd"></li>
+			</ul>
+		</ng-scrollbar>
+	</div>
+</div>
+
+<div class="modal-footer">
+	<button type="button" class="btn btn-secondary me-auto" (click)="bsModalRef.hide()">Cancelar</button>
+	<button type="button" class="btn btn-primary" (click)="save()" [disabled]="isCommandInvalid">Salvar Alterações</button>
+</div>
