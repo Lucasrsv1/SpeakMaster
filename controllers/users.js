@@ -10,7 +10,7 @@ const { isRequestInvalid } = require("../utils/http-validation");
 class Users {
 	constructor () {
 		/**
-		 * Middlewares das validações das rotas de autenticação.
+		 * Middlewares das validações das rotas.
 		 */
 		this.validations = {
 			signUp: [
@@ -83,16 +83,19 @@ class Users {
 			if (req.body.password)
 				userData.password = sha512(req.body.password);
 
-			await models.User.update(userData, {
+			const [ affectedCount ] = await models.User.update(userData, {
 				where: {
 					idUser: res.locals.user.idUser
 				}
 			});
 
+			if (affectedCount <= 0)
+				return res.status(404).json({ message: "Couldn't find user." });
+
 			// Atualiza o login do usuário usando os campos atualizados
 			const token = await loginService.signToken({ idUser: res.locals.user.idUser });
 			if (!token)
-				return res.status(403).json({ message: "Couldn't find user." });
+				return res.status(404).json({ message: "Couldn't find user." });
 
 			res.status(200).json({ token });
 		} catch (error) {

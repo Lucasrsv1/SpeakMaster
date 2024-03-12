@@ -7,7 +7,7 @@ const { isRequestInvalid } = require("../utils/http-validation");
 class Login {
 	constructor () {
 		/**
-		 * Middlewares das validações das rotas de autenticação.
+		 * Middlewares das validações das rotas.
 		 */
 		this.validations = {
 			login: [

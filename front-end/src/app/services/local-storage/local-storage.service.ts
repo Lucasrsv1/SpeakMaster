@@ -4,7 +4,8 @@ const APP_KEY_PREFIX = "SPEAKMASTER_";
 
 export enum LocalStorageKey {
 	USER = "USER",
-	LANGUAGE_COMMANDS = "LANGUAGE_COMMANDS"
+	LANGUAGE_COMMANDS = "LANGUAGE_COMMANDS",
+	USER_MODULES = "USER_MODULES"
 }
 
 @Injectable({ providedIn: "root" })

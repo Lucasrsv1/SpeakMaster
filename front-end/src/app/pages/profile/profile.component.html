@@ -123,6 +123,16 @@
 							(change)="loadLanguageCommands()"
 						></ng-select>
 					</div>
+					<div class="col-12 col-md-6">
+						<button
+							*ngIf="languageCommandsService.$updateFailed | async"
+							type="button"
+							class="btn btn-primary float-end save-commands-btn"
+							(click)="saveLanguageCommands()"
+						>
+							Retentar Salvar Comandos
+						</button>
+					</div>
 				</div>
 
 				<div class="alert alert-info" role="alert" *ngIf="!currentLanguageCommands.length">

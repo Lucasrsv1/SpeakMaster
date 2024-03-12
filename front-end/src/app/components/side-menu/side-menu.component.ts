@@ -8,6 +8,7 @@ import { NgScrollbarModule } from "ngx-scrollbar";
 import { environment } from "../../../environments/environment";
 
 import { IUserModule } from "../../models/userModule";
+import { UserModulesService } from "../../services/user-modules/user-modules.service";
 
 @Component({
 	selector: "app-side-menu",
@@ -26,19 +27,18 @@ import { IUserModule } from "../../models/userModule";
 export class SideMenuComponent {
 	public version = environment.version;
 
-	public userModules: IUserModule[] = [
-		{ name: "Controle do Spotify", isActive: true, hasNotifications: true },
-		{ name: "Teclado e Mouse", isActive: false, hasNotifications: false },
-		{ name: "Controle do Windows", isActive: true, hasNotifications: false }
-	];
+	constructor (private readonly userModulesService: UserModulesService) { }
 
-	constructor () { }
+	public get userModules (): IUserModule[] {
+		return this.userModulesService.userModules || [];
+	}
 
 	public toggleModule (event: MouseEvent, module: IUserModule): void {
 		event.preventDefault();
 		event.stopPropagation();
-		console.log("Toggle module clicked");
+
 		module.isActive = !module.isActive;
+		this.userModulesService.toggleActive(module);
 	}
 
 	public goToModuleSettings (event: MouseEvent, module: IUserModule): void {

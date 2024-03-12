@@ -51,7 +51,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	) {
 		this.monacoCrlService.registerCRL();
 		this.$valueChanged
-			.pipe(debounceTime(1000))
+			.pipe(debounceTime(500))
 			.subscribe(() => this.getPossibleCommands());
 	}
 

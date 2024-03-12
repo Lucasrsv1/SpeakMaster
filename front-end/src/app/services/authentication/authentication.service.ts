@@ -15,7 +15,6 @@ import { ILanguageCommands } from "../../models/languageCommand";
 import { IUser } from "../../models/user";
 
 import { AlertsService } from "../alerts/alerts.service";
-import { LanguageCommandsService } from "../language-commands/language-commands.service";
 import { LocalStorageKey, LocalStorageService } from "../local-storage/local-storage.service";
 
 export interface IUserUpdate extends Omit<IUser, "idUser"> {
@@ -32,7 +31,6 @@ export class AuthenticationService {
 		private readonly router: Router,
 		private readonly toastr: ToastrService,
 		private readonly alertsService: AlertsService,
-		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly localStorage: LocalStorageService
 	) {
 		// Usa usuário já logado por meio do token armazenado (caso exista)
@@ -59,7 +57,7 @@ export class AuthenticationService {
 		).subscribe({
 			next: response => {
 				this.updateUserToken(response.token);
-				this.languageCommandsService.load(blockUI);
+				blockUI?.stop();
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -82,7 +80,7 @@ export class AuthenticationService {
 		).subscribe({
 			next: response => {
 				this.updateUserToken(response.token);
-				this.languageCommandsService.load(blockUI);
+				blockUI?.stop();
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -106,7 +104,7 @@ export class AuthenticationService {
 		).subscribe({
 			next: response => {
 				this.updateUserToken(response.token);
-				this.languageCommandsService.load(blockUI);
+				blockUI?.stop();
 				this.toastr.success("Perfil atualizado.", "Sucesso!");
 			},
 

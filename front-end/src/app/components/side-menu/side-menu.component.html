@@ -58,6 +58,12 @@
 					</button>
 				</a>
 			</li>
+
+			<li class="nav-item mb-1 module" *ngIf="!userModules.length">
+				<a class="link-light py-1 px-2 rounded text-center disabled">
+					<span class="flex-fill">Nenhum módulo instalado</span>
+				</a>
+			</li>
 		</ul>
 
 		<footer class="text-center mt-2">SpeakMaster v{{ version }}</footer>

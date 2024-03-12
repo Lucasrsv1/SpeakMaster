@@ -1,43 +1,54 @@
-import { Injectable } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Injectable, OnDestroy } from "@angular/core";
 
 import { NgBlockUI } from "ng-block-ui";
 import { ToastrService } from "ngx-toastr";
 
-import { BehaviorSubject, timer } from "rxjs";
+import { BehaviorSubject, Subscription } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 import { ILanguageCommands } from "../../models/languageCommand";
 
 import { AlertsService } from "../alerts/alerts.service";
+import { AuthenticationService } from "../authentication/authentication.service";
 import { LocalStorageKey, LocalStorageService } from "../local-storage/local-storage.service";
 
 @Injectable({ providedIn: "root" })
-export class LanguageCommandsService {
+export class LanguageCommandsService implements OnDestroy {
 	public $languageCommands = new BehaviorSubject<ILanguageCommands | null>(null);
+	public $updateFailed = new BehaviorSubject<boolean>(false);
+
+	private subscription: Subscription;
 
 	constructor (
 		private readonly http: HttpClient,
 		private readonly toastr: ToastrService,
 		private readonly alertsService: AlertsService,
+		private readonly authenticationService: AuthenticationService,
 		private readonly localStorage: LocalStorageService
 	) {
-		if (this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS)) {
+		this.subscription = this.authenticationService.$loggedUser.subscribe(user => {
+			if (!user)
+				return this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
+
+			if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
+				return this.loadFromServer();
+
 			this.$languageCommands.next(
 				JSON.parse(this.localStorage.get(LocalStorageKey.LANGUAGE_COMMANDS))
 			);
-		} else if (this.localStorage.hasKey(LocalStorageKey.USER)) {
-			// Use timer to avoid the following circular dependency injection:
-			// AuthenticationService -> LanguageCommandsService -> this.http.get -> RequestInterceptor -> AuthenticationService
-			timer(0).subscribe({ next: () => this.load() });
-		}
+		});
 	}
 
 	public get languageCommands (): ILanguageCommands | null {
 		return this.$languageCommands.value;
 	}
 
-	public load (blockUI?: NgBlockUI): void {
+	public ngOnDestroy (): void {
+		this.subscription.unsubscribe();
+	}
+
+	public loadFromServer (blockUI?: NgBlockUI): void {
 		this.http.get<ILanguageCommands>(
 			`${environment.API_URL}/v1/users/language-commands`
 		).subscribe({
@@ -64,12 +75,14 @@ export class LanguageCommandsService {
 		).subscribe({
 			next: _ => {
 				blockUI?.stop();
+				this.$updateFailed.next(false);
 				this.updateLanguageCommands(languageCommands);
 				this.toastr.success("Comandos de troca de idioma atualizados.", "Sucesso!");
 			},
 
 			error: (error: HttpErrorResponse) => {
 				blockUI?.stop();
+				this.$updateFailed.next(true);
 				this.alertsService.httpErrorAlert(
 					"Falha ao Atualizar Comandos",
 					"Não foi possível fazer a atualização dos comandos de troca de idioma, tente novamente.",

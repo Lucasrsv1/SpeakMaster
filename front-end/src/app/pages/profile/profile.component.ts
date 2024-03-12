@@ -1,6 +1,6 @@
 import { MatIcon } from "@angular/material/icon";
-import { NgIf } from "@angular/common";
 import { AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild } from "@angular/core";
+import { AsyncPipe, NgIf } from "@angular/common";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 
 import { ADTSettings } from "angular-datatables/src/models/settings";
@@ -35,6 +35,7 @@ import { AuthenticationService, IUserUpdate } from "../../services/authenticatio
 	selector: "app-profile",
 	standalone: true,
 	imports: [
+		AsyncPipe,
 		CodeEditorModule,
 		CollapseModule,
 		DataTablesModule,
@@ -111,14 +112,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		data: [],
 		order: [[1, "asc"]],
 		preDrawCallback: () => {
-			for (const row of this.dtOptions.data || []) {
-				// Destroy previous editors for the current command (URI file)
-				const uri = this.codeModels.get(row.targetLanguageCode)!.uri;
-				for (const e of this.editorComponents.filter(c => c.codeModel.uri === uri))
-					e.ngOnDestroy();
-
-				this.editorComponents = this.editorComponents.filter(c => c.codeModel.uri !== uri);
-			}
+			this.editorComponents.forEach(e => e.ngOnDestroy());
+			this.editorComponents = [];
 		}
 	};
 
@@ -151,6 +146,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 	private $saveTrigger: Subject<void> = new Subject();
 
 	constructor (
+		public readonly languageCommandsService: LanguageCommandsService,
 		private readonly modalService: BsModalService,
 		private readonly formBuilder: FormBuilder,
 		private readonly ngSelectConfig: NgSelectConfig,
@@ -158,7 +154,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		private readonly authenticationService: AuthenticationService,
 		private readonly dtTranslationService: DtTranslationService,
 		private readonly monacoCrlService: MonacoCrlService,
-		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly titleService: TitleService
 	) {
 		this.titleService.setTitle("Preferências de Usuário");
@@ -212,7 +207,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
 		this.subscriptions.push(
 			this.$saveTrigger
-				.pipe(debounceTime(1000))
+				.pipe(debounceTime(500))
 				.subscribe(() => this.saveLanguageCommands())
 		);
 
@@ -240,6 +235,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 	public ngOnDestroy (): void {
 		this.dtTrigger.unsubscribe();
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
+		this.editorComponents.forEach(e => e.ngOnDestroy());
+		this.editorComponents = [];
 	}
 
 	public save (): void {
@@ -324,7 +321,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		this.$saveTrigger.next();
 	}
 
-	private saveLanguageCommands (): void {
+	public saveLanguageCommands (): void {
 		if (this.languageCommands)
 			this.languageCommandsService.update(this.languageCommands);
 	}
