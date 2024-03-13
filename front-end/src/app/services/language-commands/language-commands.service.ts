@@ -4,7 +4,7 @@ import { Injectable, OnDestroy } from "@angular/core";
 import { NgBlockUI } from "ng-block-ui";
 import { ToastrService } from "ngx-toastr";
 
-import { BehaviorSubject, Subscription } from "rxjs";
+import { BehaviorSubject, skip, Subscription } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 import { ILanguageCommands } from "../../models/languageCommand";
@@ -27,17 +27,21 @@ export class LanguageCommandsService implements OnDestroy {
 		private readonly authenticationService: AuthenticationService,
 		private readonly localStorage: LocalStorageService
 	) {
-		this.subscription = this.authenticationService.$loggedUser.subscribe(user => {
-			if (!user)
-				return this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
+		if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
+			this.loadFromServer();
+		else
+			this.loadFromStorage();
 
-			if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
-				return this.loadFromServer();
+		// Ignore first value from BehaviorSubject
+		this.subscription = this.authenticationService.$loggedUser
+			.pipe(skip(1))
+			.subscribe(user => {
+				if (!user)
+					return this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
 
-			this.$languageCommands.next(
-				JSON.parse(this.localStorage.get(LocalStorageKey.LANGUAGE_COMMANDS))
-			);
-		});
+				// Every change on the logged user means the possibility of changes on the language commands
+				this.loadFromServer();
+			});
 	}
 
 	public get languageCommands (): ILanguageCommands | null {
@@ -46,6 +50,15 @@ export class LanguageCommandsService implements OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.subscription.unsubscribe();
+	}
+
+	public loadFromStorage (): void {
+		if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
+			return;
+
+		this.$languageCommands.next(
+			JSON.parse(this.localStorage.get(LocalStorageKey.LANGUAGE_COMMANDS))
+		);
 	}
 
 	public loadFromServer (blockUI?: NgBlockUI): void {
