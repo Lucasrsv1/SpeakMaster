@@ -34,6 +34,15 @@ function initUserModuleCommands (sequelize) {
 			type: DataTypes.JSONB,
 			allowNull: false,
 			defaultValue: "[]"
+		},
+		prefix: {
+			type: DataTypes.TEXT,
+			allowNull: true
+		},
+		isPrefixMandated: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+			defaultValue: false
 		}
 	}, {
 		sequelize,

@@ -37,15 +37,6 @@ function initUserModule (sequelize) {
 			allowNull: false,
 			defaultValue: true
 		},
-		prefix: {
-			type: DataTypes.TEXT,
-			allowNull: true
-		},
-		isPrefixMandated: {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: false
-		},
 		preferences: {
 			type: DataTypes.JSONB,
 			allowNull: false,

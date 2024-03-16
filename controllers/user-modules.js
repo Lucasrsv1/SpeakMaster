@@ -20,6 +20,7 @@ class UserModules {
 			updatePrefix: [
 				loginService.ensureAuthorized,
 				body("idUserModule").isInt({ gt: 0 }).withMessage("Invalid user module."),
+				body("language").isString().withMessage("Invalid language."),
 				body("prefix").isString().withMessage("Invalid prefix command."),
 				body("isPrefixMandated").isBoolean({ strict: true }).withMessage("Invalid value for isPrefixMandated.")
 			]
@@ -37,7 +38,7 @@ class UserModules {
 		try {
 			const userModules = await models.UserModule.findAll({
 				attributes: [
-					"idUserModule", "idUser", "idModule", "isActive", "prefix", "isPrefixMandated",
+					"idUserModule", "idUser", "idModule", "isActive",
 					[models.sequelize.col("module.name"), "name"]
 				],
 				include: [{
@@ -45,7 +46,7 @@ class UserModules {
 					attributes: []
 				}, {
 					association: "userModuleCommands",
-					attributes: ["idUserModuleCommands", "idUserModule", "language", "commands"]
+					attributes: ["idUserModuleCommands", "idUserModule", "language", "commands", "prefix", "isPrefixMandated"]
 				}],
 				where: {
 					idUser: res.locals.user.idUser
@@ -95,23 +96,59 @@ class UserModules {
 		if (isRequestInvalid(req, res)) return;
 
 		try {
-			const [ affectedCount ] = await models.UserModule.update({
+			const userModule = await models.UserModule.findOne({
+				attributes: ["idUserModule"],
+				where: {
+					idUserModule: req.body.idUserModule,
+
+					// Ensure the user's module commands belong to the authenticated user.
+					idUser: res.locals.user.idUser
+				}
+			});
+
+			if (!userModule)
+				return res.status(404).json({ message: "User's module not found." });
+
+			const [ affectedCount ] = await models.UserModuleCommands.update({
 				prefix: req.body.prefix,
 				isPrefixMandated: req.body.isPrefixMandated
 			}, {
 				where: {
 					idUserModule: req.body.idUserModule,
-					idUser: res.locals.user.idUser
+					language: req.body.language
 				}
 			});
 
-			if (affectedCount > 0)
-				res.status(200).json({ message: "User's module updated." });
-			else
-				res.status(404).json({ message: "User's module not found." });
+			let userModuleCommands;
+			if (affectedCount > 0) {
+				userModuleCommands = await models.UserModuleCommands.findOne({
+					attributes: ["idUserModuleCommands", "idUserModule", "language", "commands", "prefix", "isPrefixMandated"],
+					where: {
+						idUserModule: req.body.idUserModule,
+						language: req.body.language
+					}
+				});
+			} else {
+				userModuleCommands = await models.UserModuleCommands.create({
+					idUserModule: req.body.idUserModule,
+					language: req.body.language,
+					prefix: req.body.prefix,
+					isPrefixMandated: req.body.isPrefixMandated
+				}, { returning: true });
+			}
+
+			if (!userModuleCommands)
+				return res.status(500).json({ message: "Error updating the user's module commands." });
+
+			userModuleCommands = userModuleCommands.toJSON();
+			delete userModuleCommands.createdAt;
+			delete userModuleCommands.updatedAt;
+			delete userModuleCommands.deletedAt;
+
+			res.status(200).json(userModuleCommands);
 		} catch (error) {
 			console.error(error);
-			res.status(500).json({ message: "Error updating the user's module.", error });
+			res.status(500).json({ message: "Error updating the user's module commands.", error });
 		}
 	}
 }
