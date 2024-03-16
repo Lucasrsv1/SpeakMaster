@@ -6,8 +6,6 @@ export interface IUserModule {
 	idUser: number;
 	idModule: number;
 	isActive: boolean;
-	prefix: string;
-	isPrefixMandated: boolean;
 	userModuleCommands: IUserModuleCommands[];
 	hasNotifications?: boolean;
 }

@@ -9,10 +9,11 @@ export const routes: Routes = [
 	// Public
 	{ path: "about", component: AboutComponent },
 	{ path: "login", canActivate: [loginGuard], loadComponent: () => import("./pages/login/login.component").then(c => c.LoginComponent) },
-	{ path: "signUp", canActivate: [loginGuard], loadComponent: () => import("./pages/sign-up/sign-up.component").then(c => c.SignUpComponent) },
+	{ path: "sign-up", canActivate: [loginGuard], loadComponent: () => import("./pages/sign-up/sign-up.component").then(c => c.SignUpComponent) },
 
 	// Restricted
 	{ path: "profile", canActivate: [authenticationGuard], loadComponent: () => import("./pages/profile/profile.component").then(c => c.ProfileComponent) },
+	{ path: "installed-modules", canActivate: [authenticationGuard], loadComponent: () => import("./pages/installed-modules/installed-modules.component").then(c => c.InstalledModulesComponent) },
 
 	// No match
 	{ path: "", redirectTo: "about", pathMatch: "full" },

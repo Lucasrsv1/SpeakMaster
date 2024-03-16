@@ -29,31 +29,9 @@ ul.navbar-nav {
 		}
 	}
 
-	mat-icon {
-		width: 32px;
-		height: 32px;
-		font-size: 32px;
-	}
-
 	hr {
 		margin-right: 2.3rem;
 		margin-left: 2.3rem
-	}
-
-	.module {
-		button {
-			height: 32px;
-
-			&:first-child mat-icon {
-				margin-left: -3px;
-			}
-		}
-
-		mat-icon[fontIcon="check"] {
-			position: absolute;
-			font-size: 20px;
-			line-height: 32px;
-		}
 	}
 }
 

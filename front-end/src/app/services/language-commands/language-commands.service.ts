@@ -4,7 +4,7 @@ import { Injectable, OnDestroy } from "@angular/core";
 import { NgBlockUI } from "ng-block-ui";
 import { ToastrService } from "ngx-toastr";
 
-import { BehaviorSubject, skip, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, skip, Subscription, tap } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 import { ILanguageCommands } from "../../models/languageCommand";
@@ -27,6 +27,7 @@ export class LanguageCommandsService implements OnDestroy {
 		private readonly authenticationService: AuthenticationService,
 		private readonly localStorage: LocalStorageService
 	) {
+		// Handle first time loading
 		if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
 			this.loadFromServer();
 		else
@@ -81,11 +82,11 @@ export class LanguageCommandsService implements OnDestroy {
 		});
 	}
 
-	public update (languageCommands: ILanguageCommands, blockUI?: NgBlockUI): void {
-		this.http.patch<{ message: string }>(
+	public update (languageCommands: ILanguageCommands, blockUI?: NgBlockUI): Observable<{ message: string }> {
+		return this.http.patch<{ message: string }>(
 			`${environment.API_URL}/v1/users/language-commands`,
 			languageCommands
-		).subscribe({
+		).pipe(tap({
 			next: _ => {
 				blockUI?.stop();
 				this.$updateFailed.next(false);
@@ -102,7 +103,7 @@ export class LanguageCommandsService implements OnDestroy {
 					error
 				);
 			}
-		});
+		}));
 	}
 
 	private updateLanguageCommands (languageCommands: ILanguageCommands): void {

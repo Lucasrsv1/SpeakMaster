@@ -22,7 +22,10 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 		RouterLinkActive
 	],
 	templateUrl: "./side-menu.component.html",
-	styleUrl: "./side-menu.component.scss"
+	styleUrls: [
+		"./side-menu.component.scss",
+		"../../shared/checkbox.scss"
+	]
 })
 export class SideMenuComponent {
 	public version = environment.version;

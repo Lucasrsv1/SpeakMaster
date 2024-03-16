@@ -34,7 +34,13 @@ export const appConfig: ApplicationConfig = {
 			})
 		),
 		provideScrollbarOptions({ visibility: "hover" }),
-		provideToastr({ timeOut: 3000, progressBar: true }),
+		provideToastr({
+			timeOut: 3000,
+			progressBar: true,
+			preventDuplicates: true,
+			countDuplicates: true,
+			resetTimeoutOnDuplicate: true
+		}),
 		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
 		{ provide: LOCALE_ID, useValue: "pt-BR" }
 	]

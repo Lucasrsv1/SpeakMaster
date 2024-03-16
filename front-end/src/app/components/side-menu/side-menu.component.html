@@ -29,7 +29,7 @@
 			<hr class="border border-1 opacity-100"/>
 
 			<li class="nav-item mb-1">
-				<a class="link-light py-1 px-2 rounded" routerLink="/my-modules" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<a class="link-light py-1 px-2 rounded" routerLink="/installed-modules" routerLinkActive="active" ariaCurrentWhenActive="page">
 					<span class="flex-fill">Módulos Instalados</span>
 					<mat-icon fontIcon="data_saver_on"></mat-icon>
 				</a>
@@ -39,7 +39,7 @@
 				<a class="link-light py-1 px-2 rounded" routerLink="/module" routerLinkActive="active" ariaCurrentWhenActive="page">
 					<button
 						type="button"
-						class="btn btn-link text-white p-0 me-1"
+						class="btn btn-link text-white checkbox p-0 me-1"
 						(click)="toggleModule($event, module)"
 					>
 						<mat-icon *ngIf="module.isActive" fontIcon="check"></mat-icon>

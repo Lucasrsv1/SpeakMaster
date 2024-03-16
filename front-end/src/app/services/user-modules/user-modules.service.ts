@@ -4,10 +4,11 @@ import { Injectable, OnDestroy } from "@angular/core";
 import { NgBlockUI } from "ng-block-ui";
 import { ToastrService } from "ngx-toastr";
 
-import { BehaviorSubject, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, Subscription, tap } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 import { IUserModule } from "../../models/userModule";
+import { IUserModuleCommands } from "../../models/userModuleCommands";
 
 import { AlertsService } from "../alerts/alerts.service";
 import { AuthenticationService } from "../authentication/authentication.service";
@@ -15,7 +16,6 @@ import { LocalStorageKey, LocalStorageService } from "../local-storage/local-sto
 
 @Injectable({ providedIn: "root" })
 export class UserModulesService implements OnDestroy {
-	public $updateFailed = new BehaviorSubject<boolean>(false);
 	public $userModules = new BehaviorSubject<IUserModule[] | null>([]);
 
 	private subscription: Subscription;
@@ -113,46 +113,48 @@ export class UserModulesService implements OnDestroy {
 		});
 	}
 
-	public updatePrefix (userModule: IUserModule, blockUI?: NgBlockUI): void {
+	public updatePrefix (userModuleCommands: IUserModuleCommands, blockUI?: NgBlockUI): Observable<IUserModuleCommands> {
 		const data = {
-			idUserModule: userModule.idUserModule,
-			prefix: userModule.prefix,
-			isPrefixMandated: userModule.isPrefixMandated
+			idUserModule: userModuleCommands.idUserModule,
+			language: userModuleCommands.language,
+			prefix: userModuleCommands.prefix,
+			isPrefixMandated: userModuleCommands.isPrefixMandated
 		};
 
-		this.http.patch<{ message: string }>(
+		return this.http.patch<IUserModuleCommands>(
 			`${environment.API_URL}/v1/users/modules/prefix`,
 			data
-		).subscribe({
-			next: _ => {
+		).pipe(tap({
+			next: updatedUserModuleCommands => {
 				blockUI?.stop();
 
 				// Atualiza localmente
 				const userModules = this.userModules;
-				if (userModules) {
-					const module = userModules.find(um => um.idUserModule === data.idUserModule);
-					if (module) {
-						module.prefix = data.prefix;
-						module.isPrefixMandated = data.isPrefixMandated;
+				const module = userModules?.find(um => um.idUserModule === data.idUserModule);
+				if (userModules && module) {
+					const moduleCommands = module.userModuleCommands.find(umc => umc.language === data.language);
+					if (moduleCommands) {
+						moduleCommands.prefix = data.prefix;
+						moduleCommands.isPrefixMandated = data.isPrefixMandated;
+					} else {
+						module.userModuleCommands.push(updatedUserModuleCommands);
 					}
 
 					this.updateUserModules(userModules);
 				}
 
-				this.$updateFailed.next(false);
 				this.toastr.success("Módulo atualizado com sucesso.", "Sucesso!");
 			},
 
 			error: (error: HttpErrorResponse) => {
 				blockUI?.stop();
-				this.$updateFailed.next(true);
 				this.alertsService.httpErrorAlert(
 					"Falha ao Atualizar Módulo",
 					"Não foi possível fazer a atualização do módulo do usuário, tente novamente.",
 					error
 				);
 			}
-		});
+		}));
 	}
 
 	private updateUserModules (userModules: IUserModule[]): void {

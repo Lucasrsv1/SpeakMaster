@@ -40,7 +40,7 @@
 
 	<div class="alert alert-info" role="alert">
 		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="areInstructionsCollapsed = !areInstructionsCollapsed">
-			<mat-icon class="me-2">info</mat-icon>
+			<mat-icon class="me-2" fontIcon="info"></mat-icon>
 			Instruções
 			<span class="ms-auto">
 				<mat-icon class="me-2" [fontIcon]="areInstructionsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
@@ -79,7 +79,7 @@
 
 	<div class="alert alert-light cmd-list" role="alert">
 		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="arePossibleCommandsCollapsed = !arePossibleCommandsCollapsed">
-			<mat-icon class="me-2">record_voice_over</mat-icon>
+			<mat-icon class="me-2" fontIcon="record_voice_over"></mat-icon>
 			Lista de Comandos Reconhecidos:
 			<span class="ms-auto">
 				<mat-icon class="me-2" [fontIcon]="arePossibleCommandsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>

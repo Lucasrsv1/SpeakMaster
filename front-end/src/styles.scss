@@ -39,13 +39,13 @@ $SpeakMaster-theme: mat.define-light-theme((
 /* Finished setting up Angular Material */
 
 $primary: #30981B;
-// $secondary: #696969;
+$info: #007BFF;
 
 $min-contrast-ratio: 2.5;
 
 :root {
 	--primary: $primary;
-	// --secondary: $secondary;
+	--info: $info;
 }
 
 /* Importing Bootstrap SCSS file. */
@@ -58,6 +58,11 @@ body {
 	margin: 0;
 	font-family: Roboto, "Helvetica Neue", sans-serif;
 	background-color: white;
+}
+
+.text-justify {
+	text-align: justify;
+	text-justify: inter-word;
 }
 
 /* Visual Validation for ng-select and NgxEditor */

@@ -12,9 +12,6 @@ import { editor } from "monaco-editor";
 
 import { debounceTime, Subject } from "rxjs";
 
-import { ICommand } from "../../models/command";
-import { ILanguageCommand } from "../../models/languageCommand";
-
 import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
 
 @Component({
@@ -27,7 +24,8 @@ import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
 export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	public areInstructionsCollapsed: boolean = true;
 	public arePossibleCommandsCollapsed: boolean = false;
-	public command!: ICommand | ILanguageCommand;
+	public command!: { [commandKey: string]: string };
+	public commandKey!: string;
 	public possibleCommands: string[] = [];
 
 	public codeModel: CodeModel = {
@@ -60,8 +58,8 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	}
 
 	public ngOnInit (): void {
-		this.codeModel.value = this.command.command;
-		this.currentCommand = this.command.command;
+		this.codeModel.value = this.command[this.commandKey];
+		this.currentCommand = this.command[this.commandKey];
 		this.getPossibleCommands();
 	}
 
@@ -84,7 +82,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 			return;
 
 		// Write command to the original object reference
-		this.command.command = this.currentCommand;
+		this.command[this.commandKey] = this.currentCommand;
 		this.bsModalRef.hide();
 	}
 

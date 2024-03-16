@@ -68,7 +68,7 @@
 								[items]="languages"
 								bindLabel="name"
 								bindValue="code"
-								id="interfaceLanguage"
+								labelForId="interfaceLanguage"
 								formControlName="interfaceLanguage"
 							></ng-select>
 						</app-visual-validator>
@@ -85,7 +85,7 @@
 								bindValue="code"
 								[multiple]="true"
 								[closeOnSelect]="false"
-								id="languagesToListen"
+								labelForId="languagesToListen"
 								formControlName="languagesToListen"
 							></ng-select>
 						</app-visual-validator>
@@ -118,7 +118,7 @@
 							bindLabel="name"
 							bindValue="code"
 							placeholder="Selecione o idioma falado"
-							id="selectedLanguage"
+							labelForId="selectedLanguage"
 							[(ngModel)]="selectedLanguage"
 							(change)="loadLanguageCommands()"
 						></ng-select>
@@ -146,7 +146,7 @@
 						<ngs-code-editor
 							[readOnly]="true"
 							[theme]="'crlTheme'"
-							[codeModel]="codeModels.get(data.targetLanguageCode)!"
+							[codeModel]="codeModels.get(data.reference.targetLanguageCode)!"
 							[options]="options"
 							(loaded)="editorLoaded($event)"
 						></ngs-code-editor>
