@@ -1,9 +1,9 @@
 import localePt from "@angular/common/locales/pt";
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
-import { provideRouter } from "@angular/router";
 import { registerLocaleData } from "@angular/common";
 import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from "@angular/core";
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideRouter, RouteReuseStrategy, withRouterConfig } from "@angular/router";
 
 import { BlockUIModule } from "ng-block-ui";
 import { CodeEditorModule } from "@ngstack/code-editor";
@@ -12,6 +12,7 @@ import { provideScrollbarOptions } from "ngx-scrollbar";
 import { provideToastr } from "ngx-toastr";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
 
+import { AppRouteReuseStrategy } from "./app.routes.reuse-strategy";
 import { routes } from "./app.routes";
 
 import { RequestInterceptor } from "./services/authentication/request.interceptor";
@@ -24,7 +25,10 @@ export const appConfig: ApplicationConfig = {
 		provideHttpClient(
 			withInterceptorsFromDi()
 		),
-		provideRouter(routes),
+		provideRouter(
+			routes,
+			withRouterConfig({ onSameUrlNavigation: "reload" })
+		),
 		provideAnimationsAsync(),
 		importProvidersFrom(
 			BlockUIModule.forRoot(),
@@ -41,6 +45,7 @@ export const appConfig: ApplicationConfig = {
 			countDuplicates: true,
 			resetTimeoutOnDuplicate: true
 		}),
+		{ provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
 		{ provide: HTTP_INTERCEPTORS, useClass: RequestInterceptor, multi: true },
 		{ provide: LOCALE_ID, useValue: "pt-BR" }
 	]

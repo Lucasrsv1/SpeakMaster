@@ -36,7 +36,7 @@
 			</li>
 
 			<li class="nav-item mb-1 module" *ngFor="let module of userModules">
-				<a class="link-light py-1 px-2 rounded" routerLink="/module" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<a class="link-light py-1 px-2 rounded" [routerLink]="['/module/', module.idModule]" routerLinkActive="active" ariaCurrentWhenActive="page">
 					<button
 						type="button"
 						class="btn btn-link text-white checkbox p-0 me-1"

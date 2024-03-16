@@ -1,0 +1,51 @@
+<div class="container">
+	<div class="card">
+		<div
+			class="card-header ps-2 d-flex bg-primary text-white"
+			(click)="isVoiceCardCollapsed = !isVoiceCardCollapsed"
+			[attr.aria-expanded]="!isVoiceCardCollapsed"
+			aria-controls="form"
+		>
+			<mat-icon class="me-2" [fontIcon]="isVoiceCardCollapsed ? 'chevron_right' : 'expand_more'"></mat-icon>
+			Controlador de Voz
+		</div>
+
+		<div class="card-body p-0" id="form" [collapse]="isVoiceCardCollapsed" [isAnimated]="true">
+			<div class="p-3">
+				<tabset [justified]="true">
+					<tab heading="Comandos e Ambiguidades">
+						<app-module-ambiguities></app-module-ambiguities>
+					</tab>
+					<tab heading="Últimos Comandos">
+						<app-module-last-commands></app-module-last-commands>
+					</tab>
+				</tabset>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mt-4">
+		<div
+			class="card-header ps-2 d-flex bg-primary text-white"
+			(click)="isModuleCardCollapsed = !isModuleCardCollapsed"
+			[attr.aria-expanded]="!isModuleCardCollapsed"
+			aria-controls="form"
+		>
+			<mat-icon class="me-2" [fontIcon]="isModuleCardCollapsed ? 'chevron_right' : 'expand_more'"></mat-icon>
+			Configurações do Módulo
+		</div>
+
+		<div class="card-body p-0" id="form" [collapse]="isModuleCardCollapsed" [isAnimated]="true">
+			<div class="p-3">
+				<tabset [justified]="true">
+					<tab heading="Comandos Reconhecidos">
+						<app-module-commands></app-module-commands>
+					</tab>
+					<tab heading="Preferências do Módulo">
+						<app-module-settings></app-module-settings>
+					</tab>
+				</tabset>
+			</div>
+		</div>
+	</div>
+</div>

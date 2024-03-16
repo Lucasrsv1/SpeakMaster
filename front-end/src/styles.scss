@@ -65,6 +65,11 @@ body {
 	text-justify: inter-word;
 }
 
+tab {
+	border: 1px solid #dee2e6;
+	border-top: none;
+}
+
 /* Visual Validation for ng-select and NgxEditor */
 
 .form-field.is-invalid .ng-select-container,

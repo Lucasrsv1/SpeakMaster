@@ -152,14 +152,14 @@ export class InstalledModulesComponent implements AfterViewInit, OnDestroy {
 	private $rerenderTrigger: Subject<void> = new Subject();
 
 	constructor (
-		public readonly userModulesService: UserModulesService,
 		private readonly modalService: BsModalService,
 		private readonly ngSelectConfig: NgSelectConfig,
 		private readonly authenticationService: AuthenticationService,
 		private readonly dtTranslationService: DtTranslationService,
 		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly monacoCrlService: MonacoCrlService,
-		private readonly titleService: TitleService
+		private readonly titleService: TitleService,
+		private readonly userModulesService: UserModulesService
 	) {
 		this.titleService.setTitle("Módulos Instalados");
 		this.ngSelectConfig.notFoundText = "Nenhum item encontrado";

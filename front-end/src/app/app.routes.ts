@@ -14,6 +14,7 @@ export const routes: Routes = [
 	// Restricted
 	{ path: "profile", canActivate: [authenticationGuard], loadComponent: () => import("./pages/profile/profile.component").then(c => c.ProfileComponent) },
 	{ path: "installed-modules", canActivate: [authenticationGuard], loadComponent: () => import("./pages/installed-modules/installed-modules.component").then(c => c.InstalledModulesComponent) },
+	{ path: "module/:idModule", data: { shouldReuse: false }, canActivate: [authenticationGuard], loadComponent: () => import("./pages/module/module.component").then(c => c.ModuleComponent) },
 
 	// No match
 	{ path: "", redirectTo: "about", pathMatch: "full" },
