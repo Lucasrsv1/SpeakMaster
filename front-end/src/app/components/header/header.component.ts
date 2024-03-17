@@ -32,7 +32,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 	public isLoggedIn: boolean = false;
 
 	public pageTitle = "";
-	public isMenuCollapsed = false;
+	public isMenuCollapsed = innerWidth < 768;
 	public languages: ILanguage[] = languages;
 
 	private subscriptions: Subscription[] = [];
