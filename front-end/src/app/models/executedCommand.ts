@@ -9,5 +9,6 @@ export enum CommandExecutionStatus {
 export interface IExecutedCommand {
 	value: string;
 	status: CommandExecutionStatus;
-	// sentAt: Date;
+	description?: string;
+	sentAt?: number;
 }

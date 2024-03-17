@@ -1,5 +1,5 @@
-import { Component } from "@angular/core";
 import { MatIcon } from "@angular/material/icon";
+import { Component, effect, ElementRef, input, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgFor, NgIf } from "@angular/common";
 
@@ -8,6 +8,8 @@ import { NgScrollbar } from "ngx-scrollbar";
 import { CheckboxComponent } from "../../../../components/checkbox/checkbox.component";
 
 import { IAmbiguity } from "../../../../models/ambiguity";
+
+import { CommandsService } from "../../../../services/commands/commands.service";
 
 @Component({
 	selector: "app-module-ambiguities",
@@ -25,6 +27,11 @@ import { IAmbiguity } from "../../../../models/ambiguity";
 	styleUrl: "./ambiguities.component.scss"
 })
 export class AmbiguitiesComponent {
+	@ViewChild("commandInput")
+	private commandInput?: ElementRef<any>;
+
+	public commandToEdit = input<{ command: string }>();
+
 	public form: FormGroup;
 	public isMicOn: boolean = false;
 
@@ -43,15 +50,29 @@ export class AmbiguitiesComponent {
 		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05" }
 	];
 
+	private commandSent: boolean = false;
+
 	constructor (
-		private readonly formBuilder: FormBuilder
+		private readonly formBuilder: FormBuilder,
+		private readonly commandsService: CommandsService
 	) {
 		this.form = this.formBuilder.group({
 			command: ["", Validators.required]
 		});
+
+		effect(() => {
+			if (!this.commandToEdit()?.command)
+				return;
+
+			this.form.get("command")?.setValue(this.commandToEdit()?.command);
+			this.commandInput?.nativeElement.focus();
+		});
 	}
 
 	public get placeholder (): string {
+		if (this.commandSent)
+			return "Comando enviado!";
+
 		if (this.isMicOn)
 			return "Fale um comando ou o digite aqui para executá-lo";
 
@@ -62,11 +83,19 @@ export class AmbiguitiesComponent {
 		this.isMicOn = !this.isMicOn;
 	}
 
+	public clearForm (): void {
+		this.form.reset();
+		this.commandInput?.nativeElement.focus();
+	}
+
 	public submitCommand (): void {
 		if (this.form.invalid)
 			return;
 
-		console.log("Send Command:", this.form.get("command")?.value);
+		this.commandsService.sendCommand(this.form.get("command")?.value);
+		this.commandSent = true;
+		setTimeout(() => this.commandSent = false, 2000);
+		this.form.reset();
 	}
 
 	public select (selectedAmbiguity: IAmbiguity): void {

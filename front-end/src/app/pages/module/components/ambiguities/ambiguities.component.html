@@ -10,7 +10,13 @@
 						class="form-control"
 						formControlName="command"
 						[placeholder]="placeholder"
+						#commandInput
 					>
+
+					<button class="btn px-0 border-0 text-muted clear-btn" tabindex="-1" type="button" (click)="clearForm()" *ngIf="form.valid">
+						<mat-icon fontIcon="clear"></mat-icon>
+					</button>
+
 					<button class="btn btn-primary" id="run-btn" type="submit" (click)="submitCommand()" [disabled]="form.invalid">
 						<mat-icon fontIcon="play_circle_outline"></mat-icon>
 					</button>

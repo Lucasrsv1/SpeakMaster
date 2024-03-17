@@ -11,6 +11,12 @@ span.text-truncate {
 	min-width: 145px;
 }
 
+.clear-btn {
+	width: 50px;
+	margin-left: -50px !important;
+	z-index: 5;
+}
+
 .ambiguities-container {
 	height: 255px;
 

@@ -5,6 +5,7 @@ const APP_KEY_PREFIX = "SPEAKMASTER_";
 export enum LocalStorageKey {
 	USER = "USER",
 	LANGUAGE_COMMANDS = "LANGUAGE_COMMANDS",
+	LAST_COMMANDS = "LAST_COMMANDS",
 	USER_MODULES = "USER_MODULES"
 }
 
@@ -20,10 +21,10 @@ export class LocalStorageService {
 		return window.localStorage.getItem(APP_KEY_PREFIX + key + suffix) || defaultValue;
 	}
 
-	public parse<T> (key: LocalStorageKey, defaultValue: T | null = null, suffix: string = ""): T | null {
+	public parse<T> (key: LocalStorageKey, defaultValue: T | null = null, suffix: string = ""): T {
 		const content: string | null = window.localStorage.getItem(APP_KEY_PREFIX + key + suffix);
 		if (!content)
-			return defaultValue;
+			return defaultValue as T;
 
 		return JSON.parse(content) as T;
 	}

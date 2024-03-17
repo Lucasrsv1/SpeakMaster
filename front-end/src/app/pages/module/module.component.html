@@ -12,12 +12,12 @@
 
 		<div class="card-body p-0" id="form" [collapse]="isVoiceCardCollapsed" [isAnimated]="true">
 			<div class="p-3">
-				<tabset [justified]="true">
+				<tabset [justified]="true" #commandsTabs>
 					<tab heading="Comandos e Ambiguidades">
-						<app-module-ambiguities></app-module-ambiguities>
+						<app-module-ambiguities [commandToEdit]="commandToEdit"></app-module-ambiguities>
 					</tab>
 					<tab heading="Últimos Comandos">
-						<app-module-last-commands></app-module-last-commands>
+						<app-module-last-commands (editCommand)="editCommand($event)"></app-module-last-commands>
 					</tab>
 				</tabset>
 			</div>

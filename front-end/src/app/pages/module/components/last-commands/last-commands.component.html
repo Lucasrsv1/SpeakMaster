@@ -7,6 +7,7 @@
 						class="list-group-item d-flex align-items-center"
 						*ngFor="let command of commands"
 						[class]="command.status"
+						[title]="command.description || ''"
 					>
 						<div class="flex-fill">{{ command.value }}</div>
 						<div class="ms-3">
@@ -20,7 +21,7 @@
 									<button
 										type="button"
 										class="btn btn-sm d-flex align-items-center px-0 me-1"
-										(click)="edit(command)"
+										(click)="editCommand.emit(command.value)"
 										title="Editar comando"
 									>
 										<mat-icon fontIcon="edit"></mat-icon>
