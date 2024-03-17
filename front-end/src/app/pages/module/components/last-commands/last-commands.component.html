@@ -1,1 +1,51 @@
-<p>last-commands works!</p>
+<div>
+	@if (commands.length) {
+		<div class="overflow-hidden commands-container">
+			<ng-scrollbar>
+				<ul class="list-group list-group-flush">
+					<li
+						class="list-group-item d-flex align-items-center"
+						*ngFor="let command of commands"
+						[class]="command.status"
+					>
+						<div class="flex-fill">{{ command.value }}</div>
+						<div class="ms-3">
+							@if (command.status === running) {
+								<div class="spinner-border spinner-border-sm" role="status">
+									<span class="visually-hidden">Executando...</span>
+								</div>
+								<span class="ms-2 running">Executando</span>
+							} @else {
+								<div class="d-flex">
+									<button
+										type="button"
+										class="btn btn-sm d-flex align-items-center px-0 me-1"
+										(click)="edit(command)"
+										title="Editar comando"
+									>
+										<mat-icon fontIcon="edit"></mat-icon>
+									</button>
+									<button
+										type="button"
+										class="btn btn-sm d-flex align-items-center px-0"
+										(click)="replay(command)"
+										title="Repetir execução do comando"
+									>
+										<mat-icon fontIcon="replay"></mat-icon>
+										<span class="ms-2">Repetir</span>
+									</button>
+								</div>
+							}
+						</div>
+					</li>
+				</ul>
+			</ng-scrollbar>
+		</div>
+	} @else {
+		<div class="d-flex align-items-center justify-content-center commands-container">
+			<p class="text-muted mb-0">
+				Nenhum comando executado até o momento.
+			</p>
+		</div>
+	}
+</div>

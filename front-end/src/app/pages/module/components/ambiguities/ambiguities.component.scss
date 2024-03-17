@@ -7,11 +7,15 @@ hr {
 	opacity: 1;
 }
 
+span.text-truncate {
+	min-width: 145px;
+}
+
 .ambiguities-container {
-	height: 250px;
+	height: 255px;
 
 	ng-scrollbar {
-		max-height: 250px;
+		max-height: 255px;
 	}
 
 	img {
@@ -19,4 +23,8 @@ hr {
 		height: 40px;
 		object-fit: cover;
 	}
+}
+
+.ambiguities-container.empty {
+	height: 283px;
 }

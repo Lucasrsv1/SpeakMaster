@@ -1,0 +1,16 @@
+button {
+	color: inherit;
+	height: 34px;
+}
+
+.running {
+	line-height: 34px;
+}
+
+.commands-container {
+	height: 417px;
+
+	ng-scrollbar {
+		max-height: 417px;
+	}
+}
