@@ -1,0 +1,22 @@
+button {
+	height: 37.5px;
+}
+
+hr {
+	border-color: var(--bs-border-color);
+	opacity: 1;
+}
+
+.ambiguities-container {
+	height: 250px;
+
+	ng-scrollbar {
+		max-height: 250px;
+	}
+
+	img {
+		width: 40px;
+		height: 40px;
+		object-fit: cover;
+	}
+}

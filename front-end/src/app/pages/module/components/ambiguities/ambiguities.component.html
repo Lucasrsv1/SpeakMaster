@@ -1,1 +1,74 @@
-<p>ambiguities works!</p>
+<div class="p-3">
+	<label for="command" class="form-label">Linha de comando:</label>
+	<div class="d-flex align-items-end">
+		<div class="flex-fill">
+			<form [formGroup]="form">
+				<div class="input-group">
+					<input
+						id="command"
+						type="text"
+						class="form-control"
+						formControlName="command"
+						[placeholder]="placeholder"
+					>
+					<button class="btn btn-primary" id="run-btn" type="submit" (click)="submitCommand()" [disabled]="form.invalid">
+						<mat-icon fontIcon="play_circle_outline"></mat-icon>
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<div class="ms-3">
+			<button
+				type="button"
+				[title]="isMicOn ? 'Microfone Ativado' : 'Microfone Desativado'"
+				class="btn p-1 d-flex align-items-center"
+				[class.btn-secondary]="!isMicOn"
+				[class.btn-danger]="isMicOn"
+				(click)="toggleMic()"
+			>
+				<mat-icon class="ms-1" [fontIcon]="isMicOn ? 'mic_on' : 'mic_off'"></mat-icon>
+				<span class="mx-2 text-truncate">
+					{{ isMicOn ? 'Desativar Microfone' : 'Ativar Microfone' }}
+				</span>
+			</button>
+		</div>
+	</div>
+
+	<hr/>
+
+	@if (ambiguities.length) {
+		<p class="mb-1">O último comando resultou nas seguintes possibilidades:</p>
+
+		<div class="border overflow-hidden ambiguities-container">
+			<ng-scrollbar>
+				<ul class="list-group list-group-flush">
+					<li
+						class="list-group-item list-group-item-action d-flex align-items-center"
+						*ngFor="let ambiguity of ambiguities"
+						[class.list-group-item-success]="ambiguity.isSelected"
+						(click)="select(ambiguity)"
+						title="Selecionar opção para resolver ambiguidade"
+					>
+						<app-checkbox
+							class="text-primary me-2"
+							[radio]="true"
+							[isChecked]="ambiguity.isSelected"
+						></app-checkbox>
+
+						<img *ngIf="ambiguity.image" [src]="ambiguity.image" class="me-3" />
+
+						<div class="flex-fill">{{ ambiguity.description }}</div>
+						<div class="ms-3">{{ ambiguity.secondaryInfo }}</div>
+					</li>
+				</ul>
+			</ng-scrollbar>
+		</div>
+	} @else {
+		<div class="d-flex align-items-center justify-content-center border ambiguities-container">
+			<p class="text-muted mb-0">
+				Nenhuma ambiguidade até o momento.
+			</p>
+		</div>
+	}
+</div>
