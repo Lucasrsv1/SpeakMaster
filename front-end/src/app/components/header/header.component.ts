@@ -10,6 +10,7 @@ import { Subscription } from "rxjs";
 import { getDefaultLanguage, ILanguage, languages } from "../../models/languages";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
+import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
 import { TitleService } from "../../services/title/title.service";
 
 @Component({
@@ -33,13 +34,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
 	public pageTitle = "";
 	public isMenuCollapsed = innerWidth < 768;
-	public languages: ILanguage[] = languages;
+	public spokenLanguages: ILanguage[] = [];
 
 	private subscriptions: Subscription[] = [];
 
 	constructor (
 		private readonly titleService: TitleService,
-		private readonly authenticationService: AuthenticationService
+		private readonly authenticationService: AuthenticationService,
+		private readonly languageCommandsService: LanguageCommandsService
 	) {
 		this.subscriptions.push(
 			this.authenticationService.$loggedUser.subscribe(user => {
@@ -54,6 +56,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
 					this.currentLanguage = getDefaultLanguage();
 					this.isMicOn = false;
 				}
+			})
+		);
+
+		this.subscriptions.push(
+			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+				const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
+				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
+
+				if (this.spokenLanguages.length && !this.spokenLanguages.find(l => l.code === this.currentLanguage))
+					this.currentLanguage = this.spokenLanguages[0].code;
 			})
 		);
 

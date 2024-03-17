@@ -60,9 +60,9 @@
 							role="menu"
 							aria-labelledby="button-split"
 						>
-							<li *ngFor="let l of languages">
-								<a class="dropdown-item" (click)="setLanguage(l)">
-									{{ l.name }}
+							<li *ngFor="let language of spokenLanguages">
+								<a class="dropdown-item" (click)="setLanguage(language)">
+									{{ language.name }}
 								</a>
 							</li>
 						</ul>
