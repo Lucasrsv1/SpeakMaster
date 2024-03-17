@@ -17,6 +17,7 @@ import { debounceTime, Subject, Subscription } from "rxjs";
 
 import deepEqual from "deep-equal";
 
+import { CheckboxComponent } from "../../components/checkbox/checkbox.component";
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
@@ -52,6 +53,7 @@ interface IDataTableRow {
 	standalone: true,
 	imports: [
 		AsyncPipe,
+		CheckboxComponent,
 		CodeEditorModule,
 		CollapseModule,
 		DataTablesModule,
@@ -66,8 +68,7 @@ interface IDataTableRow {
 	templateUrl: "./profile.component.html",
 	styleUrls: [
 		"./profile.component.scss",
-		"../../shared/eye-btn.scss",
-		"../../shared/checkbox.scss"
+		"../../shared/eye-btn.scss"
 	]
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {

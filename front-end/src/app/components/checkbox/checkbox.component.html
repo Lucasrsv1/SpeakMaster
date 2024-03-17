@@ -1,0 +1,13 @@
+<button
+	type="button"
+	class="btn btn-link checkbox p-0 me-1"
+	(click)="clicked.emit($event)"
+>
+	@if (radio) {
+		<mat-icon *ngIf="isChecked" fontIcon="check_circle_outline"></mat-icon>
+		<mat-icon *ngIf="!isChecked" fontIcon="radio_button_unchecked"></mat-icon>
+	} @else {
+		<mat-icon *ngIf="isChecked" fontIcon="check"></mat-icon>
+		<mat-icon fontIcon="check_box_outline_blank"></mat-icon>
+	}
+</button>

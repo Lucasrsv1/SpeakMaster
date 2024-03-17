@@ -21,6 +21,7 @@ import { IUserModule } from "../../models/userModule";
 import { IUserModuleCommands } from "../../models/userModuleCommands";
 import { ILanguage, LanguageCode, languages } from "../../models/languages";
 
+import { CheckboxComponent } from "../../components/checkbox/checkbox.component";
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
@@ -51,6 +52,7 @@ interface IDataTableRow {
 	standalone: true,
 	imports: [
 		AsyncPipe,
+		CheckboxComponent,
 		CodeEditorModule,
 		CollapseModule,
 		DataTablesModule,
@@ -61,10 +63,7 @@ interface IDataTableRow {
 		CommandEditorModalComponent
 	],
 	templateUrl: "./installed-modules.component.html",
-	styleUrls: [
-		"./installed-modules.component.scss",
-		"../../shared/checkbox.scss"
-	]
+	styleUrl: "./installed-modules.component.scss"
 })
 export class InstalledModulesComponent implements AfterViewInit, OnDestroy {
 	@BlockUI()

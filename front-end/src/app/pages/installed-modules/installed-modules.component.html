@@ -55,14 +55,11 @@
 					</ng-template>
 
 					<ng-template #toggleBtn let-data="adtData">
-						<button
-							type="button"
-							class="btn btn-link text-primary checkbox p-0"
-							(click)="togglePrefixMandated(data)"
-						>
-							<mat-icon *ngIf="data.isPrefixMandated" fontIcon="check"></mat-icon>
-							<mat-icon fontIcon="check_box_outline_blank"></mat-icon>
-						</button>
+						<app-checkbox
+							class="text-primary"
+							[isChecked]="data.isPrefixMandated"
+							(clicked)="togglePrefixMandated(data)"
+						></app-checkbox>
 					</ng-template>
 
 					<ng-template #editBtn let-data="adtData">

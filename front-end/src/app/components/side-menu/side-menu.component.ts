@@ -7,13 +7,17 @@ import { NgScrollbarModule } from "ngx-scrollbar";
 
 import { environment } from "../../../environments/environment";
 
+import { CheckboxComponent } from "../checkbox/checkbox.component";
+
 import { IUserModule } from "../../models/userModule";
+
 import { UserModulesService } from "../../services/user-modules/user-modules.service";
 
 @Component({
 	selector: "app-side-menu",
 	standalone: true,
 	imports: [
+		CheckboxComponent,
 		MatIcon,
 		NgFor,
 		NgIf,
@@ -22,10 +26,7 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 		RouterLinkActive
 	],
 	templateUrl: "./side-menu.component.html",
-	styleUrls: [
-		"./side-menu.component.scss",
-		"../../shared/checkbox.scss"
-	]
+	styleUrl: "./side-menu.component.scss"
 })
 export class SideMenuComponent {
 	public version = environment.version;
