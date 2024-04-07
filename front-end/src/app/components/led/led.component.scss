@@ -1,0 +1,103 @@
+:host {
+	padding: 8px;
+	width: 1em;
+	height: 1em;
+	font-size: 40px;
+	display: block;
+}
+
+.led {
+	width: 100%;
+	height: 100%;
+	background-color: var(--color);
+	border-radius: 50%;
+	box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 2px 0.4em;
+
+	&.off {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	&.blinking {
+		-webkit-animation: blink var(--animation-duration) infinite;
+		-moz-animation: blink var(--animation-duration) infinite;
+		-ms-animation: blink var(--animation-duration) infinite;
+		-o-animation: blink var(--animation-duration) infinite;
+		animation: blink var(--animation-duration) infinite;
+	}
+}
+
+@-webkit-keyframes blink {
+	from {
+		background-color: var(--color);
+	}
+
+	50% {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	to {
+		background-color: var(--color);
+	}
+}
+
+@-moz-keyframes blink {
+	from {
+		background-color: var(--color);
+	}
+
+	50% {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	to {
+		background-color: var(--color);
+	}
+}
+
+@-ms-keyframes blink {
+	from {
+		background-color: var(--color);
+	}
+
+	50% {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	to {
+		background-color: var(--color);
+	}
+}
+
+@-o-keyframes blink {
+	from {
+		background-color: var(--color);
+	}
+
+	50% {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	to {
+		background-color: var(--color);
+	}
+}
+
+@keyframes blink {
+	from {
+		background-color: var(--color);
+	}
+
+	50% {
+		background-color: var(--color-darkest);
+		box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset var(--color-darker) 0 -1px 9px, var(--color) 0 0 2px;
+	}
+
+	to {
+		background-color: var(--color);
+	}
+}
