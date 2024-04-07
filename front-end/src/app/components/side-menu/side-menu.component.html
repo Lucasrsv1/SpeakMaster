@@ -45,7 +45,7 @@
 
 					<span class="flex-fill">{{ module.name }}</span>
 
-					@if (!(getModuleConnectionStatus(module) | async)) {
+					@if (module.isActive && !(getModuleConnectionStatus(module) | async)) {
 						<app-led color="#F00" tooltip="Módulo Offline"></app-led>
 					} @else if (module.hasNotifications) {
 						<span class="bg-warning rounded-circle p-2 ms-2"></span>
