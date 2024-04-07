@@ -30,7 +30,7 @@ function initModule (sequelize) {
 		preferencesDefinition: {
 			type: DataTypes.JSONB,
 			allowNull: false,
-			defaultValue: "[]"
+			defaultValue: []
 		},
 		idAuthor: {
 			type: DataTypes.INTEGER,
@@ -43,6 +43,11 @@ function initModule (sequelize) {
 		apiSecret: {
 			type: DataTypes.STRING(256),
 			allowNull: false
+		},
+		featuresDefinition: {
+			type: DataTypes.JSONB,
+			allowNull: false,
+			defaultValue: []
 		}
 	}, {
 		sequelize,

@@ -40,7 +40,7 @@ function initUserModule (sequelize) {
 		preferences: {
 			type: DataTypes.JSONB,
 			allowNull: false,
-			defaultValue: "[]"
+			defaultValue: []
 		}
 	}, {
 		sequelize,

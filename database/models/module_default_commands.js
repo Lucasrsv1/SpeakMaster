@@ -33,7 +33,7 @@ function initModuleDefaultCommands (sequelize) {
 		commands: {
 			type: DataTypes.JSONB,
 			allowNull: false,
-			defaultValue: "[]"
+			defaultValue: []
 		}
 	}, {
 		sequelize,
