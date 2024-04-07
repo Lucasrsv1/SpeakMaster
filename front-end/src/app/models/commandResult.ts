@@ -3,7 +3,7 @@ import { IFeatureParameters } from "./featureParameters";
 
 export interface ICommandResult {
 	idModule: number;
-	featureKey: string;
+	featureIdentifier: string;
 	sentAt: number;
 	result: boolean | {
 		options: IAmbiguity[];

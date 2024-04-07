@@ -43,10 +43,10 @@ export class CommandCenterService implements OnDestroy {
 		return this.$moduleConnected.get(moduleId)!;
 	}
 
-	public sendCommandToModule (idModule: number, featureKey: string, parameters?: IFeatureParameters): number {
+	public sendCommandToModule (idModule: number, featureIdentifier: string, parameters?: IFeatureParameters): number {
 		const sentAt = Date.now();
 		this.socket.emit("COMMAND", {
-			idModule, featureKey, parameters, sentAt
+			idModule, featureIdentifier, parameters, sentAt
 		});
 
 		return sentAt;
