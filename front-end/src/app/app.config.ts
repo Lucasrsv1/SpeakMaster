@@ -11,6 +11,7 @@ import { ModalModule } from "ngx-bootstrap/modal";
 import { provideScrollbarOptions } from "ngx-scrollbar";
 import { provideToastr } from "ngx-toastr";
 import { defineLocale, ptBrLocale } from "ngx-bootstrap/chronos";
+import { SocketIoConfig, SocketIoModule } from "ngx-socket-io";
 
 import { AppRouteReuseStrategy } from "./app.routes.reuse-strategy";
 import { routes } from "./app.routes";
@@ -19,6 +20,8 @@ import { RequestInterceptor } from "./services/authentication/request.intercepto
 
 defineLocale("pt-br", ptBrLocale);
 registerLocaleData(localePt);
+
+const config: SocketIoConfig = { url: "http://localhost:2214" };
 
 export const appConfig: ApplicationConfig = {
 	providers: [
@@ -35,7 +38,8 @@ export const appConfig: ApplicationConfig = {
 			ModalModule.forRoot(),
 			CodeEditorModule.forRoot({
 				baseUrl: "assets/monaco"
-			})
+			}),
+			SocketIoModule.forRoot(config)
 		),
 		provideScrollbarOptions({ visibility: "hover" }),
 		provideToastr({

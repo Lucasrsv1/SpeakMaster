@@ -1,29 +1,37 @@
 import { Component } from "@angular/core";
 import { MatIcon } from "@angular/material/icon";
-import { NgFor, NgIf } from "@angular/common";
+import { AsyncPipe, NgFor, NgIf } from "@angular/common";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 import { NgScrollbarModule } from "ngx-scrollbar";
+import { TooltipModule } from "ngx-bootstrap/tooltip";
+
+import { BehaviorSubject } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 
 import { CheckboxComponent } from "../checkbox/checkbox.component";
+import { LedComponent } from "../led/led.component";
 
 import { IUserModule } from "../../models/userModule";
 
+import { CommandCenterService } from "../../services/command-center/command-center.service";
 import { UserModulesService } from "../../services/user-modules/user-modules.service";
 
 @Component({
 	selector: "app-side-menu",
 	standalone: true,
 	imports: [
+		AsyncPipe,
 		CheckboxComponent,
+		LedComponent,
 		MatIcon,
 		NgFor,
 		NgIf,
 		NgScrollbarModule,
 		RouterLink,
-		RouterLinkActive
+		RouterLinkActive,
+		TooltipModule
 	],
 	templateUrl: "./side-menu.component.html",
 	styleUrl: "./side-menu.component.scss"
@@ -31,10 +39,17 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 export class SideMenuComponent {
 	public version = environment.version;
 
-	constructor (private readonly userModulesService: UserModulesService) { }
+	constructor (
+		private readonly commandCenterService: CommandCenterService,
+		private readonly userModulesService: UserModulesService
+	) { }
 
 	public get userModules (): IUserModule[] {
 		return this.userModulesService.userModules || [];
+	}
+
+	public getModuleConnectionStatus (module: IUserModule): BehaviorSubject<boolean> {
+		return this.commandCenterService.$isModuleConnected(module.idModule);
 	}
 
 	public toggleModule (event: MouseEvent, module: IUserModule): void {

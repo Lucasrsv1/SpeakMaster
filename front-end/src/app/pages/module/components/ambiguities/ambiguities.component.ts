@@ -36,18 +36,18 @@ export class AmbiguitiesComponent {
 	public isMicOn: boolean = false;
 
 	public ambiguities: IAmbiguity[] = [
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51" },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05" }
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
+		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } }
 	];
 
 	private commandSent: boolean = false;

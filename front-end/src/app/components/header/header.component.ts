@@ -1,22 +1,35 @@
 import { MatIcon } from "@angular/material/icon";
 import { RouterLink } from "@angular/router";
+import { AsyncPipe, NgFor, NgIf } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { NgFor, NgIf } from "@angular/common";
 
 import { BsDropdownModule } from "ngx-bootstrap/dropdown";
+import { TooltipModule } from "ngx-bootstrap/tooltip";
 
 import { Subscription } from "rxjs";
+
+import { LedComponent } from "../led/led.component";
 
 import { getDefaultLanguage, ILanguage, languages } from "../../models/languages";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
+import { CommandCenterService } from "../../services/command-center/command-center.service";
 import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
 import { TitleService } from "../../services/title/title.service";
 
 @Component({
 	selector: "app-header",
 	standalone: true,
-	imports: [BsDropdownModule, MatIcon, NgFor, NgIf, RouterLink],
+	imports: [
+		AsyncPipe,
+		BsDropdownModule,
+		LedComponent,
+		MatIcon,
+		NgFor,
+		NgIf,
+		RouterLink,
+		TooltipModule
+	],
 	templateUrl: "./header.component.html",
 	styleUrls: ["./header.component.scss"]
 })
@@ -39,6 +52,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 	private subscriptions: Subscription[] = [];
 
 	constructor (
+		public readonly commandCenterService: CommandCenterService,
 		private readonly titleService: TitleService,
 		private readonly authenticationService: AuthenticationService,
 		private readonly languageCommandsService: LanguageCommandsService
