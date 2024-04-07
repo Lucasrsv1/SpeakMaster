@@ -31,6 +31,18 @@ function initModule (sequelize) {
 			type: DataTypes.JSONB,
 			allowNull: false,
 			defaultValue: "[]"
+		},
+		idAuthor: {
+			type: DataTypes.INTEGER,
+			allowNull: false
+		},
+		apiKey: {
+			type: DataTypes.UUID,
+			allowNull: false
+		},
+		apiSecret: {
+			type: DataTypes.STRING(256),
+			allowNull: false
 		}
 	}, {
 		sequelize,

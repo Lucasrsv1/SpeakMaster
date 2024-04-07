@@ -20,6 +20,10 @@ Table module {
   id_module int [pk, increment]
   name varchar(200) [not null]
   preferences_definition jsonb [not null, default: `'[]'`]
+  features_definition jsonb [not null, default: `'[]'`]
+  id_author int [not null, ref: > user.id_user]
+  api_key uuid [not null]
+  api_secret varchar(256) [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
   deleted_at timestamp [null]
@@ -37,8 +41,8 @@ Table module_default_commands {
 
 Table user_module {
   id_user_module int [pk, increment]
-  id_user int [not null, ref: > user.id_user]
   id_module int [not null, ref: > module.id_module]
+  id_user int [not null, ref: > user.id_user]
   is_active boolean [not null, default: `true`]
   preferences jsonb [not null, default: `'[]'`]
   created_at timestamp [not null, default: `NOW()`]
