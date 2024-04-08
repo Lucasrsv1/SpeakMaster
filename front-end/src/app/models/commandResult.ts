@@ -7,6 +7,6 @@ export interface ICommandResult {
 	sentAt: number;
 	result: boolean | {
 		options: IAmbiguity[];
-		parameters: IFeatureParameters;
+		parameters?: IFeatureParameters;
 	};
 }

@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from "@angular/core";
 
 import { Socket } from "ngx-socket-io";
 
-import { BehaviorSubject, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
 import { ICommandResult } from "../../models/commandResult";
 import { IFeatureParameters } from "../../models/featureParameters";
@@ -23,13 +23,15 @@ export class CommandCenterService implements OnDestroy {
 				this.$moduleConnected.forEach(subject => subject.next(false));
 			}),
 
-			this.socket.fromEvent<ICommandResult>("COMMAND_RESULT").subscribe(this.handleCommandResult.bind(this)),
-
 			this.socket.fromEvent<{ idModule: number, isConnected: boolean }>("MODULE_CONNECTION").subscribe(data => {
 				const subject = this.$moduleConnected.get(data.idModule);
 				subject?.next(data.isConnected);
 			})
 		);
+	}
+
+	public get $commandResult (): Observable<ICommandResult> {
+		return this.socket.fromEvent<ICommandResult>("COMMAND_RESULT");
 	}
 
 	public ngOnDestroy (): void {
@@ -50,10 +52,5 @@ export class CommandCenterService implements OnDestroy {
 		});
 
 		return sentAt;
-	}
-
-	private handleCommandResult (data: ICommandResult): void {
-		// TODO
-		console.log(data);
 	}
 }

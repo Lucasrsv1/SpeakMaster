@@ -7,8 +7,10 @@ export enum CommandExecutionStatus {
 }
 
 export interface IExecutedCommand {
-	value: string;
+	description: string;
 	status: CommandExecutionStatus;
-	description?: string;
+	value: string;
+	featureIdentifier?: string;
+	idModule?: number;
 	sentAt?: number;
 }
