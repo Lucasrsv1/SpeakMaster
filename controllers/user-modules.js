@@ -39,7 +39,8 @@ class UserModules {
 			const userModules = await models.UserModule.findAll({
 				attributes: [
 					"idUserModule", "idUser", "idModule", "isActive",
-					[models.sequelize.col("module.name"), "name"]
+					[models.sequelize.col("module.name"), "name"],
+					[models.sequelize.col("module.features_definition"), "featuresDefinition"]
 				],
 				include: [{
 					association: "module",

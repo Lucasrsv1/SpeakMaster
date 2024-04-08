@@ -1,3 +1,5 @@
+import { Feature } from "speakmaster-module-builder/features-builder";
+
 import { IUserModuleCommands } from "./userModuleCommands";
 
 export interface IUserModule {
@@ -7,5 +9,6 @@ export interface IUserModule {
 	idModule: number;
 	isActive: boolean;
 	userModuleCommands: IUserModuleCommands[];
+	featuresDefinition: Feature[];
 	hasNotifications?: boolean;
 }

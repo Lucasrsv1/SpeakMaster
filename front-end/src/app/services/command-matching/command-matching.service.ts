@@ -11,6 +11,7 @@ import { LanguageCode } from "../../models/languages";
 import { CommandExecutionStatus, IExecutedCommand } from "../../models/executedCommand";
 
 import { CommandCenterService } from "../command-center/command-center.service";
+import { CommandParametersService } from "../command-parameters/command-parameters.service";
 import { LanguageCommandsService } from "../language-commands/language-commands.service";
 import { UserModulesService } from "../user-modules/user-modules.service";
 
@@ -22,6 +23,7 @@ export class CommandMatchingService implements OnDestroy {
 
 	constructor (
 		private readonly commandCenterService: CommandCenterService,
+		private readonly commandParametersService: CommandParametersService,
 		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly userModulesService: UserModulesService
 	) {
@@ -52,8 +54,10 @@ export class CommandMatchingService implements OnDestroy {
 			const result = automata.match(command);
 			if (!result.match) continue;
 
-			// TODO: construir objeto de parâmetros com base nas features do comando
-			const parameters = undefined;
+			// Gera o objeto de parâmetros com base na funcionalidade associada ao comando
+			const parameters = this.commandParametersService.buildParametersObject(
+				result, moduleCommand.idModule, moduleCommand.command
+			);
 
 			const sentAt = this.commandCenterService.sendCommandToModule(
 				moduleCommand.idModule, moduleCommand.command.featureIdentifier, parameters
