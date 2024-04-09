@@ -10,5 +10,4 @@ export interface IUserModule {
 	isActive: boolean;
 	userModuleCommands: IUserModuleCommands[];
 	featuresDefinition: Feature[];
-	hasNotifications?: boolean;
 }

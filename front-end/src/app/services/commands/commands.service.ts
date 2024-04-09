@@ -5,6 +5,7 @@ import { BehaviorSubject, Subscription } from "rxjs";
 import { ICommandResult } from "../../models/commandResult";
 import { CommandExecutionStatus, IExecutedCommand } from "../../models/executedCommand";
 
+import { AmbiguityService } from "../ambiguity/ambiguity.service";
 import { AuthenticationService } from "../authentication/authentication.service";
 import { CommandCenterService } from "../command-center/command-center.service";
 import { CommandMatchingService } from "../command-matching/command-matching.service";
@@ -21,6 +22,7 @@ export class CommandsService implements OnDestroy {
 
 	constructor (
 		private readonly authenticationService: AuthenticationService,
+		private readonly ambiguityService: AmbiguityService,
 		private readonly commandCenterService: CommandCenterService,
 		private readonly commandMatchingService: CommandMatchingService,
 		private readonly localStorage: LocalStorageService
@@ -70,8 +72,6 @@ export class CommandsService implements OnDestroy {
 	}
 
 	public gotResultForCommand (data: ICommandResult): void {
-		console.log(data);
-
 		const executedCommand = this.lastCommands.find(
 			command => command.idModule === data.idModule && command.featureIdentifier === data.featureIdentifier && command.sentAt === data.sentAt
 		);
@@ -81,10 +81,11 @@ export class CommandsService implements OnDestroy {
 		if (typeof data.result == "boolean") {
 			executedCommand.status = data.result ? CommandExecutionStatus.SUCCESSFUL : CommandExecutionStatus.ERROR;
 			executedCommand.description = data.result ? "Comando executado com sucesso" : "Erro ao executar comando";
+			this.ambiguityService.clearAmbiguity(data.idModule);
 		} else {
 			executedCommand.status = CommandExecutionStatus.AMBIGUOUS;
 			executedCommand.description = "O comando resultou em ambiguidade";
-			// TODO: iniciar resolução de ambiguidades
+			this.ambiguityService.notifyAmbiguity(data);
 		}
 
 		this.updateLastCommands(this.lastCommands);

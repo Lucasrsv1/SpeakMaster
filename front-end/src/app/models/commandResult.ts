@@ -8,5 +8,6 @@ export interface ICommandResult {
 	result: boolean | {
 		options: IAmbiguity[];
 		parameters?: IFeatureParameters;
+		notified?: boolean;
 	};
 }

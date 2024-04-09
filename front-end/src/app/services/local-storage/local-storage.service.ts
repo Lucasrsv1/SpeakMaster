@@ -3,9 +3,10 @@ import { Injectable } from "@angular/core";
 const APP_KEY_PREFIX = "SPEAKMASTER_";
 
 export enum LocalStorageKey {
-	USER = "USER",
 	LANGUAGE_COMMANDS = "LANGUAGE_COMMANDS",
 	LAST_COMMANDS = "LAST_COMMANDS",
+	MODULES_AMBIGUITIES = "MODULES_AMBIGUITIES",
+	USER = "USER",
 	USER_MODULES = "USER_MODULES"
 }
 

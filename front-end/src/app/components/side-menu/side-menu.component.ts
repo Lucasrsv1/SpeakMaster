@@ -15,6 +15,7 @@ import { LedComponent } from "../led/led.component";
 
 import { IUserModule } from "../../models/userModule";
 
+import { AmbiguityService } from "../../services/ambiguity/ambiguity.service";
 import { CommandCenterService } from "../../services/command-center/command-center.service";
 import { UserModulesService } from "../../services/user-modules/user-modules.service";
 
@@ -40,6 +41,7 @@ export class SideMenuComponent {
 	public version = environment.version;
 
 	constructor (
+		private readonly ambiguityService: AmbiguityService,
 		private readonly commandCenterService: CommandCenterService,
 		private readonly userModulesService: UserModulesService
 	) { }
@@ -50,6 +52,10 @@ export class SideMenuComponent {
 
 	public getModuleConnectionStatus (module: IUserModule): BehaviorSubject<boolean> {
 		return this.commandCenterService.$isModuleConnected(module.idModule);
+	}
+
+	public getModuleAmbiguityNotification (module: IUserModule): BehaviorSubject<boolean> {
+		return this.ambiguityService.$moduleAmbiguityNotification(module.idModule);
 	}
 
 	public toggleModule (event: MouseEvent, module: IUserModule): void {

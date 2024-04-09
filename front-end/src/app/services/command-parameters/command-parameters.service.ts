@@ -48,6 +48,22 @@ export class CommandParametersService {
 		return parametersObj;
 	}
 
+	public mergeAmbiguityParameters (ambiguityValue: IFeatureParameters, originalParameters: IFeatureParameters | undefined): IFeatureParameters {
+		const mergedParameters: IFeatureParameters = {};
+
+		// Se possuir parâmetros do comando original, carrega os valores deles
+		if (originalParameters) {
+			for (const [key, value] of Object.entries(originalParameters))
+				mergedParameters[key] = value;
+		}
+
+		// Sobrescreve os parâmetros com os valores da opção selecionada na resolução da ambiguidade
+		for (const [key, value] of Object.entries(ambiguityValue))
+			mergedParameters[key] = value;
+
+		return mergedParameters;
+	}
+
 	private getModuleFeaturesDefinition (idModule: number): Feature[] {
 		return this.userModulesService.userModules?.find(module => module.idModule === idModule)?.featuresDefinition || [];
 	}

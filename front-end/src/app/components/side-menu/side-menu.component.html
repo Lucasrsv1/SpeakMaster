@@ -47,8 +47,8 @@
 
 					@if (module.isActive && !(getModuleConnectionStatus(module) | async)) {
 						<app-led color="#F00" tooltip="Módulo Offline"></app-led>
-					} @else if (module.hasNotifications) {
-						<span class="bg-warning rounded-circle p-2 ms-2"></span>
+					} @else if (getModuleAmbiguityNotification(module) | async) {
+						<app-led color="#FF0" state="on" tooltip="O último comando resultou em uma ambiguidade"></app-led>
 					}
 
 					<button

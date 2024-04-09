@@ -1,14 +1,22 @@
+import { ActivatedRoute } from "@angular/router";
 import { MatIcon } from "@angular/material/icon";
-import { Component, effect, ElementRef, input, ViewChild } from "@angular/core";
+import { Component, effect, ElementRef, input, OnDestroy, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgFor, NgIf } from "@angular/common";
 
 import { NgScrollbar } from "ngx-scrollbar";
+import { ToastrService } from "ngx-toastr";
+
+import { Subscription } from "rxjs";
 
 import { CheckboxComponent } from "../../../../components/checkbox/checkbox.component";
 
 import { IAmbiguity } from "../../../../models/ambiguity";
+import { ICommandResult } from "../../../../models/commandResult";
 
+import { AmbiguityService } from "../../../../services/ambiguity/ambiguity.service";
+import { CommandCenterService } from "../../../../services/command-center/command-center.service";
+import { CommandParametersService } from "../../../../services/command-parameters/command-parameters.service";
 import { CommandsService } from "../../../../services/commands/commands.service";
 
 @Component({
@@ -26,7 +34,7 @@ import { CommandsService } from "../../../../services/commands/commands.service"
 	templateUrl: "./ambiguities.component.html",
 	styleUrl: "./ambiguities.component.scss"
 })
-export class AmbiguitiesComponent {
+export class AmbiguitiesComponent implements OnDestroy {
 	@ViewChild("commandInput")
 	private commandInput?: ElementRef<any>;
 
@@ -35,25 +43,19 @@ export class AmbiguitiesComponent {
 	public form: FormGroup;
 	public isMicOn: boolean = false;
 
-	public ambiguities: IAmbiguity[] = [
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luka", secondaryInfo: "3:42", value: { trackID: "1" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Luiz Ayrao", secondaryInfo: "3:38", value: { trackID: "2" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta de Belo", secondaryInfo: "3:51", value: { trackID: "3" } },
-		{ image: "https://images.macrumors.com/t/vMbr05RQ60tz7V_zS5UEO9SbGR0=/1600x900/smart/article-new/2018/05/apple-music-note.jpg", description: "Porta Aberta - Ao Vivo de Bruno & Barretto", secondaryInfo: "3:05", value: { trackID: "4" } }
-	];
+	public ambiguousCommand: ICommandResult | null = null;
+	public ambiguities: IAmbiguity[] = [];
 
 	private commandSent: boolean = false;
+	private subscription: Subscription;
 
 	constructor (
+		private readonly route: ActivatedRoute,
 		private readonly formBuilder: FormBuilder,
+		private readonly toastr: ToastrService,
+		private readonly ambiguityService: AmbiguityService,
+		private readonly commandCenterService: CommandCenterService,
+		private readonly commandParametersService: CommandParametersService,
 		private readonly commandsService: CommandsService
 	) {
 		this.form = this.formBuilder.group({
@@ -67,6 +69,18 @@ export class AmbiguitiesComponent {
 			this.form.get("command")?.setValue(this.commandToEdit()?.command);
 			this.commandInput?.nativeElement.focus();
 		});
+
+		const idModule = Number(this.route.snapshot.paramMap.get("idModule"));
+		this.subscription = this.ambiguityService.$moduleAmbiguousCommand(idModule).subscribe(ambiguousCommand => {
+			this.ambiguousCommand = ambiguousCommand;
+
+			if (!ambiguousCommand || typeof ambiguousCommand.result === "boolean") {
+				this.ambiguities = [];
+			} else {
+				this.ambiguities = ambiguousCommand.result.options;
+				this.ambiguityService.clearNotification(ambiguousCommand.idModule);
+			}
+		});
 	}
 
 	public get placeholder (): string {
@@ -77,6 +91,10 @@ export class AmbiguitiesComponent {
 			return "Fale um comando ou o digite aqui para executá-lo";
 
 		return "Ative o microfone para falar um comando ou o digite aqui para executá-lo";
+	}
+
+	public ngOnDestroy (): void {
+		this.subscription.unsubscribe();
 	}
 
 	public toggleMic (): void {
@@ -99,9 +117,23 @@ export class AmbiguitiesComponent {
 	}
 
 	public select (selectedAmbiguity: IAmbiguity): void {
+		// Não faz nada nos cenários em que não ocorreu uma ambiguidade
+		if (!this.ambiguousCommand || typeof this.ambiguousCommand.result === "boolean")
+			return;
+
 		for (const ambiguity of this.ambiguities)
 			ambiguity.isSelected = ambiguity === selectedAmbiguity;
 
-		console.log("SELECTED:", selectedAmbiguity);
+		// Gera o objeto de parâmetros com base na opção selecionada para resolver a ambiguidade
+		const parameters = this.commandParametersService.mergeAmbiguityParameters(
+			selectedAmbiguity.value,
+			this.ambiguousCommand.result.parameters
+		);
+
+		this.commandCenterService.sendCommandToModule(
+			this.ambiguousCommand.idModule, this.ambiguousCommand.featureIdentifier, parameters
+		);
+
+		this.toastr.info("Comando enviado.");
 	}
 }
