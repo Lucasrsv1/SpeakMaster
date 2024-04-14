@@ -13,7 +13,7 @@ import { environment } from "../../../environments/environment";
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 import { LedComponent } from "../led/led.component";
 
-import { IUserModule } from "../../models/userModule";
+import { IUserModule } from "../../models/user-module";
 
 import { AmbiguityService } from "../../services/ambiguity/ambiguity.service";
 import { CommandCenterService } from "../../services/command-center/command-center.service";

@@ -17,8 +17,8 @@ import { editor } from "monaco-editor";
 import { debounceTime, Subject, Subscription } from "rxjs";
 
 import { IUser } from "../../models/user";
-import { IUserModule } from "../../models/userModule";
-import { IUserModuleCommands } from "../../models/userModuleCommands";
+import { IUserModule } from "../../models/user-module";
+import { IUserModuleCommands } from "../../models/user-module-commands";
 import { ILanguage, LanguageCode, languages } from "../../models/languages";
 
 import { CheckboxComponent } from "../../components/checkbox/checkbox.component";

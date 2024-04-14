@@ -4,8 +4,8 @@ import { Socket } from "ngx-socket-io";
 
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
-import { ICommandResult } from "../../models/commandResult";
-import { IFeatureParameters } from "../../models/featureParameters";
+import { ICommandResult } from "../../models/command-result";
+import { IFeatureParameters } from "../../models/feature-parameters";
 
 @Injectable({ providedIn: "root" })
 export class CommandCenterService implements OnDestroy {

@@ -4,7 +4,7 @@ import { Component, EventEmitter, Output } from "@angular/core";
 
 import { NgScrollbar } from "ngx-scrollbar";
 
-import { CommandExecutionStatus, IExecutedCommand } from "../../../../models/executedCommand";
+import { CommandExecutionStatus, IExecutedCommand } from "../../../../models/executed-command";
 
 import { CommandsService } from "../../../../services/commands/commands.service";
 

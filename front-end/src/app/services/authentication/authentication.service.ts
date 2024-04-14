@@ -11,7 +11,7 @@ import { jwtDecode } from "jwt-decode";
 import { sha512 } from "js-sha512";
 
 import { environment } from "../../../environments/environment";
-import { ILanguageCommands } from "../../models/languageCommand";
+import { ILanguageCommands } from "../../models/language-command";
 import { IUser } from "../../models/user";
 
 import { AlertsService } from "../alerts/alerts.service";

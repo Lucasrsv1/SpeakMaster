@@ -5,10 +5,10 @@ import { debounceTime, skip, Subscription } from "rxjs";
 import { Automata } from "speakmaster-crl";
 import { Command } from "speakmaster-module-builder/default-commands-builder";
 
-import { ILanguageCommands } from "../../models/languageCommand";
-import { IUserModule } from "../../models/userModule";
+import { ILanguageCommands } from "../../models/language-command";
+import { IUserModule } from "../../models/user-module";
 import { LanguageCode } from "../../models/languages";
-import { CommandExecutionStatus, IExecutedCommand } from "../../models/executedCommand";
+import { CommandExecutionStatus, IExecutedCommand } from "../../models/executed-command";
 
 import { CommandCenterService } from "../command-center/command-center.service";
 import { CommandParametersService } from "../command-parameters/command-parameters.service";

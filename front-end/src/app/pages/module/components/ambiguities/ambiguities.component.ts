@@ -12,7 +12,7 @@ import { Subscription } from "rxjs";
 import { CheckboxComponent } from "../../../../components/checkbox/checkbox.component";
 
 import { IAmbiguity } from "../../../../models/ambiguity";
-import { ICommandResult } from "../../../../models/commandResult";
+import { ICommandResult } from "../../../../models/command-result";
 
 import { AmbiguityService } from "../../../../services/ambiguity/ambiguity.service";
 import { CommandCenterService } from "../../../../services/command-center/command-center.service";

@@ -1,6 +1,6 @@
 import { Feature } from "speakmaster-module-builder/features-builder";
 
-import { IUserModuleCommands } from "./userModuleCommands";
+import { IUserModuleCommands } from "./user-module-commands";
 
 export interface IUserModule {
 	name: string;

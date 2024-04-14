@@ -2,8 +2,8 @@ import { Injectable, OnDestroy } from "@angular/core";
 
 import { BehaviorSubject, Subscription } from "rxjs";
 
-import { ICommandResult } from "../../models/commandResult";
-import { CommandExecutionStatus, IExecutedCommand } from "../../models/executedCommand";
+import { ICommandResult } from "../../models/command-result";
+import { CommandExecutionStatus, IExecutedCommand } from "../../models/executed-command";
 
 import { AmbiguityService } from "../ambiguity/ambiguity.service";
 import { AuthenticationService } from "../authentication/authentication.service";

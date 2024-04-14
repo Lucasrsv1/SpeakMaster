@@ -22,7 +22,7 @@ import { CommandEditorModalComponent } from "../../components/command-editor-mod
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
 import { IUser } from "../../models/user";
-import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } from "../../models/languageCommand";
+import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } from "../../models/language-command";
 import { getLanguageNameByCode, ILanguage, LanguageCode, languages } from "../../models/languages";
 
 import { AlertsService } from "../../services/alerts/alerts.service";

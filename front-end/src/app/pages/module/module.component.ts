@@ -11,7 +11,7 @@ import { CommandsComponent } from "./components/commands/commands.component";
 import { LastCommandsComponent } from "./components/last-commands/last-commands.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 
-import { IUserModule } from "../../models/userModule";
+import { IUserModule } from "../../models/user-module";
 
 import { TitleService } from "../../services/title/title.service";
 import { UserModulesService } from "../../services/user-modules/user-modules.service";

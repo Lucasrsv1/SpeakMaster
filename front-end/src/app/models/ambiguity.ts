@@ -1,4 +1,4 @@
-import { IFeatureParameters } from "./featureParameters";
+import { IFeatureParameters } from "./feature-parameters";
 
 export interface IAmbiguity {
 	description: string;

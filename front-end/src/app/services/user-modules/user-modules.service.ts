@@ -7,8 +7,8 @@ import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Observable, Subscription, tap } from "rxjs";
 
 import { environment } from "../../../environments/environment";
-import { IUserModule } from "../../models/userModule";
-import { IUserModuleCommands } from "../../models/userModuleCommands";
+import { IUserModule } from "../../models/user-module";
+import { IUserModuleCommands } from "../../models/user-module-commands";
 
 import { AlertsService } from "../alerts/alerts.service";
 import { AuthenticationService } from "../authentication/authentication.service";

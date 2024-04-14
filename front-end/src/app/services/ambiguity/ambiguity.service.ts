@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 
 import { BehaviorSubject } from "rxjs";
 
-import { ICommandResult } from "../../models/commandResult";
+import { ICommandResult } from "../../models/command-result";
 
 import { LocalStorageKey, LocalStorageService } from "../local-storage/local-storage.service";
 

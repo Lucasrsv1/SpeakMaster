@@ -4,7 +4,7 @@ import { Feature } from "speakmaster-module-builder/features-builder";
 import { Match } from "speakmaster-crl";
 import { Command, CommandParameterTypes } from "speakmaster-module-builder/default-commands-builder";
 
-import { IFeatureParameters } from "../../models/featureParameters";
+import { IFeatureParameters } from "../../models/feature-parameters";
 
 import { UserModulesService } from "../user-modules/user-modules.service";
 

@@ -1,5 +1,5 @@
 import { IAmbiguity } from "./ambiguity";
-import { IFeatureParameters } from "./featureParameters";
+import { IFeatureParameters } from "./feature-parameters";
 
 export interface ICommandResult {
 	idModule: number;

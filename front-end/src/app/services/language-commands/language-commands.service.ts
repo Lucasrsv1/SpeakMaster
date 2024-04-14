@@ -7,7 +7,7 @@ import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Observable, skip, Subscription, tap } from "rxjs";
 
 import { environment } from "../../../environments/environment";
-import { ILanguageCommands } from "../../models/languageCommand";
+import { ILanguageCommands } from "../../models/language-command";
 
 import { AlertsService } from "../alerts/alerts.service";
 import { AuthenticationService } from "../authentication/authentication.service";
