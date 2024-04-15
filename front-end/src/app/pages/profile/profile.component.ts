@@ -121,6 +121,9 @@ export class ProfileComponent implements OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
+
+		// Undo any unsaved changes
+		this.languageCommandsService.loadFromStorage();
 	}
 
 	public save (): void {

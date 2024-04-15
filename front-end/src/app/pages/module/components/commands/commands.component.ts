@@ -78,6 +78,8 @@ export class CommandsComponent implements OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
+
+		// TODO: Undo any unsaved changes
 	}
 
 	public loadCurrentCommands (selectedLanguage?: LanguageCode): void {

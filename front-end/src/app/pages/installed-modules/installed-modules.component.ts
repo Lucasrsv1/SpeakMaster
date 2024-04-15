@@ -59,6 +59,9 @@ export class InstalledModulesComponent implements OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
+
+		// Undo any unsaved changes
+		this.userModulesService.loadFromStorage();
 	}
 
 	public loadCurrentCommands (selectedLanguage?: LanguageCode): void {
