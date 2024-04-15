@@ -1,1 +1,18 @@
-<p>commands works!</p>
+<div>
+	<app-commands-table
+		[canDelete]="true"
+		[currentCommands]="currentCommands"
+		[hasPendingChanges]="pendingChanges.length > 0"
+		(toggle)="toggleCommand($event)"
+		(editCommand)="editCommand($event)"
+		(deleteCommand)="deleteCommand($event)"
+		(savePendingChanges)="savePendingCommands()"
+		(selectedLanguage)="loadCurrentCommands($event)"
+		[columns]="{
+			command: 'Comando',
+			action: 'Ação (Funcionalidade)',
+			extras: 'Parâmetros',
+			toggle: 'Ativo'
+		}"
+	></app-commands-table>
+</div>

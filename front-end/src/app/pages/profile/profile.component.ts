@@ -1,24 +1,17 @@
 import { MatIcon } from "@angular/material/icon";
-import { AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild } from "@angular/core";
 import { AsyncPipe, NgIf } from "@angular/common";
+import { Component, OnDestroy, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 
-import { ADTSettings } from "angular-datatables/src/models/settings";
 import { CollapseModule } from "ngx-bootstrap/collapse";
 import { BlockUI, NgBlockUI } from "ng-block-ui";
 import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
-import { DataTableDirective, DataTablesModule } from "angular-datatables";
 import { NgSelectConfig, NgSelectModule } from "@ng-select/ng-select";
-
-import { editor } from "monaco-editor";
-import { CodeEditorComponent, CodeEditorModule, CodeModel } from "@ngstack/code-editor";
 
 import { debounceTime, Subject, Subscription } from "rxjs";
 
-import deepEqual from "deep-equal";
-
-import { CheckboxComponent } from "../../components/checkbox/checkbox.component";
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
+import { CommandsTableComponent, IDataTableRow } from "../../components/commands-table/commands-table.component";
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
 import { IUser } from "../../models/user";
@@ -26,37 +19,18 @@ import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } 
 import { getLanguageNameByCode, ILanguage, LanguageCode, languages } from "../../models/languages";
 
 import { AlertsService } from "../../services/alerts/alerts.service";
-import { DtTranslationService } from "../../services/dt-translation/dt-translation.service";
 import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
 import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
 import { TitleService } from "../../services/title/title.service";
 import { AuthenticationService, IUserUpdate } from "../../services/authentication/authentication.service";
-
-/**
- * Represents a row in the data table, with formatted key values for presentation in the table columns,
- * and a reference to the corresponding language command data object.
- */
-interface IDataTableRow {
-	// Presentation values (columns)
-	command: string;
-	action: string;
-	isActive: boolean;
-
-	/**
-	 * Real data values to save in the database and local storage
-	 */
-	reference: ILanguageCommand;
-}
 
 @Component({
 	selector: "app-profile",
 	standalone: true,
 	imports: [
 		AsyncPipe,
-		CheckboxComponent,
-		CodeEditorModule,
 		CollapseModule,
-		DataTablesModule,
+		CommandsTableComponent,
 		FormsModule,
 		MatIcon,
 		NgIf,
@@ -71,67 +45,12 @@ interface IDataTableRow {
 		"../../shared/eye-btn.scss"
 	]
 })
-export class ProfileComponent implements AfterViewInit, OnDestroy {
+export class ProfileComponent implements OnDestroy {
 	@BlockUI()
 	private blockUI!: NgBlockUI;
 
-	@ViewChild("commandEditor")
-	private commandEditor!: TemplateRef<any>;
-
-	@ViewChild("toggleBtn")
-	private toggleBtn!: TemplateRef<any>;
-
-	@ViewChild("editBtn")
-	private editBtn!: TemplateRef<any>;
-
-	@ViewChild(DataTableDirective)
-	private dtElement?: DataTableDirective;
-
-	@HostListener("window:resize")
-	public onResize () {
-		this.$rerenderTrigger.next();
-	}
-
-	public dtTrigger: Subject<ADTSettings> = new Subject();
-	public dtOptions: ADTSettings = {
-		lengthMenu: [10, 25, 50, 100],
-		stateSave: true,
-		language: this.dtTranslationService.getDataTablesPortugueseTranslation(),
-		columns: [
-			{
-				title: "Comandos",
-				data: "command",
-				className: "p-2 w-auto"
-			},
-			{
-				title: "Ação",
-				data: "action",
-				className: "p-2 w-auto"
-			},
-			{
-				title: "Ativo",
-				data: "isActive",
-				className: "text-center p-1",
-				width: "96px",
-				searchable: false
-			},
-			{
-				title: "",
-				data: null,
-				defaultContent: "",
-				className: "text-center p-1",
-				width: "88px",
-				orderable: false,
-				searchable: false
-			}
-		],
-		data: [] as IDataTableRow[],
-		order: [[1, "asc"]],
-		preDrawCallback: () => {
-			this.editorComponents.forEach(e => e.ngOnDestroy());
-			this.editorComponents = [];
-		}
-	};
+	@ViewChild(CommandsTableComponent)
+	private commandsTable!: CommandsTableComponent;
 
 	public form: FormGroup;
 	public validations: IValidations;
@@ -139,26 +58,11 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 	public isCardCollapsed: boolean = false;
 
 	public languages: ILanguage[] = languages;
-
-	public selectedLanguage?: LanguageCode;
 	public languageCommands: ILanguageCommands | null = null;
-	public spokenLanguages: ILanguage[] = [];
-
-	public codeModels: Map<string, CodeModel> = new Map();
-	public options: editor.IEditorConstructionOptions = {
-		automaticLayout: true,
-		lineNumbers: "off",
-		renderLineHighlight: "none",
-		wordWrap: "on",
-		scrollBeyondLastLine: false,
-		scrollBeyondLastColumn: 0
-	};
+	public currentCommands: IDataTableRow<ILanguageCommand>[] = [];
 
 	private bsModalRef?: BsModalRef;
-	private editorComponents: CodeEditorComponent[] = [];
-
 	private subscriptions: Subscription[] = [];
-	private $rerenderTrigger: Subject<void> = new Subject();
 	private $saveTrigger: Subject<void> = new Subject();
 
 	constructor (
@@ -168,13 +72,11 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		private readonly ngSelectConfig: NgSelectConfig,
 		private readonly alertsService: AlertsService,
 		private readonly authenticationService: AuthenticationService,
-		private readonly dtTranslationService: DtTranslationService,
 		private readonly monacoCrlService: MonacoCrlService,
 		private readonly titleService: TitleService
 	) {
 		this.titleService.setTitle("Preferências de Usuário");
 		this.ngSelectConfig.notFoundText = "Nenhum item encontrado";
-		this.monacoCrlService.registerCRL();
 
 		this.form = this.formBuilder.group({
 			name: [null, [Validators.required, Validators.maxLength(200)]],
@@ -201,23 +103,12 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
 		this.resetForm();
 
-		const user = this.authenticationService.loggedUser as IUser;
-		this.selectedLanguage = user.interfaceLanguage;
-
 		this.subscriptions.push(
 			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
 				this.languageCommands = languageCommands;
 				this.form.get("languagesToListen")!.setValue(
 					languageCommands?.languagesToListen || []
 				);
-
-				const spokenLanguagesCodes = this.languageCommands?.languagesToListen || [];
-				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
-
-				if (this.spokenLanguages.length && !this.spokenLanguages.find(l => l.code === this.selectedLanguage))
-					this.selectedLanguage = this.spokenLanguages[0].code;
-
-				this.loadLanguageCommands();
 			})
 		);
 
@@ -226,39 +117,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 				.pipe(debounceTime(500))
 				.subscribe(() => this.saveLanguageCommands())
 		);
-
-		this.subscriptions.push(
-			this.$rerenderTrigger
-				.pipe(debounceTime(500))
-				.subscribe(() => this.rerenderDataTables())
-		);
-	}
-
-	public get currentLanguageCommands (): IDataTableRow[] {
-		if (!this.selectedLanguage || !this.languageCommands)
-			return [];
-
-		const references = this.languageCommands[this.selectedLanguage] || [];
-		return references.map(reference => ({
-			reference,
-			command: reference.command,
-			isActive: reference.isActive,
-			action: "Ouvir no idioma " + getLanguageNameByCode(reference.targetLanguageCode)
-		}));
-	}
-
-	public ngAfterViewInit (): void {
-		this.dtOptions.columns![0].ngTemplateRef = { ref: this.commandEditor };
-		this.dtOptions.columns![2].ngTemplateRef = { ref: this.toggleBtn };
-		this.dtOptions.columns![3].ngTemplateRef = { ref: this.editBtn };
-		this.dtTrigger.next(this.dtOptions);
 	}
 
 	public ngOnDestroy (): void {
-		this.dtTrigger.unsubscribe();
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
-		this.editorComponents.forEach(e => e.ngOnDestroy());
-		this.editorComponents = [];
 	}
 
 	public save (): void {
@@ -298,27 +160,27 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		);
 	}
 
-	public loadLanguageCommands (): void {
-		if (deepEqual(this.dtOptions.data, this.currentLanguageCommands))
+	public loadCurrentCommands (selectedLanguage?: LanguageCode): void {
+		if (!selectedLanguage || !this.languageCommands) {
+			this.currentCommands = [];
 			return;
-
-		for (const l of this.currentLanguageCommands) {
-			this.codeModels.set(l.reference.targetLanguageCode, {
-				language: "crl",
-				uri: l.reference.targetLanguageCode + "-command.crl",
-				value: l.command
-			});
 		}
 
-		this.dtOptions.data = this.currentLanguageCommands;
-		this.rerenderDataTables();
+		const references = this.languageCommands[selectedLanguage] || [];
+		this.currentCommands = references.map(reference => ({
+			reference,
+			uriKey: "targetLanguageCode",
+			command: reference.command,
+			isToggleActive: reference.isActive,
+			action: "Ouvir no idioma " + getLanguageNameByCode(reference.targetLanguageCode)
+		}));
 	}
 
-	public editCommand (row: IDataTableRow): void {
+	public editCommand (row: IDataTableRow<ILanguageCommand>): void {
 		const originalCommand = row.command;
-		const initialState: ModalOptions = {
-			initialState: { command: row, commandKey: "command" },
-			class: "modal-lg"
+		const initialState: ModalOptions<CommandEditorModalComponent> = {
+			initialState: { editingCommand: row },
+			class: "modal-xl"
 		};
 
 		this.bsModalRef = this.modalService.show(CommandEditorModalComponent, initialState);
@@ -328,10 +190,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 				if (originalCommand !== row.command) {
 					row.reference.command = row.command;
 					this.$saveTrigger.next();
-
-					const codeModel = this.codeModels.get(row.reference.targetLanguageCode);
-					if (codeModel)
-						this.monacoCrlService.setEditorContent(codeModel.uri, row.command);
+					this.monacoCrlService.setEditorContent(row.reference.targetLanguageCode + "-command.crl", row.command);
 				}
 
 				this.bsModalRef = undefined;
@@ -339,9 +198,9 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		);
 	}
 
-	public toggleCommand (row: IDataTableRow): void {
-		row.isActive = !row.isActive;
-		row.reference.isActive = row.isActive;
+	public toggleCommand (row: IDataTableRow<ILanguageCommand>): void {
+		row.isToggleActive = !row.isToggleActive;
+		row.reference.isActive = row.isToggleActive;
 		this.$saveTrigger.next();
 	}
 
@@ -352,25 +211,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 		this.languageCommandsService.update(this.languageCommands).subscribe({
 			next: () => {
 				// When data changes, we need to re-render the data table in order to update sort and filter features.
-				this.$rerenderTrigger.next();
+				this.commandsTable.$rerenderTrigger.next();
 			}
 		});
-	}
-
-	public editorLoaded (editorComponent: CodeEditorComponent): void {
-		this.editorComponents.push(editorComponent);
-	}
-
-	private async rerenderDataTables (): Promise<void> {
-		const dtInstance: DataTables.Api | undefined = await this.dtElement?.dtInstance;
-
-		// Destroy the table first
-		dtInstance?.destroy();
-
-		// Call the dtTrigger to rerender again
-		this.dtTrigger.next(this.dtOptions);
-
-		// Validate commands after rerendering
-		setTimeout(() => this.monacoCrlService.validateAllEditors(), 100);
 	}
 }

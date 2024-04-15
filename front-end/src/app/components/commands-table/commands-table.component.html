@@ -1,0 +1,63 @@
+<div class="p-3">
+	<div class="row mb-3">
+		<div class="col-12 col-md-6">
+			<label for="selectedLanguage" class="form-label">Configurar Comandos do Idioma:</label>
+			<ng-select
+				[items]="spokenLanguages"
+				bindLabel="name"
+				bindValue="code"
+				placeholder="Selecione o idioma falado"
+				labelForId="selectedLanguage"
+				[ngModel]="selectedLanguageSignal()"
+				(change)="selectedLanguageSignal.set($event.code);"
+			></ng-select>
+		</div>
+		<div class="col-12 col-md-6">
+			<button
+				*ngIf="hasPendingChanges"
+				type="button"
+				class="btn btn-primary float-end save-commands-btn"
+				(click)="savePendingChanges.emit()"
+			>
+				Retentar Salvar Comandos
+			</button>
+		</div>
+	</div>
+
+	<div class="alert alert-info mb-0" role="alert" *ngIf="!currentCommands().length">
+		Nenhum comando encontrado para o idioma selecionado.
+	</div>
+
+	<div [hidden]="!currentCommands().length">
+		<table datatable [dtOptions]="dtOptions!" [dtTrigger]="dtTrigger" class="w-100 row-border table table-bordered"></table>
+
+		<ng-template #commandEditor let-data="adtData">
+			<ngs-code-editor
+				[readOnly]="true"
+				[theme]="'crlTheme'"
+				[codeModel]="codeModels.get(data.reference[data.uriKey])!"
+				[options]="options"
+				(loaded)="editorLoaded($event)"
+			></ngs-code-editor>
+		</ng-template>
+
+		<ng-template #toggleBtn let-data="adtData">
+			<app-checkbox
+				class="text-primary"
+				[isChecked]="data.isToggleActive"
+				(clicked)="toggle.emit(data)"
+			></app-checkbox>
+		</ng-template>
+
+		<ng-template #editBtn let-data="adtData">
+			<div>
+				<button class='btn btn-primary d-inline-flex p-2' type='button' (click)="editCommand.emit(data)">
+					<mat-icon fontIcon='edit'></mat-icon>
+				</button>
+				<button *ngIf="canDelete" class='btn btn-danger d-inline-flex ms-1 p-2' type='button' (click)="deleteCommand.emit(data)">
+					<mat-icon fontIcon='delete'></mat-icon>
+				</button>
+			</div>
+		</ng-template>
+	</div>
+</div>

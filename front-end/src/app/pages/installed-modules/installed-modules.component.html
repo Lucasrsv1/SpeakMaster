@@ -11,72 +11,27 @@
 		</div>
 
 		<div class="card-body p-0" id="form" [collapse]="isCardCollapsed" [isAnimated]="true">
-			<div class="p-3">
-				<div class="row mb-3">
-					<div class="col-12 col-md-6">
-						<label for="selectedLanguage" class="form-label">Configurar Comandos do Idioma:</label>
-						<ng-select
-							[items]="spokenLanguages"
-							bindLabel="name"
-							bindValue="code"
-							placeholder="Selecione o idioma falado"
-							labelForId="selectedLanguage"
-							[(ngModel)]="selectedLanguage"
-							(change)="loadCommands()"
-						></ng-select>
-					</div>
-					<div class="col-12 col-md-6">
-						<button
-							*ngIf="pendingChanges.length"
-							type="button"
-							class="btn btn-primary float-end save-commands-btn"
-							(click)="savePendingCommands()"
-						>
-							Retentar Salvar Prefixos
-						</button>
-					</div>
+			<app-commands-table
+				[currentCommands]="currentCommands"
+				[hasPendingChanges]="pendingChanges.length > 0"
+				(toggle)="togglePrefixMandated($event)"
+				(editCommand)="editCommand($event)"
+				(savePendingChanges)="savePendingCommands()"
+				(selectedLanguage)="loadCurrentCommands($event)"
+				[columns]="{
+					command: 'Comando ou Prefixo',
+					action: 'Módulo Ativado',
+					toggle: 'Obrigatório'
+				}"
+			></app-commands-table>
+
+			<div class="alert alert-info d-flex align-items-center m-3 mt-0" role="alert">
+				<div class="me-3">
+					<mat-icon fontIcon="info"></mat-icon>
 				</div>
-
-				<div class="alert alert-info" role="alert" *ngIf="!currentCommands.length">
-					Nenhum comando encontrado para o idioma selecionado.
-				</div>
-
-				<div [hidden]="!currentCommands.length">
-					<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="w-100 row-border table table-bordered"></table>
-
-					<ng-template #commandEditor let-data="adtData">
-						<ngs-code-editor
-							[readOnly]="true"
-							[theme]="'crlTheme'"
-							[codeModel]="codeModels.get(data.reference.idUserModule)!"
-							[options]="options"
-							(loaded)="editorLoaded($event)"
-						></ngs-code-editor>
-					</ng-template>
-
-					<ng-template #toggleBtn let-data="adtData">
-						<app-checkbox
-							class="text-primary"
-							[isChecked]="data.isPrefixMandated"
-							(clicked)="togglePrefixMandated(data)"
-						></app-checkbox>
-					</ng-template>
-
-					<ng-template #editBtn let-data="adtData">
-						<button class='btn btn-primary d-inline-flex p-2' type='button' (click)="editCommand(data)">
-							<mat-icon fontIcon='edit'></mat-icon>
-						</button>
-					</ng-template>
-				</div>
-
-				<div class="alert alert-info d-flex align-items-center mt-3" role="alert">
-					<div class="me-3">
-						<mat-icon fontIcon="info"></mat-icon>
-					</div>
-					<div class="text-justify">
-						Os comandos aqui definidos serão usados para diferenciar entre um módulo e outro e devem ser falados no início do comando como um prefixo.
-						Caso a opção <strong>obrigatório</strong> seja marcada, todos os comandos daquele módulo deverão ser falados iniciando com o prefixo definido, caso contrário não serão reconhecidos.
-					</div>
+				<div class="text-justify">
+					Os comandos aqui definidos serão usados para diferenciar entre um módulo e outro e devem ser falados no início do comando como um prefixo.
+					Caso a opção <strong>obrigatório</strong> seja marcada, todos os comandos daquele módulo deverão ser falados iniciando com o prefixo definido, caso contrário não serão reconhecidos.
 				</div>
 			</div>
 		</div>
