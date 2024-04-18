@@ -5,13 +5,14 @@ import { Component, OnInit } from "@angular/core";
 import { BsModalRef } from "ngx-bootstrap/modal";
 import { BlockUI, NgBlockUI } from "ng-block-ui";
 
+import { Command } from "speakmaster-module-builder/default-commands-builder";
 import { Feature } from "speakmaster-module-builder/features-builder";
 
 import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../commands-table/commands-table.component";
 
+import { IModuleDefaultCommands } from "../../models/module-default-commands";
 import { IUserModule } from "../../models/user-module";
-import { LanguageCode } from "../../models/languages";
-import { IUserModuleCommands, UserModuleCommand } from "../../models/user-module-commands";
+import { ILanguage, LanguageCode, languages } from "../../models/languages";
 
 import { AlertsService } from "../../services/alerts/alerts.service";
 import { FeaturesService } from "../../services/features/features.service";
@@ -34,11 +35,15 @@ export class ImportCommandsModalComponent implements OnInit {
 	public initialLanguage?: LanguageCode;
 
 	// Output
-	public commandsToImport: UserModuleCommand[] = [];
+	public commandsToImport: Command[] = [];
 
+	protected languageOptions?: ILanguage[];
 	protected settings?: ICommandsTableSettings;
-	protected selectedCommands: UserModuleCommand[] = [];
-	protected currentCommands: IDataTableRow<UserModuleCommand>[] = [];
+	protected selectedCommands: Command[] = [];
+	protected currentCommands: IDataTableRow<Command>[] = [];
+
+	private currentLanguage?: LanguageCode;
+	private defaultCommands: IModuleDefaultCommands[] = [];
 
 	constructor (
 		protected readonly bsModalRef: BsModalRef,
@@ -64,8 +69,13 @@ export class ImportCommandsModalComponent implements OnInit {
 		this.moduleDefaultCommandsService.getModuleDefaultCommands(this.idModule).subscribe({
 			next: defaultCommands => {
 				this.blockUI.stop();
-				// TODO: usar comandos padrões como opções de importação
-				console.log(defaultCommands);
+
+				this.defaultCommands = defaultCommands;
+				this.languageOptions = languages.filter(
+					language => defaultCommands.some(dc => dc.language === language.code)
+				);
+
+				this.loadCurrentCommands(this.currentLanguage);
 			},
 
 			error: (error: HttpErrorResponse) => {
@@ -87,18 +97,15 @@ export class ImportCommandsModalComponent implements OnInit {
 		return this.userModule?.featuresDefinition || [];
 	}
 
-	private get userModuleCommands (): IUserModuleCommands[] {
-		return this.userModule?.userModuleCommands || [];
-	}
-
 	protected loadCurrentCommands (selectedLanguage?: LanguageCode): void {
+		this.currentLanguage = selectedLanguage;
+
 		if (!selectedLanguage) {
 			this.currentCommands = [];
 			return;
 		}
 
-		// TODO: usar comandos padrões do módulo como opções de importação
-		const references = this.userModuleCommands.find(umc => umc.language === selectedLanguage)?.commands || [];
+		const references = this.defaultCommands.find(dc => dc.language === selectedLanguage)?.commands || [];
 		this.currentCommands = references.map(reference => ({
 			reference,
 			command: reference.command,
@@ -109,7 +116,7 @@ export class ImportCommandsModalComponent implements OnInit {
 		}));
 	}
 
-	protected toggleSelection (row: IDataTableRow<UserModuleCommand>): void {
+	protected toggleSelection (row: IDataTableRow<Command>): void {
 		row.isToggleActive = !row.isToggleActive;
 
 		// Remove from selection

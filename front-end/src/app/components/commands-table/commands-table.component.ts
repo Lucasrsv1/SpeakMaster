@@ -81,6 +81,7 @@ export interface ICommandsTableSettings {
 })
 export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy {
 	public currentCommands = input<IDataTableRow<any>[]>([]);
+	public languageOptions = input<ILanguage[] | undefined>(undefined);
 
 	@Input()
 	public hasPendingChanges: boolean = false;
@@ -140,7 +141,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	protected dtOptions!: ADTSettings;
 
 	protected selectedLanguageSignal = signal<LanguageCode | undefined>(undefined);
-	protected spokenLanguages: ILanguage[] = [];
+	protected availableLanguageOptions: ILanguage[] = [];
 
 	protected codeModels: Map<number, CodeModel> = new Map();
 	protected options: editor.IEditorConstructionOptions = {
@@ -184,16 +185,30 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 				this.loadCommands();
 		});
 
+		effect(() => {
+			// Update available language options based on input
+			const languageOptions = this.languageOptions();
+			if (languageOptions) {
+				this.availableLanguageOptions = languageOptions;
+
+				if (this.availableLanguageOptions.length && !this.availableLanguageOptions.find(l => l.code === this.selectedLanguageSignal()))
+					this.selectedLanguageSignal.set(this.availableLanguageOptions[0].code);
+			}
+		});
+
 		const user = this.authenticationService.loggedUser as IUser;
 		this.selectedLanguageSignal.set(user.interfaceLanguage);
 
 		this.subscriptions.push(
 			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
-				const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
-				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
+				if (!this.languageOptions()) {
+					// Load spoken languages and use as language options, if no input was provided
+					const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
+					this.availableLanguageOptions = languages.filter(language => spokenLanguagesCodes.includes(language.code));
+				}
 
-				if (this.spokenLanguages.length && !this.spokenLanguages.find(l => l.code === this.selectedLanguageSignal()))
-					this.selectedLanguageSignal.set(this.spokenLanguages[0].code);
+				if (this.availableLanguageOptions.length && !this.availableLanguageOptions.find(l => l.code === this.selectedLanguageSignal()))
+					this.selectedLanguageSignal.set(this.availableLanguageOptions[0].code);
 			})
 		);
 

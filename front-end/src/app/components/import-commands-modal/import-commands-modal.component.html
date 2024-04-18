@@ -10,6 +10,7 @@
 		*ngIf="settings"
 		[settings]="settings"
 		[currentCommands]="currentCommands"
+		[languageOptions]="languageOptions"
 		(toggle)="toggleSelection($event)"
 		(selectedLanguage)="loadCurrentCommands($event)"
 	></app-commands-table>

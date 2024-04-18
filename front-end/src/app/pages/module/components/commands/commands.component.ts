@@ -5,6 +5,7 @@ import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
 
 import { debounceTime, Subject, Subscription } from "rxjs";
 
+import { Command } from "speakmaster-module-builder/default-commands-builder";
 import { Feature } from "speakmaster-module-builder/features-builder";
 
 import { ImportCommandsModalComponent } from "../../../../components/import-commands-modal/import-commands-modal.component";
@@ -167,7 +168,7 @@ export class CommandsComponent implements OnDestroy {
 	}
 
 	public importCommands (): void {
-		const commandsToImport: UserModuleCommand[] = [];
+		const commandsToImport: Command[] = [];
 		const initialState: ModalOptions<ImportCommandsModalComponent> = {
 			initialState: {
 				idModule: this.idModule,
