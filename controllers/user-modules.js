@@ -4,6 +4,7 @@ const models = require("../database/models");
 const { isRequestInvalid } = require("../utils/http-validation");
 
 const loginService = require("../services/login");
+const userModuleCommandsService = require("../services/user-module-commands");
 
 class UserModules {
 	constructor () {
@@ -23,6 +24,12 @@ class UserModules {
 				body("language").isString().withMessage("Invalid language."),
 				body("prefix").isString().withMessage("Invalid prefix command."),
 				body("isPrefixMandated").isBoolean({ strict: true }).withMessage("Invalid value for isPrefixMandated.")
+			],
+			updateCommands: [
+				loginService.ensureAuthorized,
+				body("idUserModule").isInt({ gt: 0 }).withMessage("Invalid user module."),
+				body("language").isString().withMessage("Invalid language."),
+				body("commands").isArray().withMessage("Invalid commands.")
 			]
 		};
 	}
@@ -89,7 +96,7 @@ class UserModules {
 	}
 
 	/**
-	 * Rota de atualização do prefixo de um módulo do usuário.
+	 * Rota de atualização do prefixo de um módulo do usuário para um certo idioma.
 	 * @param {import("express").Request} req
 	 * @param {import("express").Response} res
 	 */
@@ -97,59 +104,47 @@ class UserModules {
 		if (isRequestInvalid(req, res)) return;
 
 		try {
-			const userModule = await models.UserModule.findOne({
-				attributes: ["idUserModule"],
-				where: {
-					idUserModule: req.body.idUserModule,
-
-					// Ensure the user's module commands belong to the authenticated user.
-					idUser: res.locals.user.idUser
-				}
-			});
-
-			if (!userModule)
-				return res.status(404).json({ message: "User's module not found." });
-
-			const [ affectedCount ] = await models.UserModuleCommands.update({
-				prefix: req.body.prefix,
-				isPrefixMandated: req.body.isPrefixMandated
-			}, {
-				where: {
-					idUserModule: req.body.idUserModule,
-					language: req.body.language
-				}
-			});
-
-			let userModuleCommands;
-			if (affectedCount > 0) {
-				userModuleCommands = await models.UserModuleCommands.findOne({
-					attributes: ["idUserModuleCommands", "idUserModule", "language", "commands", "prefix", "isPrefixMandated"],
-					where: {
-						idUserModule: req.body.idUserModule,
-						language: req.body.language
-					}
-				});
-			} else {
-				userModuleCommands = await models.UserModuleCommands.create({
-					idUserModule: req.body.idUserModule,
-					language: req.body.language,
+			const userModuleCommands = await userModuleCommandsService.upsert(
+				res.locals.user.idUser,
+				req.body.idUserModule,
+				req.body.language,
+				{
 					prefix: req.body.prefix,
 					isPrefixMandated: req.body.isPrefixMandated
-				}, { returning: true });
-			}
+				}
+			);
 
 			if (!userModuleCommands)
-				return res.status(500).json({ message: "Error updating the user's module commands." });
-
-			userModuleCommands = userModuleCommands.toJSON();
-			delete userModuleCommands.createdAt;
-			delete userModuleCommands.updatedAt;
-			delete userModuleCommands.deletedAt;
+				return res.status(404).json({ message: "User's module not found." });
 
 			res.status(200).json(userModuleCommands);
 		} catch (error) {
-			console.error(error);
-			res.status(500).json({ message: "Error updating the user's module commands.", error });
+			res.status(500).json({ message: error });
+		}
+	}
+
+	/**
+	 * Rota de atualização dos comandos de um módulo do usuário para um certo idioma.
+	 * @param {import("express").Request} req
+	 * @param {import("express").Response} res
+	 */
+	async updateCommands (req, res) {
+		if (isRequestInvalid(req, res)) return;
+
+		try {
+			const userModuleCommands = await userModuleCommandsService.upsert(
+				res.locals.user.idUser,
+				req.body.idUserModule,
+				req.body.language,
+				{ commands: req.body.commands }
+			);
+
+			if (!userModuleCommands)
+				return res.status(404).json({ message: "User's module not found." });
+
+			res.status(200).json(userModuleCommands);
+		} catch (error) {
+			res.status(500).json({ message: error });
 		}
 	}
 }
