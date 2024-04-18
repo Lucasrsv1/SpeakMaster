@@ -1,5 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 
+import { ToastrService } from "ngx-toastr";
+
 import { debounceTime, skip, Subscription } from "rxjs";
 
 import { Automata } from "speakmaster-crl";
@@ -22,6 +24,7 @@ export class CommandMatchingService implements OnDestroy {
 	private subscriptions: Subscription[] = [];
 
 	constructor (
+		private readonly toastr: ToastrService,
 		private readonly commandCenterService: CommandCenterService,
 		private readonly commandParametersService: CommandParametersService,
 		private readonly languageCommandsService: LanguageCommandsService,
@@ -97,11 +100,11 @@ export class CommandMatchingService implements OnDestroy {
 	}
 
 	private rebuildLanguageCommands (languageCommands: ILanguageCommands | null): void {
-		console.log("REBUILD LANGUAGE COMMANDS", languageCommands);
-
 		this.languageCommands = new Map();
-		if (!languageCommands)
+		if (!languageCommands) {
+			this.toastr.info("Nenhum comando de troca de idioma definido.");
 			return;
+		}
 
 		for (const languageCode of languageCommands.languagesToListen) {
 			for (const languageCommand of languageCommands[languageCode] || []) {
@@ -112,14 +115,16 @@ export class CommandMatchingService implements OnDestroy {
 				this.languageCommands.set(automata, languageCommand.targetLanguageCode);
 			}
 		}
+
+		this.toastr.info("Os comandos de troca de idioma foram atualizados.");
 	}
 
 	private rebuildModulesCommands (userModules: IUserModule[] | null): void {
-		console.log("REBUILD MODULES COMMANDS", userModules);
-
 		this.moduleCommands = new Map();
-		if (!userModules)
+		if (!userModules) {
+			this.toastr.info("Nenhum comando definido para os módulos ativos.");
 			return;
+		}
 
 		for (const userModule of userModules) {
 			if (!userModule.isActive)
@@ -140,5 +145,7 @@ export class CommandMatchingService implements OnDestroy {
 				}
 			}
 		}
+
+		this.toastr.info("Os comandos dos módulos ativos foram atualizados.");
 	}
 }

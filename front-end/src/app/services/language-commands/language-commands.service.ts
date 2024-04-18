@@ -63,6 +63,11 @@ export class LanguageCommandsService implements OnDestroy {
 	}
 
 	public loadFromServer (blockUI?: NgBlockUI): void {
+		if (!this.authenticationService.loggedUser) {
+			blockUI?.stop();
+			return;
+		}
+
 		this.http.get<ILanguageCommands>(
 			`${environment.API_URL}/v1/users/language-commands`
 		).subscribe({
