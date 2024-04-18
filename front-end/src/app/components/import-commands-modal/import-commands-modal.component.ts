@@ -1,7 +1,9 @@
+import { HttpErrorResponse } from "@angular/common/http";
 import { NgIf } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 
 import { BsModalRef } from "ngx-bootstrap/modal";
+import { BlockUI, NgBlockUI } from "ng-block-ui";
 
 import { Feature } from "speakmaster-module-builder/features-builder";
 
@@ -11,7 +13,9 @@ import { IUserModule } from "../../models/user-module";
 import { LanguageCode } from "../../models/languages";
 import { IUserModuleCommands, UserModuleCommand } from "../../models/user-module-commands";
 
+import { AlertsService } from "../../services/alerts/alerts.service";
 import { FeaturesService } from "../../services/features/features.service";
+import { ModuleDefaultCommandsService } from "../../services/module-default-commands/module-default-commands.service";
 import { UserModulesService } from "../../services/user-modules/user-modules.service";
 
 @Component({
@@ -22,6 +26,9 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 	styleUrl: "./import-commands-modal.component.scss"
 })
 export class ImportCommandsModalComponent implements OnInit {
+	@BlockUI()
+	private blockUI!: NgBlockUI;
+
 	// Inputs
 	public idModule!: number;
 	public initialLanguage?: LanguageCode;
@@ -35,7 +42,9 @@ export class ImportCommandsModalComponent implements OnInit {
 
 	constructor (
 		protected readonly bsModalRef: BsModalRef,
+		private readonly alertsService: AlertsService,
 		private readonly featuresService: FeaturesService,
+		private readonly moduleDefaultCommandsService: ModuleDefaultCommandsService,
 		private readonly userModulesService: UserModulesService
 	) { }
 
@@ -50,6 +59,24 @@ export class ImportCommandsModalComponent implements OnInit {
 				toggle: "Selecionar"
 			}
 		};
+
+		this.blockUI.start("Carregando comandos padrões do módulo...");
+		this.moduleDefaultCommandsService.getModuleDefaultCommands(this.idModule).subscribe({
+			next: defaultCommands => {
+				this.blockUI.stop();
+				// TODO: usar comandos padrões como opções de importação
+				console.log(defaultCommands);
+			},
+
+			error: (error: HttpErrorResponse) => {
+				this.blockUI?.stop();
+				this.alertsService.httpErrorAlert(
+					"Falha ao Carregar Comandos do Módulo",
+					"Não foi possível obter os comandos padrões do módulo, tente novamente.",
+					error
+				);
+			}
+		});
 	}
 
 	protected get userModule (): IUserModule | undefined {
