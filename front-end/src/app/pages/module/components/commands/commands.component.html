@@ -1,18 +1,14 @@
 <div>
 	<app-commands-table
-		[canDelete]="true"
+		[settings]="settings"
 		[currentCommands]="currentCommands"
-		[hasPendingChanges]="pendingChanges.length > 0"
+		[hasPendingChanges]="errorSaving && pendingChanges.length > 0"
 		(toggle)="toggleCommand($event)"
-		(editCommand)="editCommand($event)"
-		(deleteCommand)="deleteCommand($event)"
+		(edit)="editCommand($event)"
+		(delete)="deleteCommand($event)"
+		(add)="addCommand()"
+		(import)="importCommands()"
 		(savePendingChanges)="savePendingCommands()"
 		(selectedLanguage)="loadCurrentCommands($event)"
-		[columns]="{
-			command: 'Comando',
-			action: 'Ação (Funcionalidade)',
-			extras: 'Parâmetros',
-			toggle: 'Ativo'
-		}"
 	></app-commands-table>
 </div>

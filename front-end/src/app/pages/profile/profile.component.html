@@ -110,10 +110,11 @@
 			<hr class="m-3 mb-2"/>
 
 			<app-commands-table
+				[settings]="{ canEdit: true }"
 				[currentCommands]="currentCommands"
 				[hasPendingChanges]="(languageCommandsService.$updateFailed | async) || false"
 				(toggle)="toggleCommand($event)"
-				(editCommand)="editCommand($event)"
+				(edit)="editCommand($event)"
 				(savePendingChanges)="saveLanguageCommands()"
 				(selectedLanguage)="loadCurrentCommands($event)"
 			></app-commands-table>

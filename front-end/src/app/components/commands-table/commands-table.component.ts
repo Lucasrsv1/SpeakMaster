@@ -3,7 +3,7 @@ import { MatIcon } from "@angular/material/icon";
 import { AfterViewInit, Component, effect, EventEmitter, HostListener, input, Input, OnDestroy, OnInit, Output, signal, TemplateRef, ViewChild } from "@angular/core";
 import { AsyncPipe, NgIf } from "@angular/common";
 
-import { ADTSettings } from "angular-datatables/src/models/settings";
+import { ADTColumns, ADTSettings } from "angular-datatables/src/models/settings";
 import { DataTableDirective, DataTablesModule } from "angular-datatables";
 import { NgSelectConfig, NgSelectModule } from "@ng-select/ng-select";
 
@@ -53,6 +53,16 @@ export interface IDataTableColumnNames {
 	extras?: string;
 }
 
+export interface ICommandsTableSettings {
+	canAdd?: boolean;
+	canImport?: boolean;
+	canDelete?: boolean;
+	canEdit?: boolean;
+	columns?: IDataTableColumnNames;
+	initialLanguage?: LanguageCode;
+	selectionMode?: boolean;
+}
+
 @Component({
 	selector: "app-commands-table",
 	standalone: true,
@@ -76,19 +86,29 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	public hasPendingChanges: boolean = false;
 
 	@Input()
-	public canDelete: boolean = false;
-
-	@Input()
-	public columns: IDataTableColumnNames = { command: "Comando", action: "Ação", toggle: "Ativo" };
+	public settings: ICommandsTableSettings = {
+			canAdd: false,
+			canImport: false,
+			canDelete: false,
+			canEdit: false,
+			selectionMode: false,
+			columns: { command: "Comando", action: "Ação", toggle: "Ativo" }
+		};
 
 	@Output()
 	public toggle = new EventEmitter<IDataTableRow<any>>();
 
 	@Output()
-	public editCommand = new EventEmitter<IDataTableRow<any>>();
+	public edit = new EventEmitter<IDataTableRow<any>>();
 
 	@Output()
-	public deleteCommand = new EventEmitter<IDataTableRow<any>>();
+	public delete = new EventEmitter<IDataTableRow<any>>();
+
+	@Output()
+	public add = new EventEmitter<void>();
+
+	@Output()
+	public import = new EventEmitter<void>();
 
 	@Output()
 	public savePendingChanges = new EventEmitter<void>();
@@ -102,8 +122,8 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	@ViewChild("toggleBtn")
 	private toggleBtn!: TemplateRef<any>;
 
-	@ViewChild("editBtn")
-	private editBtn!: TemplateRef<any>;
+	@ViewChild("buttons")
+	private buttons!: TemplateRef<any>;
 
 	@ViewChild(DataTableDirective)
 	private dtElement?: DataTableDirective;
@@ -135,6 +155,15 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	private editorComponents: CodeEditorComponent[] = [];
 	private subscriptions: Subscription[] = [];
 
+	private columnIndexes = {
+		command: 0,
+		toggle: -1,
+		buttons: -1
+	};
+
+	private tableID: number;
+	private static nextID: number = 1;
+
 	constructor (
 		private readonly ngSelectConfig: NgSelectConfig,
 		private readonly authenticationService: AuthenticationService,
@@ -142,6 +171,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 		private readonly languageCommandsService: LanguageCommandsService,
 		private readonly monacoCrlService: MonacoCrlService
 	) {
+		this.tableID = CommandsTableComponent.nextID++;
 		this.ngSelectConfig.notFoundText = "Nenhum item encontrado";
 		this.monacoCrlService.registerCRL();
 
@@ -175,58 +205,95 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	}
 
 	public ngOnInit (): void {
+		if (!this.settings.columns) {
+			this.settings.columns = {
+				command: "Comando",
+				action: "Ação",
+				toggle: this.settings.selectionMode ? "Selecionar" : "Ativo"
+			};
+		}
+
+		const columns: ADTColumns[] = [{
+			title: this.settings.columns.command,
+			data: "command",
+			className: "p-2 pe-4 w-auto"
+		}, {
+			title: this.settings.columns.action,
+			data: "action",
+			className: "p-2 pe-4 w-auto"
+		}];
+
+		if (this.settings.columns.extras) {
+			columns.push({
+				title: this.settings.columns.extras,
+				data: "extras",
+				className: "p-2 pe-4 w-auto"
+			});
+		}
+
+		if (this.settings.selectionMode) {
+			columns.unshift({
+				title: this.settings.columns.toggle,
+				data: "isToggleActive",
+				className: "text-center p-1",
+				width: `${Math.round((this.settings.columns.toggle.length * 6.6) + 50)}px`,
+				searchable: false
+			});
+
+			this.columnIndexes.toggle = 0;
+			this.columnIndexes.command = 1;
+		} else {
+			columns.push({
+				title: this.settings.columns.toggle,
+				data: "isToggleActive",
+				className: "text-center p-1",
+				width: `${Math.round((this.settings.columns.toggle.length * 6.6) + 50)}px`,
+				searchable: false
+			});
+
+			this.columnIndexes.toggle = columns.length - 1;
+		}
+
+		if (this.settings.canEdit || this.settings.canDelete) {
+			columns.push({
+				title: "",
+				data: null,
+				defaultContent: "",
+				className: "text-center p-1",
+				width: this.settings.canDelete ? "110px" : "88px",
+				orderable: false,
+				searchable: false
+			});
+
+			this.columnIndexes.buttons = columns.length - 1;
+		}
+
 		this.dtOptions = {
 			lengthMenu: [10, 25, 50, 100],
 			stateSave: true,
 			language: this.dtTranslationService.getDataTablesPortugueseTranslation(),
-			columns: [
-				{
-					title: this.columns.command,
-					data: "command",
-					className: "p-2 pe-4 w-auto"
-				},
-				{
-					title: this.columns.action,
-					data: "action",
-					className: "p-2 pe-4 w-auto"
-				},
-				...(
-					!this.columns.extras ? [] : [{
-						title: this.columns.extras,
-						data: "extras",
-						className: "p-2 pe-4 w-auto"
-					}]
-				),
-				{
-					title: this.columns.toggle,
-					data: "isToggleActive",
-					className: "text-center p-1",
-					width: `${Math.round((this.columns.toggle.length * 6.6) + 63)}px`,
-					searchable: false
-				},
-				{
-					title: "",
-					data: null,
-					defaultContent: "",
-					className: "text-center p-1",
-					width: this.canDelete ? "110px" : "88px",
-					orderable: false,
-					searchable: false
-				}
-			],
+			columns,
 			data: [] as IDataTableRow<any>[],
-			order: [[1, "asc"]],
+			order: [[this.columnIndexes.command + 1, "asc"]],
 			preDrawCallback: () => {
 				this.editorComponents.forEach(e => e.ngOnDestroy());
 				this.editorComponents = [];
 			}
 		};
+
+		if (this.settings.initialLanguage)
+			this.selectedLanguageSignal.set(this.settings.initialLanguage);
 	}
 
 	public ngAfterViewInit (): void {
-		this.dtOptions.columns![0].ngTemplateRef = { ref: this.commandEditor };
-		this.dtOptions.columns!.slice(-2)[0].ngTemplateRef = { ref: this.toggleBtn };
-		this.dtOptions.columns!.slice(-1)[0].ngTemplateRef = { ref: this.editBtn };
+		this.dtOptions.columns![this.columnIndexes.command].ngTemplateRef = { ref: this.commandEditor };
+
+		if (this.columnIndexes.toggle !== -1)
+			this.dtOptions.columns![this.columnIndexes.toggle].ngTemplateRef = { ref: this.toggleBtn };
+
+		if (this.columnIndexes.buttons !== -1)
+			this.dtOptions.columns![this.columnIndexes.buttons].ngTemplateRef = { ref: this.buttons };
+
 		this.dtTrigger.next(this.dtOptions);
 	}
 
@@ -237,21 +304,39 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 		this.editorComponents = [];
 	}
 
+	public getURI (rowIdentifier: string | number): string {
+		return `${rowIdentifier}-${this.tableID}-command.crl`;
+	}
+
+	protected deselectAll (): void {
+		for (const cmd of this.currentCommands()) {
+			if (cmd.isToggleActive)
+				this.toggle.emit(cmd);
+		}
+	}
+
+	protected selectAll (): void {
+		for (const cmd of this.currentCommands()) {
+			if (!cmd.isToggleActive)
+				this.toggle.emit(cmd);
+		}
+	}
+
+	protected editorLoaded (editorComponent: CodeEditorComponent): void {
+		this.editorComponents.push(editorComponent);
+	}
+
 	private loadCommands (): void {
-		for (const l of this.currentCommands()) {
-			this.codeModels.set(l.reference[l.uriKey], {
+		for (const cmd of this.currentCommands()) {
+			this.codeModels.set(cmd.reference[cmd.uriKey], {
 				language: "crl",
-				uri: l.reference[l.uriKey] + "-command.crl",
-				value: l.command
+				uri: this.getURI(cmd.reference[cmd.uriKey]),
+				value: cmd.command
 			});
 		}
 
 		this.dtOptions.data = this.currentCommands();
 		this.rerenderDataTables();
-	}
-
-	protected editorLoaded (editorComponent: CodeEditorComponent): void {
-		this.editorComponents.push(editorComponent);
 	}
 
 	private async rerenderDataTables (): Promise<void> {

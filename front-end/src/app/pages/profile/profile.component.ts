@@ -193,7 +193,7 @@ export class ProfileComponent implements OnDestroy {
 				if (originalCommand !== row.command) {
 					row.reference.command = row.command;
 					this.$saveTrigger.next();
-					this.monacoCrlService.setEditorContent(row.reference.targetLanguageCode + "-command.crl", row.command);
+					this.monacoCrlService.setEditorContent(this.commandsTable.getURI(row.reference.targetLanguageCode), row.command);
 				}
 
 				this.bsModalRef = undefined;

@@ -24,18 +24,21 @@ import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
 	styleUrl: "./command-editor-modal.component.scss"
 })
 export class CommandEditorModalComponent implements OnInit, OnDestroy {
+	// Inputs
 	public areInstructionsCollapsed: boolean = true;
 	public arePossibleCommandsCollapsed: boolean = false;
-	public editingCommand!: IDataTableRow<any>;
-	public possibleCommands: string[] = [];
 
-	public codeModel: CodeModel = {
+	// Output
+	public editingCommand!: IDataTableRow<any>;
+
+	protected possibleCommands: string[] = [];
+	protected codeModel: CodeModel = {
 		language: "crl",
 		uri: "editing-command.crl",
 		value: ""
 	};
 
-	public options: editor.IEditorConstructionOptions = {
+	protected options: editor.IEditorConstructionOptions = {
 		automaticLayout: true
 	};
 
@@ -45,7 +48,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	private editorComponent?: CodeEditorComponent;
 
 	constructor (
-		public readonly bsModalRef: BsModalRef,
+		protected readonly bsModalRef: BsModalRef,
 		private readonly monacoCrlService: MonacoCrlService
 	) {
 		this.monacoCrlService.registerCRL();
@@ -54,7 +57,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 			.subscribe(() => this.getPossibleCommands());
 	}
 
-	public get isCommandInvalid (): boolean {
+	protected get isCommandInvalid (): boolean {
 		return !this.currentCommand || this.monacoCrlService.isEditorContentInvalid(this.codeModel.uri);
 	}
 
@@ -68,17 +71,17 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 		this.editorComponent?.ngOnDestroy();
 	}
 
-	public editorLoaded (editorComponent: CodeEditorComponent): void {
+	protected editorLoaded (editorComponent: CodeEditorComponent): void {
 		this.editorComponent = editorComponent;
 	}
 
-	public onValueChanged (value: string): void {
+	protected onValueChanged (value: string): void {
 		this.currentCommand = value;
 		this.monacoCrlService.validate(this.codeModel.uri);
 		this.$valueChanged.next();
 	}
 
-	public save (): void {
+	protected save (): void {
 		if (this.isCommandInvalid)
 			return;
 

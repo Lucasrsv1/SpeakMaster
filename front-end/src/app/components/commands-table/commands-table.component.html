@@ -1,8 +1,35 @@
 <div class="p-3">
+	<div *ngIf="settings.canImport || settings.canAdd" class="row mb-1">
+		<div class="col-12 d-flex justify-content-center justify-content-sm-end">
+			<button
+				*ngIf="settings.canImport"
+				type="button"
+				class="btn btn-primary top-btn ms-2 d-flex"
+				(click)="import.emit()"
+			>
+				<mat-icon class="me-2" fontIcon="downloading"></mat-icon>
+				Importar Comandos
+			</button>
+			<button
+				*ngIf="settings.canAdd"
+				type="button"
+				class="btn btn-primary top-btn ms-2 d-flex"
+				(click)="add.emit()"
+			>
+				<mat-icon class="me-2" fontIcon="add_circle_outline"></mat-icon>
+				Novo Comando
+			</button>
+		</div>
+	</div>
+
 	<div class="row mb-3">
 		<div class="col-12 col-md-6">
-			<label for="selectedLanguage" class="form-label">Configurar Comandos do Idioma:</label>
+			<label for="selectedLanguage" class="form-label">
+				{{ settings.selectionMode ? "Selecionar" : "Configurar" }}
+				Comandos do Idioma:
+			</label>
 			<ng-select
+				[clearable]="false"
 				[items]="spokenLanguages"
 				bindLabel="name"
 				bindValue="code"
@@ -12,15 +39,35 @@
 				(change)="selectedLanguageSignal.set($event.code);"
 			></ng-select>
 		</div>
-		<div class="col-12 col-md-6">
-			<button
-				*ngIf="hasPendingChanges"
-				type="button"
-				class="btn btn-primary float-end save-commands-btn"
-				(click)="savePendingChanges.emit()"
-			>
-				Retentar Salvar Comandos
-			</button>
+		<div class="col-12 col-md-6 d-flex justify-content-center justify-content-sm-end">
+			@if (settings.selectionMode) {
+				<button
+					type="button"
+					class="btn btn-outline-secondary top-btn ms-2 d-flex"
+					(click)="deselectAll()"
+				>
+					<mat-icon class="me-2" fontIcon="deselect"></mat-icon>
+					Desselecionar Tudo
+				</button>
+				<button
+					type="button"
+					class="btn btn-outline-secondary top-btn ms-2 d-flex"
+					(click)="selectAll()"
+				>
+					<mat-icon class="me-2" fontIcon="select_all"></mat-icon>
+					Selecionar Tudo
+				</button>
+			} @else {
+				<button
+					*ngIf="hasPendingChanges"
+					type="button"
+					class="btn btn-warning top-btn d-flex"
+					(click)="savePendingChanges.emit()"
+				>
+					<mat-icon class="me-2" fontIcon="replay"></mat-icon>
+					Retentar Salvar Comandos
+				</button>
+			}
 		</div>
 	</div>
 
@@ -49,13 +96,24 @@
 			></app-checkbox>
 		</ng-template>
 
-		<ng-template #editBtn let-data="adtData">
+		<ng-template #buttons let-data="adtData">
 			<div>
-				<button class='btn btn-primary d-inline-flex p-2' type='button' (click)="editCommand.emit(data)">
-					<mat-icon fontIcon='edit'></mat-icon>
+				<button
+					*ngIf="settings.canEdit"
+					class="btn btn-primary d-inline-flex p-2"
+					type="button"
+					(click)="edit.emit(data)"
+				>
+					<mat-icon fontIcon="edit"></mat-icon>
 				</button>
-				<button *ngIf="canDelete" class='btn btn-danger d-inline-flex ms-1 p-2' type='button' (click)="deleteCommand.emit(data)">
-					<mat-icon fontIcon='delete'></mat-icon>
+				<button
+					*ngIf="settings.canDelete"
+					type="button"
+					class="btn btn-danger d-inline-flex p-2"
+					[class.ms-2]="settings.canEdit"
+					(click)="delete.emit(data)"
+				>
+					<mat-icon fontIcon="delete"></mat-icon>
 				</button>
 			</div>
 		</ng-template>

@@ -1,23 +1,21 @@
 import { ActivatedRoute } from "@angular/router";
 import { Component, OnDestroy, ViewChild } from "@angular/core";
 
-import { BlockUI, NgBlockUI } from "ng-block-ui";
 import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
 
 import { debounceTime, Subject, Subscription } from "rxjs";
 
 import { Feature } from "speakmaster-module-builder/features-builder";
-import { CommandParameter, CommandParameterTypes } from "speakmaster-module-builder/default-commands-builder";
 
-import { CommandsTableComponent, IDataTableRow } from "../../../../components/commands-table/commands-table.component";
+import { ImportCommandsModalComponent } from "../../../../components/import-commands-modal/import-commands-modal.component";
+import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../../../../components/commands-table/commands-table.component";
 
-import { IUser } from "../../../../models/user";
 import { IUserModule } from "../../../../models/user-module";
 import { LanguageCode } from "../../../../models/languages";
 import { IUserModuleCommands, UserModuleCommand } from "../../../../models/user-module-commands";
 
-import { AuthenticationService } from "../../../../services/authentication/authentication.service";
 import { CommandEditorModalComponent } from "../../../../components/command-editor-modal/command-editor-modal.component";
+import { FeaturesService } from "../../../../services/features/features.service";
 import { MonacoCrlService } from "../../../../services/monaco-crl/monaco-crl.service";
 import { UserModulesService } from "../../../../services/user-modules/user-modules.service";
 
@@ -29,18 +27,30 @@ import { UserModulesService } from "../../../../services/user-modules/user-modul
 	styleUrl: "./commands.component.scss"
 })
 export class CommandsComponent implements OnDestroy {
-	@BlockUI()
-	private blockUI!: NgBlockUI;
-
 	@ViewChild(CommandsTableComponent)
 	private commandsTable!: CommandsTableComponent;
 
+	public errorSaving: boolean = false;
 	public isCardCollapsed: boolean = false;
-	public pendingChanges: Array<UserModuleCommand> = [];
+	public pendingChanges: IUserModuleCommands[] = [];
 	public currentCommands: IDataTableRow<UserModuleCommand>[] = [];
 
+	public settings: ICommandsTableSettings = {
+		canAdd: true,
+		canEdit: true,
+		canDelete: true,
+		canImport: true,
+		columns: {
+			command: "Comando",
+			action: "Ação (Funcionalidade)",
+			extras: "Parâmetros",
+			toggle: "Ativo"
+		}
+	};
+
 	private idModule: number;
-	private interfaceLanguage: LanguageCode;
+	private currentLanguage?: LanguageCode;
+	private currentUserModuleCommands?: IUserModuleCommands;
 	private bsModalRef?: BsModalRef;
 	private subscriptions: Subscription[] = [];
 	private $saveTrigger: Subject<void> = new Subject();
@@ -48,19 +58,16 @@ export class CommandsComponent implements OnDestroy {
 	constructor (
 		private readonly route: ActivatedRoute,
 		private readonly modalService: BsModalService,
-		private readonly authenticationService: AuthenticationService,
+		private readonly featuresService: FeaturesService,
 		private readonly monacoCrlService: MonacoCrlService,
 		private readonly userModulesService: UserModulesService
 	) {
 		this.idModule = Number(this.route.snapshot.paramMap.get("idModule"));
 
-		const user = this.authenticationService.loggedUser as IUser;
-		this.interfaceLanguage = user.interfaceLanguage;
-
 		this.subscriptions.push(
 			this.$saveTrigger
 				.pipe(debounceTime(500))
-				.subscribe(() => this.saveCommands())
+				.subscribe(() => this.savePendingCommands())
 		);
 	}
 
@@ -79,23 +86,28 @@ export class CommandsComponent implements OnDestroy {
 	public ngOnDestroy (): void {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
 
-		// TODO: Undo any unsaved changes
+		// Undo any unsaved changes
+		this.userModulesService.loadFromStorage();
 	}
 
 	public loadCurrentCommands (selectedLanguage?: LanguageCode): void {
+		this.currentLanguage = selectedLanguage;
+
 		if (!selectedLanguage) {
 			this.currentCommands = [];
 			return;
 		}
 
-		const references = this.userModuleCommands.find(umc => umc.language === selectedLanguage)?.commands || [];
+		this.currentUserModuleCommands = this.userModuleCommands.find(umc => umc.language === selectedLanguage);
+
+		const references = this.currentUserModuleCommands?.commands || [];
 		this.currentCommands = references.map(reference => ({
 			reference,
 			command: reference.command,
 			isToggleActive: reference.isActive || false,
 			uriKey: "featureIdentifier",
-			action: this.getFeatureName(reference.featureIdentifier),
-			extras: "<ul class='mb-0 ps-3'>" + this.getFeatureParameters(reference.featureIdentifier, reference.parameters).join("") + "</ul>"
+			action: this.featuresService.getFeatureName(this.features, reference.featureIdentifier),
+			extras: "<ul class='mb-0 ps-3'>" + this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters).join("") + "</ul>"
 		}));
 	}
 
@@ -112,8 +124,13 @@ export class CommandsComponent implements OnDestroy {
 			this.bsModalRef.onHide!.subscribe(() => {
 				if (originalCommand !== row.command) {
 					row.reference.command = row.command;
+
+					// All changes are applied to objects referenced in this.currentUserModuleCommands.commands,
+					// therefore row.reference is in this.currentUserModuleCommands.commands
+					this.updatePendingChanges(this.currentUserModuleCommands!);
 					this.$saveTrigger.next();
-					this.monacoCrlService.setEditorContent(row.reference.featureIdentifier + "-command.crl", row.command);
+
+					this.monacoCrlService.setEditorContent(this.commandsTable.getURI(row.reference.featureIdentifier), row.command);
 				}
 
 				this.bsModalRef = undefined;
@@ -124,58 +141,83 @@ export class CommandsComponent implements OnDestroy {
 	public toggleCommand (row: IDataTableRow<UserModuleCommand>): void {
 		row.isToggleActive = !row.isToggleActive;
 		row.reference.isActive = row.isToggleActive;
+
+		// All changes are applied to objects referenced in this.currentUserModuleCommands.commands,
+		// therefore row.reference is in this.currentUserModuleCommands.commands
+		this.updatePendingChanges(this.currentUserModuleCommands!);
 		this.$saveTrigger.next();
 	}
 
 	public deleteCommand (row: IDataTableRow<UserModuleCommand>): void {
+		const rowIndex = this.currentCommands.indexOf(row);
+		const index = this.currentUserModuleCommands!.commands.indexOf(row.reference);
+		if (rowIndex === -1 || index === -1)
+			return;
+
+		this.currentCommands.splice(rowIndex, 1);
+		this.currentUserModuleCommands!.commands.splice(index, 1);
+		this.commandsTable.$rerenderTrigger.next();
+
+		this.updatePendingChanges(this.currentUserModuleCommands!);
+		this.$saveTrigger.next();
+	}
+
+	public addCommand (): void {
+		// TODO: Implement add command functionality
+	}
+
+	public importCommands (): void {
+		const commandsToImport: UserModuleCommand[] = [];
+		const initialState: ModalOptions<ImportCommandsModalComponent> = {
+			initialState: {
+				idModule: this.idModule,
+				initialLanguage: this.currentLanguage,
+				commandsToImport
+			},
+			class: "modal-xl"
+		};
+
+		this.bsModalRef = this.modalService.show(ImportCommandsModalComponent, initialState);
+
+		this.subscriptions.push(
+			this.bsModalRef.onHide!.subscribe(() => {
+				if (commandsToImport.length > 0) {
+					// TODO: Implement import
+					console.log(commandsToImport);
+				}
+
+				this.bsModalRef = undefined;
+			})
+		);
 	}
 
 	public savePendingCommands (): void {
+		for (const command of this.pendingChanges)
+			this.saveCommands(command);
 	}
 
-	public saveCommands (): void {
-	}
+	public saveCommands (userModuleCommands: IUserModuleCommands): void {
+		this.userModulesService.updateCommands(userModuleCommands).subscribe({
+			next: () => {
+				this.errorSaving = false;
+				this.updatePendingChanges(userModuleCommands, true);
 
-	private getFeatureName (featureIdentifier: string): string {
-		const feature = this.features.find(f => f.identifier === featureIdentifier);
-		const translation = feature?.translations[this.interfaceLanguage] ||
-							feature?.translations[feature.defaultLanguage] ||
-							feature?.translations[LanguageCode.EN_US];
-
-		return translation?.name || featureIdentifier;
-	}
-
-	private getFeatureParameters (featureIdentifier: string, parameters: CommandParameter[] | undefined): string[] {
-		const feature = this.features.find(f => f.identifier === featureIdentifier);
-		if (!feature)
-			return [];
-
-		const values: string[] = [];
-		for (const p of feature.parameters) {
-			let value = "";
-			const userParameter = parameters?.find(p2 => p2.identifier === p.identifier);
-			if (!userParameter)
-				continue;
-
-			switch (userParameter.type) {
-				case CommandParameterTypes.CONSTANT:
-					value = `<span class='source-text'>${userParameter.value}</span>`;
-					break;
-				case CommandParameterTypes.VARIABLE:
-				case CommandParameterTypes.RESTRICTED_VARIABLE:
-					value = `<span class='variable-text'>{${userParameter.variableName}}</span>`;
-					break;
-				case CommandParameterTypes.UNDEFINED:
-					continue;
+				// When data changes, we need to re-render the data table in order to update sort and filter features.
+				this.commandsTable.$rerenderTrigger.next();
+			},
+			error: () => {
+				this.errorSaving = true;
+				this.updatePendingChanges(userModuleCommands);
 			}
+		});
+	}
 
-			const translation = p.translations[this.interfaceLanguage] ||
-								p.translations[feature.defaultLanguage] ||
-								p.translations[LanguageCode.EN_US];
+	private updatePendingChanges (command: IUserModuleCommands, removeOnly: boolean = false): void {
+		const indexToRemove = this.pendingChanges.findIndex(c => c.idUserModule === command.idUserModule && c.language === command.language);
+		if (indexToRemove >= 0)
+			this.pendingChanges.splice(indexToRemove, 1);
 
-			values.push(`<li>${translation?.name || p.identifier}: ${value}</li>`);
-		}
-
-		return values;
+		if (!removeOnly)
+			this.pendingChanges.push(command);
 	}
 }

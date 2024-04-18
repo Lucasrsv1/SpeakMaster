@@ -2,7 +2,6 @@ import { MatIcon } from "@angular/material/icon";
 import { Component, OnDestroy, ViewChild } from "@angular/core";
 
 import { CollapseModule } from "ngx-bootstrap/collapse";
-import { BlockUI, NgBlockUI } from "ng-block-ui";
 import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
 
 import { Subscription } from "rxjs";
@@ -12,7 +11,7 @@ import { IUserModuleCommands } from "../../models/user-module-commands";
 import { LanguageCode } from "../../models/languages";
 
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
-import { CommandsTableComponent, IDataTableRow } from "../../components/commands-table/commands-table.component";
+import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../../components/commands-table/commands-table.component";
 
 import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
 import { TitleService } from "../../services/title/title.service";
@@ -31,15 +30,22 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 	styleUrl: "./installed-modules.component.scss"
 })
 export class InstalledModulesComponent implements OnDestroy {
-	@BlockUI()
-	private blockUI!: NgBlockUI;
-
 	@ViewChild(CommandsTableComponent)
 	private commandsTable!: CommandsTableComponent;
 
+	public errorSaving: boolean = false;
 	public isCardCollapsed: boolean = false;
 	public pendingChanges: IUserModuleCommands[] = [];
 	public currentCommands: IDataTableRow<IUserModuleCommands>[] = [];
+
+	public settings: ICommandsTableSettings = {
+		canEdit: true,
+		columns: {
+			command: "Comando ou Prefixo",
+			action: "Módulo Ativado",
+			toggle: "Obrigatório"
+		}
+	};
 
 	private bsModalRef?: BsModalRef;
 	private subscriptions: Subscription[] = [];
@@ -107,7 +113,7 @@ export class InstalledModulesComponent implements OnDestroy {
 					row.reference.prefix = row.command;
 					this.updatePendingChanges(row.reference);
 					this.savePendingCommands();
-					this.monacoCrlService.setEditorContent(row.reference.idUserModule + "-command.crl", row.command);
+					this.monacoCrlService.setEditorContent(this.commandsTable.getURI(row.reference.idUserModule), row.command);
 				}
 
 				this.bsModalRef = undefined;
@@ -136,16 +142,18 @@ export class InstalledModulesComponent implements OnDestroy {
 			this.pendingChanges.push(command);
 	}
 
-	private savePrefix (command: IUserModuleCommands): void {
-		this.userModulesService.updatePrefix(command, this.blockUI).subscribe({
+	private savePrefix (userModuleCommands: IUserModuleCommands): void {
+		this.userModulesService.updatePrefix(userModuleCommands).subscribe({
 			next: () => {
-				this.updatePendingChanges(command, true);
+				this.errorSaving = false;
+				this.updatePendingChanges(userModuleCommands, true);
 
 				// When data changes, we need to re-render the data table in order to update sort and filter features.
 				this.commandsTable.$rerenderTrigger.next();
 			},
 			error: () => {
-				this.updatePendingChanges(command);
+				this.errorSaving = true;
+				this.updatePendingChanges(userModuleCommands);
 			}
 		});
 	}

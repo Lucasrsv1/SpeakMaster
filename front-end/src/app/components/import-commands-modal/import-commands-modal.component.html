@@ -1,0 +1,23 @@
+<div class="modal-header">
+	<h4 class="modal-title pull-left">Importar Comandos - {{ userModule?.name }}</h4>
+	<button type="button" class="btn-close close pull-right" aria-label="Close" (click)="bsModalRef.hide()">
+		<span aria-hidden="true" class="visually-hidden">&times;</span>
+	</button>
+</div>
+
+<div class="modal-body p-0">
+	<app-commands-table
+		*ngIf="settings"
+		[settings]="settings"
+		[currentCommands]="currentCommands"
+		(toggle)="toggleSelection($event)"
+		(selectedLanguage)="loadCurrentCommands($event)"
+	></app-commands-table>
+</div>
+
+<div class="modal-footer">
+	<button type="button" class="btn btn-secondary me-auto" (click)="bsModalRef.hide()">Cancelar</button>
+	<button type="button" class="btn btn-primary" (click)="import()" [disabled]="selectedCommands.length <= 0">
+		Importar {{ selectedCommands.length }} {{ selectedCommands.length === 1 ? "Comando Selecionado" : "Comandos Selecionados" }}
+	</button>
+</div>

@@ -12,17 +12,13 @@
 
 		<div class="card-body p-0" id="form" [collapse]="isCardCollapsed" [isAnimated]="true">
 			<app-commands-table
+				[settings]="settings"
 				[currentCommands]="currentCommands"
-				[hasPendingChanges]="pendingChanges.length > 0"
+				[hasPendingChanges]="errorSaving && pendingChanges.length > 0"
 				(toggle)="togglePrefixMandated($event)"
-				(editCommand)="editCommand($event)"
+				(edit)="editCommand($event)"
 				(savePendingChanges)="savePendingCommands()"
 				(selectedLanguage)="loadCurrentCommands($event)"
-				[columns]="{
-					command: 'Comando ou Prefixo',
-					action: 'Módulo Ativado',
-					toggle: 'Obrigatório'
-				}"
 			></app-commands-table>
 
 			<div class="alert alert-info d-flex align-items-center m-3 mt-0" role="alert">

@@ -114,17 +114,30 @@ export class UserModulesService implements OnDestroy {
 	}
 
 	public updatePrefix (userModuleCommands: IUserModuleCommands, blockUI?: NgBlockUI): Observable<IUserModuleCommands> {
-		const data = {
+		const data: Partial<IUserModuleCommands> = {
 			idUserModule: userModuleCommands.idUserModule,
 			language: userModuleCommands.language,
 			prefix: userModuleCommands.prefix,
 			isPrefixMandated: userModuleCommands.isPrefixMandated
 		};
 
-		return this.http.patch<IUserModuleCommands>(
-			`${environment.API_URL}/v1/users/modules/prefix`,
-			data
-		).pipe(tap({
+		return this.updateUserModuleCommands(data, blockUI);
+	}
+
+	public updateCommands (userModuleCommands: IUserModuleCommands, blockUI?: NgBlockUI): Observable<IUserModuleCommands> {
+		const data: Partial<IUserModuleCommands> = {
+			idUserModule: userModuleCommands.idUserModule,
+			language: userModuleCommands.language,
+			commands: userModuleCommands.commands
+		};
+
+		return this.updateUserModuleCommands(data, blockUI);
+	}
+
+	private updateUserModuleCommands (data: Partial<IUserModuleCommands>, blockUI?: NgBlockUI): Observable<IUserModuleCommands> {
+		const url = data.commands ? `${environment.API_URL}/v1/users/modules/commands` : `${environment.API_URL}/v1/users/modules/prefix`;
+
+		return this.http.patch<IUserModuleCommands>(url, data).pipe(tap({
 			next: updatedUserModuleCommands => {
 				blockUI?.stop();
 
@@ -134,8 +147,12 @@ export class UserModulesService implements OnDestroy {
 				if (userModules && module) {
 					const moduleCommands = module.userModuleCommands.find(umc => umc.language === data.language);
 					if (moduleCommands) {
-						moduleCommands.prefix = data.prefix;
-						moduleCommands.isPrefixMandated = data.isPrefixMandated;
+						if (data.commands) {
+							moduleCommands.commands = data.commands;
+						} else {
+							moduleCommands.prefix = data.prefix!;
+							moduleCommands.isPrefixMandated = data.isPrefixMandated!;
+						}
 					} else {
 						module.userModuleCommands.push(updatedUserModuleCommands);
 					}
