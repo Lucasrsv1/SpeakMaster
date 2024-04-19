@@ -194,7 +194,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 				if (this.availableLanguageOptions.length && !this.availableLanguageOptions.find(l => l.code === this.selectedLanguageSignal()))
 					this.selectedLanguageSignal.set(this.availableLanguageOptions[0].code);
 			}
-		});
+		}, { allowSignalWrites: true });
 
 		const user = this.authenticationService.loggedUser as IUser;
 		this.selectedLanguageSignal.set(user.interfaceLanguage);

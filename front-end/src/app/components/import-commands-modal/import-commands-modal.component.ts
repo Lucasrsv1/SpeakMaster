@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
+import { MatIcon } from "@angular/material/icon";
 import { NgIf } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 
@@ -22,7 +23,7 @@ import { UserModulesService } from "../../services/user-modules/user-modules.ser
 @Component({
 	selector: "app-import-commands-modal",
 	standalone: true,
-	imports: [CommandsTableComponent, NgIf],
+	imports: [CommandsTableComponent, MatIcon, NgIf],
 	templateUrl: "./import-commands-modal.component.html",
 	styleUrl: "./import-commands-modal.component.scss"
 })
@@ -52,6 +53,10 @@ export class ImportCommandsModalComponent implements OnInit {
 		private readonly moduleDefaultCommandsService: ModuleDefaultCommandsService,
 		private readonly userModulesService: UserModulesService
 	) { }
+
+	public get initialLanguageName (): string {
+		return languages.find(l => l.code === this.initialLanguage)?.name || "-";
+	}
 
 	public ngOnInit (): void {
 		this.settings = {

@@ -14,6 +14,16 @@
 		(toggle)="toggleSelection($event)"
 		(selectedLanguage)="loadCurrentCommands($event)"
 	></app-commands-table>
+
+	<div class="alert alert-info d-flex align-items-center m-3 mt-0" role="alert">
+		<div class="me-3">
+			<mat-icon fontIcon="info"></mat-icon>
+		</div>
+		<div class="text-justify">
+			Todos os comandos aqui selecionados, mesmo que originários de múltiplos idiomas,
+			serão importados e associados ao idioma sendo configurado atualmente, ou seja, {{ initialLanguageName }}.
+		</div>
+	</div>
 </div>
 
 <div class="modal-footer">
