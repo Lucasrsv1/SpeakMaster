@@ -37,8 +37,11 @@ export class LanguageCommandsService implements OnDestroy {
 		this.subscription = this.authenticationService.$loggedUser
 			.pipe(skip(1))
 			.subscribe(user => {
-				if (!user)
-					return this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
+				if (!user) {
+					this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
+					this.$languageCommands.next(null);
+					return;
+				}
 
 				// Every change on the logged user means the possibility of changes on the language commands
 				this.loadFromServer();

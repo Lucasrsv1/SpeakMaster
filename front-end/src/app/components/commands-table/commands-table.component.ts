@@ -36,9 +36,9 @@ export interface IDataTableRow<ReferenceType> {
 	isToggleActive: boolean;
 
 	/**
-	 * Determines the key in the reference object that identifies the command.
+	 * Monaco Editor file URI for the command.
 	 */
-	uriKey: keyof ReferenceType;
+	editorUri?: string;
 
 	/**
 	 * Real data values to save in the database and local storage
@@ -143,7 +143,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	protected selectedLanguageSignal = signal<LanguageCode | undefined>(undefined);
 	protected availableLanguageOptions: ILanguage[] = [];
 
-	protected codeModels: Map<number, CodeModel> = new Map();
+	protected codeModels: Map<string, CodeModel> = new Map();
 	protected options: editor.IEditorConstructionOptions = {
 		automaticLayout: true,
 		lineNumbers: "off",
@@ -319,10 +319,6 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 		this.editorComponents = [];
 	}
 
-	public getURI (rowIdentifier: string | number): string {
-		return `${rowIdentifier}-${this.tableID}-command.crl`;
-	}
-
 	protected deselectAll (): void {
 		for (const cmd of this.currentCommands()) {
 			if (cmd.isToggleActive)
@@ -342,16 +338,23 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 	}
 
 	private loadCommands (): void {
-		for (const cmd of this.currentCommands()) {
-			this.codeModels.set(cmd.reference[cmd.uriKey], {
+		const currentCommands = this.currentCommands();
+		for (let i = 0; i < currentCommands.length; i++) {
+			currentCommands[i].editorUri = this.getEditorURI(i);
+
+			this.codeModels.set(currentCommands[i].editorUri!, {
 				language: "crl",
-				uri: this.getURI(cmd.reference[cmd.uriKey]),
-				value: cmd.command
+				uri: currentCommands[i].editorUri!,
+				value: currentCommands[i].command
 			});
 		}
 
 		this.dtOptions.data = this.currentCommands();
 		this.rerenderDataTables();
+	}
+
+	private getEditorURI (index: number): string {
+		return `${index}-${this.tableID}-command.crl`;
 	}
 
 	private async rerenderDataTables (): Promise<void> {

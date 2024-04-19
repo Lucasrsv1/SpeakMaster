@@ -28,8 +28,11 @@ export class UserModulesService implements OnDestroy {
 		private readonly localStorage: LocalStorageService
 	) {
 		this.subscription = this.authenticationService.$loggedUser.subscribe(user => {
-			if (!user)
-				return this.localStorage.delete(LocalStorageKey.USER_MODULES);
+			if (!user) {
+				this.$userModules.next(null);
+				this.localStorage.delete(LocalStorageKey.USER_MODULES);
+				return;
+			}
 
 			if (!this.localStorage.hasKey(LocalStorageKey.USER_MODULES))
 				return this.loadFromServer();

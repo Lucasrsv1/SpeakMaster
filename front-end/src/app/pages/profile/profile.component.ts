@@ -61,6 +61,7 @@ export class ProfileComponent implements OnDestroy {
 	public languageCommands: ILanguageCommands | null = null;
 	public currentCommands: IDataTableRow<ILanguageCommand>[] = [];
 
+	private currentLanguage?: LanguageCode;
 	private bsModalRef?: BsModalRef;
 	private subscriptions: Subscription[] = [];
 	private $saveTrigger: Subject<void> = new Subject();
@@ -109,6 +110,8 @@ export class ProfileComponent implements OnDestroy {
 				this.form.get("languagesToListen")!.setValue(
 					languageCommands?.languagesToListen || []
 				);
+
+				this.loadCurrentCommands(this.currentLanguage);
 			})
 		);
 
@@ -164,6 +167,8 @@ export class ProfileComponent implements OnDestroy {
 	}
 
 	public loadCurrentCommands (selectedLanguage?: LanguageCode): void {
+		this.currentLanguage = selectedLanguage;
+
 		if (!selectedLanguage || !this.languageCommands) {
 			this.currentCommands = [];
 			return;
@@ -172,7 +177,6 @@ export class ProfileComponent implements OnDestroy {
 		const references = this.languageCommands[selectedLanguage] || [];
 		this.currentCommands = references.map(reference => ({
 			reference,
-			uriKey: "targetLanguageCode",
 			command: reference.command,
 			isToggleActive: reference.isActive,
 			action: "Ouvir no idioma " + getLanguageNameByCode(reference.targetLanguageCode)
@@ -193,7 +197,7 @@ export class ProfileComponent implements OnDestroy {
 				if (originalCommand !== row.command) {
 					row.reference.command = row.command;
 					this.$saveTrigger.next();
-					this.monacoCrlService.setEditorContent(this.commandsTable.getURI(row.reference.targetLanguageCode), row.command);
+					this.monacoCrlService.setEditorContent(row.editorUri!, row.command);
 				}
 
 				this.bsModalRef = undefined;

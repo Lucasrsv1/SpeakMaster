@@ -93,7 +93,6 @@ export class InstalledModulesComponent implements OnDestroy {
 			reference,
 			command: reference.prefix,
 			isToggleActive: reference.isPrefixMandated,
-			uriKey: "idUserModule",
 			action: this.userModules.find(module => module.idUserModule === Number(reference.idUserModule))?.name || "Módulo Indefinido"
 		}));
 	}
@@ -113,7 +112,7 @@ export class InstalledModulesComponent implements OnDestroy {
 					row.reference.prefix = row.command;
 					this.updatePendingChanges(row.reference);
 					this.savePendingCommands();
-					this.monacoCrlService.setEditorContent(this.commandsTable.getURI(row.reference.idUserModule), row.command);
+					this.monacoCrlService.setEditorContent(row.editorUri!, row.command);
 				}
 
 				this.bsModalRef = undefined;

@@ -82,7 +82,7 @@
 			<ngs-code-editor
 				[readOnly]="true"
 				[theme]="'crlTheme'"
-				[codeModel]="codeModels.get(data.reference[data.uriKey])!"
+				[codeModel]="codeModels.get(data.editorUri)!"
 				[options]="options"
 				(loaded)="editorLoaded($event)"
 			></ngs-code-editor>
