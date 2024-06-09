@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 
-import { Feature } from "speakmaster-module-builder/features-builder";
 import { CommandParameter, CommandParameterTypes } from "speakmaster-module-builder/default-commands-builder";
+import { Feature, Parameter, ParameterValue, Translations } from "speakmaster-module-builder/features-builder";
 
 import { Subscription } from "rxjs";
 
@@ -24,19 +24,50 @@ export class FeaturesService implements OnDestroy {
 		this.subscription.unsubscribe();
 	}
 
-	public getFeatureName (features: Feature[], featureIdentifier: string): string {
-		const feature = features.find(f => f.identifier === featureIdentifier);
-		const translation = feature?.translations[this.interfaceLanguage] ||
-							feature?.translations[feature.defaultLanguage] ||
-							feature?.translations[LanguageCode.EN_US];
+	public getFeatureName (feature: Feature): string;
+	public getFeatureName (features: Feature[], featureIdentifier: string): string;
+	public getFeatureName (features: Feature | Feature[], featureIdentifier?: string): string {
+		const feature = Array.isArray(features) ? features.find(f => f.identifier === featureIdentifier!) : features;
+		if (!feature) return "";
 
-		return translation?.name || featureIdentifier;
+		const translation = this.getTranslation(feature);
+		return translation?.name || feature?.identifier || featureIdentifier!;
 	}
 
-	public getFeatureParameters (features: Feature[], featureIdentifier: string, parameters: CommandParameter[] | undefined): string[] {
+	public getFeatureDescription (feature: Feature): string;
+	public getFeatureDescription (features: Feature[], featureIdentifier: string): string;
+	public getFeatureDescription (features: Feature | Feature[], featureIdentifier?: string): string {
+		const feature = Array.isArray(features) ? features.find(f => f.identifier === featureIdentifier!) : features;
+		if (!feature) return "";
+
+		const translation = this.getTranslation(feature);
+		return translation?.description || "";
+	}
+
+	public getParameterName (feature: Feature, parameter: Parameter): string {
+		const translation = this.getTranslation(feature, parameter.translations);
+		return translation?.name || parameter.identifier;
+	}
+
+	public getParameterDescription (feature: Feature, parameter: Parameter): string {
+		const translation = this.getTranslation(feature, parameter.translations);
+		return translation?.description || "";
+	}
+
+	public getParameterValueName (feature: Feature, parameterValue: ParameterValue): string {
+		const translation = this.getTranslation(feature, parameterValue.translations);
+		return translation?.name || parameterValue.identifier;
+	}
+
+	public getParameterValueDescription (feature: Feature, parameterValue: ParameterValue): string {
+		const translation = this.getTranslation(feature, parameterValue.translations);
+		return translation?.description || "";
+	}
+
+	public getFeatureParameters (features: Feature[], featureIdentifier: string, parameters: CommandParameter[] | undefined): string {
 		const feature = features.find(f => f.identifier === featureIdentifier);
 		if (!feature)
-			return [];
+			return "<ul class='mb-0 ps-3'></ul>";
 
 		const values: string[] = [];
 		for (const p of feature.parameters) {
@@ -45,9 +76,15 @@ export class FeaturesService implements OnDestroy {
 			if (!userParameter)
 				continue;
 
+			const allowedValue = p.allowedValues.find(v => v.identifier === userParameter.value);
 			switch (userParameter.type) {
 				case CommandParameterTypes.CONSTANT:
-					value = `<span class='source-text'>${userParameter.value}</span>`;
+					if (allowedValue) {
+						const translation = this.getTranslation(feature, allowedValue.translations);
+						value = `<span class='source-text'>${translation?.name || userParameter.value}</span>`;
+					} else {
+						value = `<span class='source-text'>${userParameter.value}</span>`;
+					}
 					break;
 				case CommandParameterTypes.VARIABLE:
 				case CommandParameterTypes.RESTRICTED_VARIABLE:
@@ -57,13 +94,19 @@ export class FeaturesService implements OnDestroy {
 					continue;
 			}
 
-			const translation = p.translations[this.interfaceLanguage] ||
-								p.translations[feature.defaultLanguage] ||
-								p.translations[LanguageCode.EN_US];
-
+			const translation = this.getTranslation(feature, p.translations);
 			values.push(`<li>${translation?.name || p.identifier}: ${value}</li>`);
 		}
 
-		return values;
+		return "<ul class='mb-0 ps-3'>" + values.join("") + "</ul>";
+	}
+
+	private getTranslation (feature: Feature, translations?: Translations) {
+		if (!translations)
+			translations = feature.translations;
+
+		return translations[this.interfaceLanguage] ||
+			translations[feature.defaultLanguage] ||
+			translations[LanguageCode.EN_US];
 	}
 }

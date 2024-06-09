@@ -15,7 +15,7 @@
 
 			<a class="navbar-brand d-flex align-items-center" title="SpeakMaster" [routerLink]="['/']">
 				<h1 class="m-0 me-3" [class.ms-3]="disableMenu">SpeakMaster</h1>
-				<img src="../../../assets/logo.png" class="d-none d-sm-block"/>
+				<img src="../../../assets/logo.png" class="d-none d-sm-block">
 			</a>
 
 			<div class="d-none d-xl-block" *ngIf="pageTitle">
@@ -30,18 +30,18 @@
 				<li class="nav-item">
 					@if (commandCenterService.$isConnected | async) {
 						<ng-template #tooltipTemplate>
-							Conectado à Central de Comandos.<br/>
+							Conectado à Central de Comandos.<br>
 							Você pode enviar comandos para os seus módulos.
-							<!-- Connected to Command Center.<br/>
+							<!-- Connected to Command Center.<br>
 							You can send commands to your modules. -->
 						</ng-template>
 
 						<app-led color="#0F0" state="on" [tooltip]="tooltipTemplate"></app-led>
 					} @else {
 						<ng-template #tooltipTemplate>
-							Desconectado da Central de Comandos.<br/>
+							Desconectado da Central de Comandos.<br>
 							Você não conseguirá enviar comandos para os seus módulos.
-							<!-- Disconnected from Command Center.<br/>
+							<!-- Disconnected from Command Center.<br>
 							You won't be able to send commands to your modules. -->
 						</ng-template>
 

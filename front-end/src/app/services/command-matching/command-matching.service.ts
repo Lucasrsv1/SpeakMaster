@@ -111,7 +111,7 @@ export class CommandMatchingService implements OnDestroy {
 				if (!languageCommand.isActive)
 					continue;
 
-				const automata = new Automata(languageCommand.command);
+				const automata = new Automata(languageCommand.command.trim());
 				this.languageCommands.set(automata, languageCommand.targetLanguageCode);
 			}
 		}

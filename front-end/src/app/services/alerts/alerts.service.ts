@@ -45,7 +45,7 @@ export class AlertsService {
 			buttonsStyling: false,
 			customClass: { confirmButton: "btn btn-primary btn-lg" },
 			title,
-			html: `${html}<br/>${errorMessage}`
+			html: `${html}<br>${errorMessage}`
 		});
 	}
 }

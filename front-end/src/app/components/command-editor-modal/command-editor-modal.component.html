@@ -1,5 +1,11 @@
 <div class="modal-header">
-	<h4 class="modal-title pull-left">Edição de Comandos</h4>
+	<h4 class="modal-title pull-left">
+		@if (addingToLanguage) {
+			Adição de Comandos - {{ languageName }}
+		} @else {
+			Edição de Comandos
+		}
+	</h4>
 	<button type="button" class="btn-close close pull-right" aria-label="Close" (click)="bsModalRef.hide()">
 		<span aria-hidden="true" class="visually-hidden">&times;</span>
 	</button>
@@ -38,16 +44,167 @@
 		</div>
 	</div>
 
-	<div class="alert alert-info" role="alert">
+	<div class="alert alert-light" role="alert" *ngIf="editingCommandFeature">
+		<h4 class="alert-heading d-flex align-items-center mb-0">
+			<mat-icon class="me-2" fontIcon="flare"></mat-icon>
+			Ação Executada:
+		</h4>
+		<form [formGroup]="form" class="mt-2">
+			<ul class="list-group">
+				<li class="list-group-item">
+					<label for="feature" class="form-label">
+						Selecionar Funcionalidade:
+					</label>
+					<ng-select
+						[clearable]="true"
+						[items]="featuresOptions"
+						placeholder="Selecione a ação a ser executada quando o comando for reconhecido"
+						labelForId="feature"
+						formControlName="feature"
+					></ng-select>
+					<p class="mt-2 mb-1">
+						<span class="fw-medium">Descrição:</span> {{ form.controls['feature'].value?.description }}
+					</p>
+				</li>
+			</ul>
+
+			<ul class="list-group mt-2">
+				<li class="list-group-item list-group-item-light" *ngIf="form.controls['feature'].valid && !parameters.length">
+					Essa funcionalidade não requer nenhum parâmetro.
+				</li>
+
+				<li class="list-group-item p-3" *ngFor="let p of parameters; index as i">
+					<div class="d-flex align-items-center" (click)="p.collapsed = !p.collapsed">
+						<div>
+							<h6 class="form-label mb-0">
+								{{ i + 1 }}º Parâmetro: {{ p.name }}
+							</h6>
+							<p class="mb-0">{{ p.description }}</p>
+						</div>
+						<span class="ms-auto d-flex">
+							<mat-icon class="me-2" [fontIcon]="p.collapsed ? 'expand_less' : 'expand_more'"></mat-icon>
+						</span>
+					</div>
+
+					<div [collapse]="p.collapsed" [isAnimated]="true">
+						<div class="row mt-2">
+							<div class="col-12 col-md-6">
+								<label [for]="p.valueTypeControl" class="form-label">
+									Tipo de valor a ser usado:
+								</label>
+								<ng-select
+									[items]="p.valueTypeOptions"
+									placeholder="Selecione como definir o valor do parâmetro"
+									bindValue="value"
+									[labelForId]="p.valueTypeControl"
+									[formControlName]="p.valueTypeControl"
+								></ng-select>
+							</div>
+
+							@if (form.controls[p.valueTypeControl].value === CommandParameterTypes.CONSTANT) {
+								<div class="col-12 col-md-6">
+									<label [for]="p.valueControl" class="form-label">
+										Valor usado:
+									</label>
+
+									@if (p.allowedValuesOptions.length) {
+										<ng-select
+											[items]="p.allowedValuesOptions"
+											placeholder="Selecione o valor atribuído ao parâmetro"
+											bindValue="value"
+											[labelForId]="p.valueControl"
+											[formControlName]="p.valueControl"
+										>
+											<ng-template ng-option-tmp let-item="item">
+												<div>
+													<h6 class="mb-0">{{ item.label }}</h6>
+													<small>{{ item.description }}</small>
+												</div>
+											</ng-template>
+										</ng-select>
+									} @else {
+										<input
+											[id]="p.valueControl"
+											type="text"
+											class="form-control"
+											placeholder="Digite o valor do parâmetro"
+											[formControlName]="p.valueControl"
+										>
+									}
+								</div>
+							} @else if (
+								form.controls[p.valueTypeControl].value === CommandParameterTypes.VARIABLE ||
+								form.controls[p.valueTypeControl].value === CommandParameterTypes.RESTRICTED_VARIABLE
+							) {
+								<div class="col-12 col-md-6">
+									<label [for]="p.valueControl" class="form-label">
+										Variável a ser usada:
+									</label>
+									<ng-select
+										[items]="form.controls[p.valueTypeControl].value === CommandParameterTypes.VARIABLE ? commandVariableNames : commandRestrictedVariableNames"
+										placeholder="Selecione a variável que irá definir o valor do parâmetro"
+										[labelForId]="p.valueControl"
+										[formControlName]="p.valueControl"
+									></ng-select>
+								</div>
+							}
+
+							<div class="col-12 mt-3" *ngIf="form.controls[p.valueTypeControl].value === CommandParameterTypes.RESTRICTED_VARIABLE">
+								<p class="mb-1">Mapeie cada um dos possíveis valores da variável selecionada para o valor desejado do parâmetro:</p>
+								<div class="row">
+									<div class="col-12 col-md-6 mb-1" *ngFor="let opt of p.restrictedVariableOptions">
+										<label [for]="opt.formControlName" class="form-label fw-medium">
+											{{ opt.automataOption }}
+										</label>
+										<ng-select
+											[items]="p.allowedValuesOptions"
+											placeholder="Selecione o valor atribuído ao parâmetro"
+											bindValue="value"
+											[labelForId]="opt.formControlName"
+											[formControlName]="opt.formControlName"
+										>
+											<ng-template ng-option-tmp let-item="item">
+												<div>
+													<h6 class="mb-0">{{ item.label }}</h6>
+													<small>{{ item.description }}</small>
+												</div>
+											</ng-template>
+										</ng-select>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</form>
+	</div>
+
+	<div class="alert alert-light" role="alert">
+		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="arePossibleCommandsCollapsed = !arePossibleCommandsCollapsed">
+			<mat-icon class="me-2" fontIcon="record_voice_over"></mat-icon>
+			Lista de Comandos Reconhecidos:
+			<span class="ms-auto d-flex">
+				<mat-icon class="me-2" [fontIcon]="arePossibleCommandsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
+			</span>
+		</h4>
+		<ng-scrollbar [collapse]="arePossibleCommandsCollapsed" [isAnimated]="true">
+			<ul class="list-group mt-2">
+				<li class="list-group-item" *ngFor="let cmd of possibleCommands" [innerHTML]="cmd"></li>
+			</ul>
+		</ng-scrollbar>
+	</div>
+
+	<div class="alert alert-info mb-0" role="alert">
 		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="areInstructionsCollapsed = !areInstructionsCollapsed">
 			<mat-icon class="me-2" fontIcon="info"></mat-icon>
 			Instruções
-			<span class="ms-auto">
+			<span class="ms-auto d-flex">
 				<mat-icon class="me-2" [fontIcon]="areInstructionsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
 			</span>
 		</h4>
-		<div class="mt-2" [collapse]="areInstructionsCollapsed" [isAnimated]="true">
-			<h6>Estruture o comando que deverá ser falado usando as seguintes funcionalidades:</h6>
+		<div [collapse]="areInstructionsCollapsed" [isAnimated]="true">
+			<h6 class="mt-2">Estruture o comando que deverá ser falado usando as seguintes funcionalidades:</h6>
 			<div>
 				<p class="mb-2">
 					<span class="optional">[Termos opcionais]</span>:
@@ -74,26 +231,43 @@
 					o restante são termos obrigatórios que terão de ser falados.
 				</p>
 			</div>
-		</div>
-	</div>
 
-	<div class="alert alert-light cmd-list" role="alert">
-		<h4 class="alert-heading d-flex align-items-center mb-0" (click)="arePossibleCommandsCollapsed = !arePossibleCommandsCollapsed">
-			<mat-icon class="me-2" fontIcon="record_voice_over"></mat-icon>
-			Lista de Comandos Reconhecidos:
-			<span class="ms-auto">
-				<mat-icon class="me-2" [fontIcon]="arePossibleCommandsCollapsed ? 'expand_less' : 'expand_more'"></mat-icon>
-			</span>
-		</h4>
-		<ng-scrollbar class="mt-2" [collapse]="arePossibleCommandsCollapsed" [isAnimated]="true">
-			<ul class="list-group">
-				<li class="list-group-item" *ngFor="let cmd of possibleCommands" [innerHTML]="cmd"></li>
-			</ul>
-		</ng-scrollbar>
+			@if (editingCommandFeature) {
+				<h6 class="mt-3">Em seguida, defina a ação que será executada quando o comando for reconhecido seguindo o passo a passo:</h6>
+				<ol>
+					<li>
+						Selecione qual funcionalidade será ativada pelo comando;
+					</li>
+					<li>
+						Para cada parâmetro da funcionalidade escolhida, defina a forma como o valor do parâmetro será definido,
+						o que pode ser através de um <strong>valor constante</strong>, ou uma <strong>variável</strong>, ou uma <strong>variável restrita</strong>:
+					</li>
+					<ul>
+						<li>
+							se optar por usar um valor constante, você terá a opção de digitar o valor desejado, ou terá de escolher um dos valores válidos aceitos para o parâmetro;
+						</li>
+						<li>
+							se optar por usar uma variável ou uma variável restrita, você terá a opção de selecionar a variável que irá definir o valor do parâmetro;
+						</li>
+						<li>
+							se o parâmetro não for obrigatório, você também terá a opção de simplesmente não utilizá-lo.
+						</li>
+					</ul>
+					<li>
+						Se tiver optado por usar uma variável restrita, você também terá que mapear cada um dos possíveis valores da variável selecionada para o valor desejado do parâmetro.
+						Para isso, selecione um dos valores válidos aceitos para o parâmetro para cada item da lista de restrições da variável restrita.
+					</li>
+				</ol>
+			}
+		</div>
 	</div>
 </div>
 
 <div class="modal-footer">
-	<button type="button" class="btn btn-secondary me-auto" (click)="bsModalRef.hide()">Cancelar</button>
-	<button type="button" class="btn btn-primary" (click)="save()" [disabled]="isCommandInvalid">Salvar Alterações</button>
+	<button type="button" class="btn btn-secondary me-auto" (click)="bsModalRef.hide()">
+		Cancelar
+	</button>
+	<button type="button" class="btn btn-primary" (click)="save()" [disabled]="isCommandInvalid || (editingCommandFeature && form.invalid)">
+		Salvar Alterações
+	</button>
 </div>

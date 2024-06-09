@@ -41,7 +41,7 @@
 		</div>
 	</div>
 
-	<hr/>
+	<hr>
 
 	@if (ambiguities.length) {
 		<p class="mb-1">O último comando resultou nas seguintes possibilidades:</p>
@@ -62,7 +62,7 @@
 							[isChecked]="ambiguity.isSelected"
 						></app-checkbox>
 
-						<img *ngIf="ambiguity.image" [src]="ambiguity.image" class="me-3" />
+						<img *ngIf="ambiguity.image" [src]="ambiguity.image" class="me-3">
 
 						<div class="flex-fill">{{ ambiguity.description }}</div>
 						<div class="ms-3">{{ ambiguity.secondaryInfo }}</div>

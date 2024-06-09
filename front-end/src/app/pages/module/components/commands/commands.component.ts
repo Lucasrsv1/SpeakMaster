@@ -107,14 +107,19 @@ export class CommandsComponent implements OnDestroy {
 			command: reference.command,
 			isToggleActive: reference.isActive || false,
 			action: this.featuresService.getFeatureName(this.features, reference.featureIdentifier),
-			extras: "<ul class='mb-0 ps-3'>" + this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters).join("") + "</ul>"
+			extras: this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters)
 		}));
 	}
 
 	public editCommand (row: IDataTableRow<UserModuleCommand>): void {
-		const originalCommand = row.command;
+		const saveTrigger = { value: false };
 		const initialState: ModalOptions<CommandEditorModalComponent> = {
-			initialState: { editingCommand: row },
+			initialState: {
+				editingCommand: row,
+				editingCommandFeature: row.reference,
+				moduleFeatures: this.features,
+				saveTrigger
+			},
 			class: "modal-xl"
 		};
 
@@ -122,8 +127,9 @@ export class CommandsComponent implements OnDestroy {
 
 		this.subscriptions.push(
 			this.bsModalRef.onHide!.subscribe(() => {
-				if (originalCommand !== row.command) {
-					row.reference.command = row.command;
+				if (saveTrigger.value) {
+					row.action = this.featuresService.getFeatureName(this.features, row.reference.featureIdentifier);
+					row.extras = this.featuresService.getFeatureParameters(this.features, row.reference.featureIdentifier, row.reference.parameters);
 
 					// All changes are applied to objects referenced in this.currentUserModuleCommands.commands,
 					// therefore row.reference is in this.currentUserModuleCommands.commands
@@ -163,7 +169,59 @@ export class CommandsComponent implements OnDestroy {
 	}
 
 	public addCommand (): void {
-		// TODO: Implement add command functionality
+		const saveTrigger = { value: false };
+		const newRow: IDataTableRow<UserModuleCommand> = {
+			reference: {
+				command: "",
+				featureIdentifier: "",
+				parameters: [],
+				isActive: true
+			},
+			command: "",
+			isToggleActive: true,
+			action: ""
+		};
+
+		const initialState: ModalOptions<CommandEditorModalComponent> = {
+			initialState: {
+				addingToLanguage: this.currentLanguage,
+				editingCommand: newRow,
+				editingCommandFeature: newRow.reference,
+				moduleFeatures: this.features,
+				saveTrigger
+			},
+			class: "modal-xl"
+		};
+
+		this.bsModalRef = this.modalService.show(CommandEditorModalComponent, initialState);
+
+		this.subscriptions.push(
+			this.bsModalRef.onHide!.subscribe(() => {
+				if (saveTrigger.value) {
+					newRow.action = this.featuresService.getFeatureName(this.features, newRow.reference.featureIdentifier);
+					newRow.extras = this.featuresService.getFeatureParameters(this.features, newRow.reference.featureIdentifier, newRow.reference.parameters);
+
+					// Create a new UserModuleCommands object in case it doesn't exist yet
+					if (!this.currentUserModuleCommands) {
+						this.currentUserModuleCommands = {
+							idUserModule: this.idModule,
+							language: this.currentLanguage!,
+							commands: [],
+							prefix: "",
+							isPrefixMandated: false
+						};
+					}
+
+					this.currentUserModuleCommands.commands.push(newRow.reference);
+					this.currentCommands = this.currentCommands.concat(newRow);
+
+					this.updatePendingChanges(this.currentUserModuleCommands);
+					this.$saveTrigger.next(true);
+				}
+
+				this.bsModalRef = undefined;
+			})
+		);
 	}
 
 	public importCommands (): void {
@@ -195,7 +253,7 @@ export class CommandsComponent implements OnDestroy {
 						command: reference.command,
 						isToggleActive: reference.isActive || false,
 						action: this.featuresService.getFeatureName(this.features, reference.featureIdentifier),
-						extras: "<ul class='mb-0 ps-3'>" + this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters).join("") + "</ul>"
+						extras: this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters)
 					}));
 
 					// Create a new UserModuleCommands object in case it doesn't exist yet
@@ -212,7 +270,7 @@ export class CommandsComponent implements OnDestroy {
 					this.currentUserModuleCommands.commands.push(...newCommandsReferences);
 					this.currentCommands = this.currentCommands.concat(...rows);
 
-					this.updatePendingChanges(this.currentUserModuleCommands!);
+					this.updatePendingChanges(this.currentUserModuleCommands);
 					this.$saveTrigger.next(true);
 				}
 

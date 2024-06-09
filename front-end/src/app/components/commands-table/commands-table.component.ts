@@ -252,6 +252,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 				data: "isToggleActive",
 				className: "text-center p-1",
 				width: `${Math.round((this.settings.columns.toggle.length * 6.6) + 50)}px`,
+				orderable: false,
 				searchable: false
 			});
 

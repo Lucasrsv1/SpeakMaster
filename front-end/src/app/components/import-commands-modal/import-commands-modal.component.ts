@@ -116,7 +116,7 @@ export class ImportCommandsModalComponent implements OnInit {
 			command: reference.command,
 			isToggleActive: this.selectedCommands.includes(reference),
 			action: this.featuresService.getFeatureName(this.features, reference.featureIdentifier),
-			extras: "<ul class='mb-0 ps-3'>" + this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters).join("") + "</ul>"
+			extras: this.featuresService.getFeatureParameters(this.features, reference.featureIdentifier, reference.parameters)
 		}));
 	}
 
