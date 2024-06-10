@@ -132,11 +132,13 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	public ngOnInit (): void {
 		this.codeModel.value = this.editingCommand.command;
 		this.currentCommand = this.editingCommand.command;
-		this.featuresOptions = this.moduleFeatures.map(f => ({
-			label: this.featuresService.getFeatureName(f),
-			value: f.identifier,
-			description: this.featuresService.getFeatureDescription(f)
-		}));
+		this.featuresOptions = this.moduleFeatures
+			.map(f => ({
+				label: this.featuresService.getFeatureName(f),
+				value: f.identifier,
+				description: this.featuresService.getFeatureDescription(f)
+			}))
+			.sort((a, b) => a.label.localeCompare(b.label));
 	}
 
 	public ngOnDestroy (): void {
@@ -257,11 +259,13 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 			valueControl: p.identifier + "-value",
 			valueTypeControl: p.identifier + "-value-type",
 			valueTypeOptions: this.getParameterValueTypes(p),
-			allowedValuesOptions: p.allowedValues.map(v => ({
-				description: this.featuresService.getParameterValueDescription(feature, v),
-				label: this.featuresService.getParameterValueName(feature, v),
-				value: v.identifier
-			}))
+			allowedValuesOptions: p.allowedValues
+				.map(v => ({
+					description: this.featuresService.getParameterValueDescription(feature, v),
+					label: this.featuresService.getParameterValueName(feature, v),
+					value: v.identifier
+				}))
+				.sort((a, b) => (p.autoSort ? a.label.localeCompare(b.label) : 0))
 		}));
 
 		for (const p of this.parameters) {
