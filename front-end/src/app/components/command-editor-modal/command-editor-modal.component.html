@@ -55,20 +55,22 @@
 					<label for="feature" class="form-label">
 						Selecionar Funcionalidade:
 					</label>
-					<ng-select
-						[clearable]="true"
-						[items]="featuresOptions"
-						placeholder="Selecione a ação a ser executada quando o comando for reconhecido"
-						labelForId="feature"
-						formControlName="feature"
-					>
-						<ng-template ng-option-tmp let-item="item">
-							<div>
-								<h6 class="mb-0">{{ item.label }}</h6>
-								<small>{{ item.description }}</small>
-							</div>
-						</ng-template>
-					</ng-select>
+					<app-visual-validator [config]="validations" field="feature">
+						<ng-select
+							[clearable]="true"
+							[items]="featuresOptions"
+							placeholder="Selecione a ação a ser executada quando o comando for reconhecido"
+							labelForId="feature"
+							formControlName="feature"
+						>
+							<ng-template ng-option-tmp let-item="item">
+								<div>
+									<h6 class="mb-0">{{ item.label }}</h6>
+									<small>{{ item.description }}</small>
+								</div>
+							</ng-template>
+						</ng-select>
+					</app-visual-validator>
 					<p class="mt-2 mb-1">
 						<span class="fw-medium">Descrição:</span> {{ form.controls['feature'].value?.description }}
 					</p>
@@ -99,13 +101,15 @@
 								<label [for]="p.valueTypeControl" class="form-label">
 									Tipo de valor a ser usado:
 								</label>
-								<ng-select
-									[items]="p.valueTypeOptions"
-									placeholder="Selecione como definir o valor do parâmetro"
-									bindValue="value"
-									[labelForId]="p.valueTypeControl"
-									[formControlName]="p.valueTypeControl"
-								></ng-select>
+								<app-visual-validator [config]="validations" [field]="p.valueTypeControl">
+									<ng-select
+										[items]="p.valueTypeOptions"
+										placeholder="Selecione como definir o valor do parâmetro"
+										bindValue="value"
+										[labelForId]="p.valueTypeControl"
+										[formControlName]="p.valueTypeControl"
+									></ng-select>
+								</app-visual-validator>
 							</div>
 
 							@if (form.controls[p.valueTypeControl].value === CommandParameterTypes.CONSTANT) {
@@ -115,28 +119,32 @@
 									</label>
 
 									@if (p.allowedValuesOptions.length) {
-										<ng-select
-											[items]="p.allowedValuesOptions"
-											placeholder="Selecione o valor atribuído ao parâmetro"
-											bindValue="value"
-											[labelForId]="p.valueControl"
-											[formControlName]="p.valueControl"
-										>
-											<ng-template ng-option-tmp let-item="item">
-												<div>
-													<h6 class="mb-0">{{ item.label }}</h6>
-													<small>{{ item.description }}</small>
-												</div>
-											</ng-template>
-										</ng-select>
+										<app-visual-validator [config]="validations" [field]="p.valueControl">
+											<ng-select
+												[items]="p.allowedValuesOptions"
+												placeholder="Selecione o valor atribuído ao parâmetro"
+												bindValue="value"
+												[labelForId]="p.valueControl"
+												[formControlName]="p.valueControl"
+											>
+												<ng-template ng-option-tmp let-item="item">
+													<div>
+														<h6 class="mb-0">{{ item.label }}</h6>
+														<small>{{ item.description }}</small>
+													</div>
+												</ng-template>
+											</ng-select>
+										</app-visual-validator>
 									} @else {
-										<input
-											[id]="p.valueControl"
-											type="text"
-											class="form-control"
-											placeholder="Digite o valor do parâmetro"
-											[formControlName]="p.valueControl"
-										>
+										<app-visual-validator [config]="validations" [field]="p.valueControl">
+											<input
+												[id]="p.valueControl"
+												type="text"
+												class="form-control"
+												placeholder="Digite o valor do parâmetro"
+												[formControlName]="p.valueControl"
+											>
+										</app-visual-validator>
 									}
 								</div>
 							} @else if (
@@ -147,13 +155,16 @@
 									<label [for]="p.valueControl" class="form-label">
 										Variável a ser usada:
 									</label>
-									<ng-select
-										[items]="form.controls[p.valueTypeControl].value === CommandParameterTypes.VARIABLE ? commandVariableNames : commandRestrictedVariableNames"
-										placeholder="Selecione a variável que irá definir o valor do parâmetro"
-										[labelForId]="p.valueControl"
-										[formControlName]="p.valueControl"
-									></ng-select>
+									<app-visual-validator [config]="validations" [field]="p.valueControl">
+										<ng-select
+											[items]="form.controls[p.valueTypeControl].value === CommandParameterTypes.VARIABLE ? commandVariableNames : commandRestrictedVariableNames"
+											placeholder="Selecione a variável que irá definir o valor do parâmetro"
+											[labelForId]="p.valueControl"
+											[formControlName]="p.valueControl"
+										></ng-select>
+									</app-visual-validator>
 								</div>
+								<!-- TODO: adicionar tratamento para caso a variável selecionada seja opcional no autômato -->
 							}
 
 							<div class="col-12 mt-3" *ngIf="form.controls[p.valueTypeControl].value === CommandParameterTypes.RESTRICTED_VARIABLE">
@@ -163,20 +174,22 @@
 										<label [for]="opt.formControlName" class="form-label fw-medium">
 											{{ opt.automataOption }}
 										</label>
-										<ng-select
-											[items]="p.allowedValuesOptions"
-											placeholder="Selecione o valor atribuído ao parâmetro"
-											bindValue="value"
-											[labelForId]="opt.formControlName"
-											[formControlName]="opt.formControlName"
-										>
-											<ng-template ng-option-tmp let-item="item">
-												<div>
-													<h6 class="mb-0">{{ item.label }}</h6>
-													<small>{{ item.description }}</small>
-												</div>
-											</ng-template>
-										</ng-select>
+										<app-visual-validator [config]="validations" [field]="opt.formControlName">
+											<ng-select
+												[items]="p.allowedValuesOptions"
+												placeholder="Selecione o valor atribuído ao parâmetro"
+												bindValue="value"
+												[labelForId]="opt.formControlName"
+												[formControlName]="opt.formControlName"
+											>
+												<ng-template ng-option-tmp let-item="item">
+													<div>
+														<h6 class="mb-0">{{ item.label }}</h6>
+														<small>{{ item.description }}</small>
+													</div>
+												</ng-template>
+											</ng-select>
+										</app-visual-validator>
 									</div>
 								</div>
 							</div>

@@ -21,6 +21,7 @@ import { LanguageCode, languages } from "../../models/languages";
 
 import { FeaturesService } from "../../services/features/features.service";
 import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";
+import { IValidations, VisualValidatorComponent } from "../visual-validator/visual-validator.component";
 
 interface ISelectOption {
 	label: string;
@@ -55,7 +56,8 @@ interface IFeatureParameter {
 		NgIf,
 		NgScrollbarModule,
 		NgSelectModule,
-		ReactiveFormsModule
+		ReactiveFormsModule,
+		VisualValidatorComponent
 	],
 	templateUrl: "./command-editor-modal.component.html",
 	styleUrl: "./command-editor-modal.component.scss"
@@ -84,6 +86,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	};
 
 	protected form: FormGroup;
+	protected validations: IValidations;
 	protected commandVariableNames: string[] = [];
 	protected commandRestrictedVariableNames: string[] = [];
 	protected featuresOptions: ISelectOption[] = [];
@@ -113,6 +116,13 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 		this.form = this.formBuilder.group({
 			feature: [null, Validators.required]
 		});
+
+		this.validations = {
+			form: this.form,
+			fields: {
+				feature: [{ key: "required" }]
+			}
+		};
 
 		this.subscriptions.push(
 			this.form.get("feature")!.valueChanges.subscribe(
@@ -243,8 +253,10 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 		// Then remove fields from the form
 		const controlNames = Object.keys(this.form.controls);
 		for (const controlName of controlNames) {
-			if (controlName !== "feature")
+			if (controlName !== "feature") {
 				this.form.removeControl(controlName);
+				delete this.validations.fields[controlName];
+			}
 		}
 
 		if (!option)
@@ -274,18 +286,23 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 			this.subscriptions.push(
 				typeControl.valueChanges.subscribe(value => {
-					if (value === CommandParameterTypes.UNDEFINED)
+					if (value === CommandParameterTypes.UNDEFINED) {
 						valueControl.setValidators([]);
-					else
+						this.validations.fields[p.valueControl] = [];
+					} else {
 						valueControl.setValidators([Validators.required]);
+						this.validations.fields[p.valueControl] = [{ key: "required" }];
+					}
 
 					valueControl.setValue(null);
 				}),
 
 				valueControl.valueChanges.subscribe(value => {
 					// Remove previous fields
-					for (const { formControlName } of p.restrictedVariableOptions || [])
+					for (const { formControlName } of p.restrictedVariableOptions || []) {
 						this.form.removeControl(formControlName);
+						delete this.validations.fields[formControlName];
+					}
 
 					if (typeControl.value === CommandParameterTypes.RESTRICTED_VARIABLE) {
 						// Clear previous values for parameter
@@ -303,6 +320,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 							const control = new FormControl<string | null>(null, Validators.required);
 							this.form.addControl(formControlName, control);
+							this.validations.fields[formControlName] = [{ key: "required" }];
 						}
 					}
 				})
@@ -310,6 +328,8 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 			this.form.addControl(p.valueControl, valueControl);
 			this.form.addControl(p.valueTypeControl, typeControl);
+			this.validations.fields[p.valueControl] = [];
+			this.validations.fields[p.valueTypeControl] = [{ key: "required" }];
 		}
 	}
 
@@ -367,11 +387,14 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 				const control = new FormControl<string | null>(previousValues[options[idx]], Validators.required);
 				this.form.addControl(formControlName, control);
+				this.validations.fields[formControlName] = [{ key: "required" }];
 			}
 
 			// Remove previous options
-			for (let i = options.length; i < p.restrictedVariableOptions.length; i++)
+			for (let i = options.length; i < p.restrictedVariableOptions.length; i++) {
 				this.form.removeControl(p.restrictedVariableOptions[i].formControlName);
+				delete this.validations.fields[p.restrictedVariableOptions[i].formControlName];
+			}
 
 			p.restrictedVariableOptions.splice(options.length);
 		}
