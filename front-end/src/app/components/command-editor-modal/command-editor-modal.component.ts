@@ -141,7 +141,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.editorComponent?.ngOnDestroy();
-		this.subscriptions.forEach(s => s.unsubscribe());
+		this.subscriptions.forEach(subscription => subscription.unsubscribe());
 	}
 
 	protected editorLoaded (editorComponent: CodeEditorComponent): void {

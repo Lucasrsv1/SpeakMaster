@@ -47,7 +47,9 @@ export class AmbiguitiesComponent implements OnDestroy {
 	public ambiguities: IAmbiguity[] = [];
 
 	private commandSent: boolean = false;
-	private subscription: Subscription;
+	private commandHistoryIndex: number = -1;
+	private commandHistory: string[] = [];
+	private subscriptions: Subscription[] = [];
 
 	constructor (
 		private readonly route: ActivatedRoute,
@@ -71,16 +73,22 @@ export class AmbiguitiesComponent implements OnDestroy {
 		});
 
 		const idModule = Number(this.route.snapshot.paramMap.get("idModule"));
-		this.subscription = this.ambiguityService.$moduleAmbiguousCommand(idModule).subscribe(ambiguousCommand => {
-			this.ambiguousCommand = ambiguousCommand;
+		this.subscriptions.push(
+			this.ambiguityService.$moduleAmbiguousCommand(idModule).subscribe(ambiguousCommand => {
+				this.ambiguousCommand = ambiguousCommand;
 
-			if (!ambiguousCommand || typeof ambiguousCommand.result === "boolean") {
-				this.ambiguities = [];
-			} else {
-				this.ambiguities = ambiguousCommand.result.options;
-				this.ambiguityService.clearNotification(ambiguousCommand.idModule);
-			}
-		});
+				if (!ambiguousCommand || typeof ambiguousCommand.result === "boolean") {
+					this.ambiguities = [];
+				} else {
+					this.ambiguities = ambiguousCommand.result.options;
+					this.ambiguityService.clearNotification(ambiguousCommand.idModule);
+				}
+			}),
+
+			this.commandsService.$lastUniqueCommands.subscribe(
+				commands => this.commandHistory = commands
+			)
+		);
 	}
 
 	public get placeholder (): string {
@@ -94,7 +102,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 	}
 
 	public ngOnDestroy (): void {
-		this.subscription.unsubscribe();
+		this.subscriptions.forEach(subscription => subscription.unsubscribe());
 	}
 
 	public toggleMic (): void {
@@ -104,6 +112,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 	public clearForm (): void {
 		this.form.reset();
 		this.commandInput?.nativeElement.focus();
+		this.commandHistoryIndex = -1;
 	}
 
 	public submitCommand (): void {
@@ -135,5 +144,18 @@ export class AmbiguitiesComponent implements OnDestroy {
 		);
 
 		this.toastr.info("Comando enviado.");
+	}
+
+	public previousInput (): void {
+		this.commandHistoryIndex = Math.min(this.commandHistoryIndex + 1, this.commandHistory.length - 1);
+		this.form.get("command")?.setValue(this.commandHistory[this.commandHistoryIndex]);
+	}
+
+	public nextInput (): void {
+		this.commandHistoryIndex = Math.max(this.commandHistoryIndex - 1, -1);
+		if (this.commandHistoryIndex === -1)
+			this.form.get("command")?.setValue("");
+		else
+			this.form.get("command")?.setValue(this.commandHistory[this.commandHistoryIndex]);
 	}
 }

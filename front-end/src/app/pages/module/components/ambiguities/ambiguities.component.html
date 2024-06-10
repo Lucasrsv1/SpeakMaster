@@ -8,8 +8,11 @@
 						id="command"
 						type="text"
 						class="form-control"
+						autocomplete="off"
 						formControlName="command"
 						[placeholder]="placeholder"
+						(keydown.arrowup)="previousInput()"
+						(keydown.arrowdown)="nextInput()"
 						#commandInput
 					>
 

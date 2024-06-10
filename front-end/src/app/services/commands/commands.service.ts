@@ -16,6 +16,7 @@ const MAX_HISTORY_LENGTH = 64;
 @Injectable({ providedIn: "root" })
 export class CommandsService implements OnDestroy {
 	public $lastCommands = new BehaviorSubject<IExecutedCommand[]>([]);
+	public $lastUniqueCommands = new BehaviorSubject<string[]>([]);
 
 	private idUser?: number;
 	private subscription: Subscription[] = [];
@@ -31,13 +32,16 @@ export class CommandsService implements OnDestroy {
 			this.authenticationService.$loggedUser.subscribe(user => {
 				if (!user) {
 					this.idUser = undefined;
-					return this.$lastCommands.next([]);
+					this.$lastCommands.next([]);
+					this.$lastUniqueCommands.next([]);
+					return;
 				}
 
 				this.idUser = user.idUser;
 				if (!this.localStorage.hasKey(LocalStorageKey.LAST_COMMANDS, user.idUser.toString())) {
 					this.localStorage.set(LocalStorageKey.LAST_COMMANDS, "[]", user.idUser.toString());
 					this.$lastCommands.next([]);
+					this.$lastUniqueCommands.next([]);
 					return;
 				}
 
@@ -48,6 +52,9 @@ export class CommandsService implements OnDestroy {
 				}
 
 				this.$lastCommands.next(commands);
+				this.$lastUniqueCommands.next(
+					this.localStorage.parse<string[]>(LocalStorageKey.LAST_UNIQUE_COMMANDS, [], user.idUser.toString())
+				);
 			}),
 
 			this.commandCenterService.$commandResult.subscribe(this.gotResultForCommand.bind(this))
@@ -56,6 +63,10 @@ export class CommandsService implements OnDestroy {
 
 	public get lastCommands (): IExecutedCommand[] {
 		return this.$lastCommands.value;
+	}
+
+	public get lastUniqueCommands (): string[] {
+		return this.$lastUniqueCommands.value;
 	}
 
 	public ngOnDestroy (): void {
@@ -68,7 +79,13 @@ export class CommandsService implements OnDestroy {
 		this.lastCommands.unshift(executedCommand);
 		this.setCommandTimeout(executedCommand);
 
-		this.updateLastCommands(this.lastCommands);
+		const lastUniqueCommand = this.lastUniqueCommands[0];
+		if (lastUniqueCommand !== executedCommand.value) {
+			this.lastUniqueCommands.unshift(executedCommand.value);
+			this.updateLastUniqueCommands();
+		}
+
+		this.updateLastCommands();
 	}
 
 	public gotResultForCommand (data: ICommandResult): void {
@@ -88,7 +105,7 @@ export class CommandsService implements OnDestroy {
 			this.ambiguityService.notifyAmbiguity(data);
 		}
 
-		this.updateLastCommands(this.lastCommands);
+		this.updateLastCommands();
 	}
 
 	private setCommandTimeout (command: IExecutedCommand): void {
@@ -96,19 +113,31 @@ export class CommandsService implements OnDestroy {
 			if (command.status === CommandExecutionStatus.PENDING) {
 				command.status = CommandExecutionStatus.ERROR;
 				command.description = "Tempo esgotado";
-				this.updateLastCommands(this.lastCommands);
+				this.updateLastCommands();
 			}
 		}, 5000);
 	}
 
-	private updateLastCommands (commands: IExecutedCommand[]): void {
+	private updateLastCommands (): void {
 		if (!this.idUser)
 			return;
 
-		this.$lastCommands.next(commands);
+		this.$lastCommands.next(this.lastCommands);
 		this.localStorage.set(
 			LocalStorageKey.LAST_COMMANDS,
-			JSON.stringify(commands.slice(0, MAX_HISTORY_LENGTH)),
+			JSON.stringify(this.lastCommands.slice(0, MAX_HISTORY_LENGTH)),
+			this.idUser.toString()
+		);
+	}
+
+	private updateLastUniqueCommands (): void {
+		if (!this.idUser)
+			return;
+
+		this.$lastUniqueCommands.next(this.lastUniqueCommands);
+		this.localStorage.set(
+			LocalStorageKey.LAST_UNIQUE_COMMANDS,
+			JSON.stringify(this.lastUniqueCommands.slice(0, MAX_HISTORY_LENGTH)),
 			this.idUser.toString()
 		);
 	}
