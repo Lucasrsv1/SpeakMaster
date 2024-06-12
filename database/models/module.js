@@ -12,7 +12,7 @@ class Module extends Model {
 }
 
 /**
- * Cria o modelo da tabela itens
+ * Cria o modelo da tabela
  * @param {import("sequelize/types").Sequelize} sequelize
  */
 function initModule (sequelize) {
