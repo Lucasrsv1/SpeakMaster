@@ -116,6 +116,44 @@ export class UserModulesService implements OnDestroy {
 		});
 	}
 
+	public savePreferences (userModule: IUserModule, blockUI?: NgBlockUI): void {
+		const data = {
+			idUserModule: userModule.idUserModule,
+			preferences: userModule.preferences
+		};
+
+		this.http.patch<{ message: string }>(
+			`${environment.API_URL}/v1/users/modules/preferences`,
+			data
+		).subscribe({
+			next: _ => {
+				blockUI?.stop();
+
+				// Atualiza localmente
+				const userModules = this.userModules;
+				if (userModules) {
+					const module = userModules.find(um => um.idUserModule === data.idUserModule);
+					if (module)
+						module.preferences = data.preferences;
+
+					this.updateUserModules(userModules);
+				}
+
+				this.toastr.success("As preferências do módulo foram atualizadas.", "Sucesso!");
+			},
+
+			error: (error: HttpErrorResponse) => {
+				this.loadFromStorage();
+				blockUI?.stop();
+				this.alertsService.httpErrorAlert(
+					"Falha ao Salvar Preferências",
+					"Não foi possível salvar as preferências do módulo do usuário, tente novamente.",
+					error
+				);
+			}
+		});
+	}
+
 	public updatePrefix (userModuleCommands: IUserModuleCommands, blockUI?: NgBlockUI): Observable<IUserModuleCommands> {
 		const data: Partial<IUserModuleCommands> = {
 			idUserModule: userModuleCommands.idUserModule,

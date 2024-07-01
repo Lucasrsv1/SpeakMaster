@@ -37,7 +37,7 @@
 
 		<div class="card-body p-0" id="form" [collapse]="isModuleCardCollapsed" [isAnimated]="true">
 			<div class="p-3">
-				<tabset [justified]="true">
+				<tabset [justified]="true" #managementTabs>
 					<tab heading="Comandos Reconhecidos">
 						<app-module-commands></app-module-commands>
 					</tab>

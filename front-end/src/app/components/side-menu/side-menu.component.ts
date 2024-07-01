@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatIcon } from "@angular/material/icon";
 import { AsyncPipe, NgFor, NgIf } from "@angular/common";
-import { RouterLink, RouterLinkActive } from "@angular/router";
+import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 
 import { NgScrollbarModule } from "ngx-scrollbar";
 import { TooltipModule } from "ngx-bootstrap/tooltip";
@@ -41,6 +41,7 @@ export class SideMenuComponent {
 	public version = environment.version;
 
 	constructor (
+		private readonly router: Router,
 		private readonly ambiguityService: AmbiguityService,
 		private readonly commandCenterService: CommandCenterService,
 		private readonly userModulesService: UserModulesService
@@ -69,6 +70,6 @@ export class SideMenuComponent {
 	public goToModuleSettings (event: MouseEvent, module: IUserModule): void {
 		event.preventDefault();
 		event.stopPropagation();
-		console.log("Go to module settings clicked", module.name);
+		this.router.navigate(["/module", module.idModule], { fragment: "settings" });
 	}
 }

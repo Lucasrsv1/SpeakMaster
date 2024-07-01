@@ -18,6 +18,11 @@ class UserModules {
 				body("idUserModule").isInt({ gt: 0 }).withMessage("Invalid user module."),
 				body("isActive").isBoolean({ strict: true }).withMessage("Invalid value for isActive.")
 			],
+			savePreferences: [
+				loginService.ensureAuthorized,
+				body("idUserModule").isInt({ gt: 0 }).withMessage("Invalid user module."),
+				body("preferences").isObject({ strict: true }).withMessage("Invalid value for isActive.")
+			],
 			updatePrefix: [
 				loginService.ensureAuthorized,
 				body("idUserModule").isInt({ gt: 0 }).withMessage("Invalid user module."),
@@ -45,9 +50,10 @@ class UserModules {
 		try {
 			const userModules = await models.UserModule.findAll({
 				attributes: [
-					"idUserModule", "idUser", "idModule", "isActive",
+					"idUserModule", "idUser", "idModule", "isActive", "preferences",
 					[models.sequelize.col("module.name"), "name"],
-					[models.sequelize.col("module.features_definition"), "featuresDefinition"]
+					[models.sequelize.col("module.features_definition"), "featuresDefinition"],
+					[models.sequelize.col("module.preferences_definition"), "preferencesDefinition"]
 				],
 				include: [{
 					association: "module",
@@ -79,6 +85,32 @@ class UserModules {
 
 		try {
 			const [ affectedCount ] = await models.UserModule.update({ isActive: req.body.isActive }, {
+				where: {
+					idUserModule: req.body.idUserModule,
+					idUser: res.locals.user.idUser
+				}
+			});
+
+			if (affectedCount > 0)
+				res.status(200).json({ message: "User's module updated." });
+			else
+				res.status(404).json({ message: "User's module not found." });
+		} catch (error) {
+			console.error(error);
+			res.status(500).json({ message: "Error updating the user's module.", error });
+		}
+	}
+
+	/**
+	 * Rota para salvar alterações nas preferências de um módulo do usuário.
+	 * @param {import("express").Request} req
+	 * @param {import("express").Response} res
+	 */
+	async savePreferences (req, res) {
+		if (isRequestInvalid(req, res)) return;
+
+		try {
+			const [ affectedCount ] = await models.UserModule.update({ preferences: req.body.preferences }, {
 				where: {
 					idUserModule: req.body.idUserModule,
 					idUser: res.locals.user.idUser

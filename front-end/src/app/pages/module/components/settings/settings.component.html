@@ -1,1 +1,65 @@
-<p>settings works!</p>
+<div class="p-3">
+	<form [formGroup]="form">
+		<div class="mt-3 mb-4" *ngFor="let group of preferenceGroups">
+			<h2 class="mb-3">{{ group | translation }}</h2>
+			<div class="row mt-2" *ngFor="let row of group.preferenceRows">
+				<div
+					class="col-12"
+					[class.col-md-6]="row.length >= 2"
+					[class.col-lg-4]="row.length >= 3"
+					[class.col-xl-3]="row.length >= 4"
+					*ngFor="let preference of row"
+				>
+					@if (preference) {
+						<label class="form-label" [for]="preference.identifier">
+							{{ preference | translation }}:
+						</label>
+
+						<app-visual-validator [config]="validations" [field]="preference.identifier">
+							@switch (preference.type) {
+								@case (PreferenceType.FLOAT) {
+									<input
+										type="number"
+										class="form-control"
+										step="0.01"
+										[id]="preference.identifier"
+										[formControlName]="preference.identifier"
+										[placeholder]="preference | translation:'description'"
+										[max]="(preference | as:NumberPreference).max"
+										[min]="(preference | as:NumberPreference).min"
+									/>
+								}
+								@case (PreferenceType.INTEGER) {
+									<input
+										type="number"
+										class="form-control"
+										step="1"
+										[id]="preference.identifier"
+										[formControlName]="preference.identifier"
+										[placeholder]="preference | translation:'description'"
+										[max]="(preference | as:NumberPreference).max"
+										[min]="(preference | as:NumberPreference).min"
+									/>
+								}
+							}
+						</app-visual-validator>
+					}
+				</div>
+			</div>
+		</div>
+
+		<div class="mt-4 d-flex justify-content-between">
+			<div class="btn-group">
+				<button type="button" class="btn btn-dark" (click)="loadSavedPreferences()">
+					Valores Salvos
+				</button>
+				<button type="button" class="btn btn-secondary" (click)="loadCurrentValues()">
+					Valores Atuais
+				</button>
+			</div>
+			<button type="button" class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
+				Salvar Alterações
+			</button>
+		</div>
+	</form>
+</div>

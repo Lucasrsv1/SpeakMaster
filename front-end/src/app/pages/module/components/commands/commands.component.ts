@@ -77,6 +77,7 @@ export class CommandsComponent implements OnDestroy {
 	}
 
 	public get features (): Feature[] {
+		// TODO: trocar os getters por algo mais performático
 		return this.userModule?.featuresDefinition || [];
 	}
 

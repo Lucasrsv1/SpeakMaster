@@ -120,6 +120,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 			return;
 
 		this.commandsService.sendCommand(this.form.get("command")?.value);
+		this.commandHistoryIndex = -1;
 		this.commandSent = true;
 		setTimeout(() => this.commandSent = false, 2000);
 		this.form.reset();
