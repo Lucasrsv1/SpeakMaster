@@ -18,6 +18,7 @@ import { AmbiguityService } from "../../../../services/ambiguity/ambiguity.servi
 import { CommandCenterService } from "../../../../services/command-center/command-center.service";
 import { CommandParametersService } from "../../../../services/command-parameters/command-parameters.service";
 import { CommandsService } from "../../../../services/commands/commands.service";
+import { SpeechRecognitionService } from "../../../../services/speech-recognition/speech-recognition.service";
 
 @Component({
 	selector: "app-module-ambiguities",
@@ -41,8 +42,6 @@ export class AmbiguitiesComponent implements OnDestroy {
 	public commandToEdit = input<{ command: string }>();
 
 	public form: FormGroup;
-	public isMicOn: boolean = false;
-
 	public ambiguousCommand: ICommandResult | null = null;
 	public ambiguities: IAmbiguity[] = [];
 
@@ -52,6 +51,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 	private subscriptions: Subscription[] = [];
 
 	constructor (
+		public readonly speechRecognitionService: SpeechRecognitionService,
 		private readonly route: ActivatedRoute,
 		private readonly formBuilder: FormBuilder,
 		private readonly toastr: ToastrService,
@@ -95,7 +95,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 		if (this.commandSent)
 			return "Comando enviado!";
 
-		if (this.isMicOn)
+		if (this.speechRecognitionService.isMicOn)
 			return "Fale um comando ou o digite aqui para executá-lo";
 
 		return "Ative o microfone para falar um comando ou o digite aqui para executá-lo";
@@ -103,10 +103,6 @@ export class AmbiguitiesComponent implements OnDestroy {
 
 	public ngOnDestroy (): void {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
-	}
-
-	public toggleMic (): void {
-		this.isMicOn = !this.isMicOn;
 	}
 
 	public clearForm (): void {

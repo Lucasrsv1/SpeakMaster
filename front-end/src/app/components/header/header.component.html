@@ -54,12 +54,12 @@
 							type="button"
 							title="Idioma reconhecido pelo microfone"
 							class="btn p-1 d-flex align-items-center"
-							[class.btn-secondary]="!isMicOn"
-							[class.btn-danger]="isMicOn"
-							(click)="toggleMic()"
+							[class.btn-secondary]="!speechRecognitionService.isMicOn"
+							[class.btn-danger]="speechRecognitionService.isMicOn"
+							(click)="speechRecognitionService.toggleMic()"
 						>
-							<mat-icon class="ms-1" [fontIcon]="isMicOn ? 'mic_on' : 'mic_off'"></mat-icon>
-							<span class="ms-2">{{ currentLanguage }}</span>
+							<mat-icon class="ms-1" [fontIcon]="speechRecognitionService.isMicOn ? 'mic_on' : 'mic_off'"></mat-icon>
+							<span class="ms-2">{{ speechRecognitionService.currentLanguage }}</span>
 						</button>
 
 						<button
@@ -67,8 +67,8 @@
 							type="button"
 							id="button-split"
 							class="btn dropdown-toggle dropdown-toggle-split d-flex py-2 px-1"
-							[class.btn-secondary]="!isMicOn"
-							[class.btn-danger]="isMicOn"
+							[class.btn-secondary]="!speechRecognitionService.isMicOn"
+							[class.btn-danger]="speechRecognitionService.isMicOn"
 							aria-controls="dropdown-split"
 						>
 							<mat-icon fontIcon="expand_more"></mat-icon>

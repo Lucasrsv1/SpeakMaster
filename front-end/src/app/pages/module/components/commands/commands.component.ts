@@ -7,12 +7,12 @@ import { debounceTime, Subject, Subscription } from "rxjs";
 
 import { Command } from "speakmaster-module-builder/default-commands-builder";
 import { Feature } from "speakmaster-module-builder/features-builder";
+import { LanguageCode } from "speakmaster-module-builder";
 
 import { ImportCommandsModalComponent } from "../../../../components/import-commands-modal/import-commands-modal.component";
 import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../../../../components/commands-table/commands-table.component";
 
 import { IUserModule } from "../../../../models/user-module";
-import { LanguageCode } from "../../../../models/languages";
 import { IUserModuleCommands, UserModuleCommand } from "../../../../models/user-module-commands";
 
 import { CommandEditorModalComponent } from "../../../../components/command-editor-modal/command-editor-modal.component";

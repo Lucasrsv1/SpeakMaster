@@ -2,14 +2,14 @@ import { Injectable, OnDestroy } from "@angular/core";
 
 import { ToastrService } from "ngx-toastr";
 
-import { debounceTime, skip, Subscription } from "rxjs";
+import { BehaviorSubject, debounceTime, skip, Subscription } from "rxjs";
 
 import { Automata } from "speakmaster-crl";
 import { Command } from "speakmaster-module-builder/default-commands-builder";
+import { LanguageCode } from "speakmaster-module-builder";
 
 import { ILanguageCommands } from "../../models/language-command";
 import { IUserModule } from "../../models/user-module";
-import { LanguageCode } from "../../models/languages";
 import { CommandExecutionStatus, IExecutedCommand } from "../../models/executed-command";
 
 import { CommandCenterService } from "../command-center/command-center.service";
@@ -19,6 +19,8 @@ import { UserModulesService } from "../user-modules/user-modules.service";
 
 @Injectable({ providedIn: "root" })
 export class CommandMatchingService implements OnDestroy {
+	public $commandToChangeLanguage = new BehaviorSubject<LanguageCode | null>(null);
+
 	private languageCommands = new Map<Automata, LanguageCode>();
 	private moduleCommands = new Map<Automata, { idModule: number, command: Command}>();
 	private subscriptions: Subscription[] = [];
@@ -80,8 +82,8 @@ export class CommandMatchingService implements OnDestroy {
 			const result = automata.match(command);
 			if (!result.match) continue;
 
-			// TODO: altera o idioma do microfone para languageCode
-			console.log("Altera o idioma do microfone para:", languageCode);
+			// Altera o idioma do microfone para languageCode
+			this.$commandToChangeLanguage.next(languageCode);
 
 			return {
 				sentAt: Date.now(),
@@ -108,7 +110,7 @@ export class CommandMatchingService implements OnDestroy {
 
 		for (const languageCode of languageCommands.languagesToListen) {
 			for (const languageCommand of languageCommands[languageCode] || []) {
-				if (!languageCommand.isActive)
+				if (!languageCommand.isActive || !languageCommands.languagesToListen.includes(languageCommand.targetLanguageCode))
 					continue;
 
 				const automata = new Automata(languageCommand.command.trim());

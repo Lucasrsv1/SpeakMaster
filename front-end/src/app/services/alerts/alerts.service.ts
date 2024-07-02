@@ -5,8 +5,6 @@ import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 
 @Injectable({ providedIn: "root" })
 export class AlertsService {
-	constructor () { }
-
 	public show (title: string, html: string, icon: SweetAlertIcon = "info"): void {
 		Swal.fire({
 			icon,

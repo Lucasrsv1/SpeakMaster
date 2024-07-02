@@ -10,13 +10,15 @@ import { NgSelectConfig, NgSelectModule } from "@ng-select/ng-select";
 
 import { debounceTime, Subject, Subscription } from "rxjs";
 
+import { LanguageCode } from "speakmaster-module-builder";
+
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
 import { CommandsTableComponent, IDataTableRow } from "../../components/commands-table/commands-table.component";
 import { IValidations, VisualValidatorComponent } from "../../components/visual-validator/visual-validator.component";
 
 import { IUser } from "../../models/user";
 import { generateLanguageCommandsForUser, ILanguageCommand, ILanguageCommands } from "../../models/language-command";
-import { getLanguageNameByCode, ILanguage, LanguageCode, languages } from "../../models/languages";
+import { getLanguageNameByCode, ILanguage, interfaceLanguages, languages } from "../../models/languages";
 
 import { AlertsService } from "../../services/alerts/alerts.service";
 import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
@@ -58,6 +60,7 @@ export class ProfileComponent implements OnDestroy {
 	public isCardCollapsed: boolean = false;
 
 	public languages: ILanguage[] = languages;
+	public interfaceLanguages: ILanguage[] = languages.filter(language => interfaceLanguages.includes(language.code));
 	public languageCommands: ILanguageCommands | null = null;
 	public currentCommands: IDataTableRow<ILanguageCommand>[] = [];
 
@@ -174,7 +177,11 @@ export class ProfileComponent implements OnDestroy {
 			return;
 		}
 
-		const references = this.languageCommands[selectedLanguage] || [];
+		const languagesToListen = this.languageCommandsService.languageCommands?.languagesToListen || [];
+		const references = (this.languageCommands[selectedLanguage] || []).filter(
+			r => languagesToListen.includes(r.targetLanguageCode)
+		);
+
 		this.currentCommands = references.map(reference => ({
 			reference,
 			command: reference.command,

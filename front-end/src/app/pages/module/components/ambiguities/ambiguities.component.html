@@ -30,15 +30,15 @@
 		<div class="ms-3">
 			<button
 				type="button"
-				[title]="isMicOn ? 'Microfone Ativado' : 'Microfone Desativado'"
+				[title]="speechRecognitionService.isMicOn ? 'Microfone Ativado' : 'Microfone Desativado'"
 				class="btn p-1 d-flex align-items-center"
-				[class.btn-secondary]="!isMicOn"
-				[class.btn-danger]="isMicOn"
-				(click)="toggleMic()"
+				[class.btn-secondary]="!speechRecognitionService.isMicOn"
+				[class.btn-danger]="speechRecognitionService.isMicOn"
+				(click)="speechRecognitionService.toggleMic()"
 			>
-				<mat-icon class="ms-1" [fontIcon]="isMicOn ? 'mic_on' : 'mic_off'"></mat-icon>
+				<mat-icon class="ms-1" [fontIcon]="speechRecognitionService.isMicOn ? 'mic_on' : 'mic_off'"></mat-icon>
 				<span class="mx-2 text-truncate">
-					{{ isMicOn ? 'Desativar Microfone' : 'Ativar Microfone' }}
+					{{ speechRecognitionService.isMicOn ? 'Desativar Microfone' : 'Ativar Microfone' }}
 				</span>
 			</button>
 		</div>

@@ -10,11 +10,12 @@ import { Subscription } from "rxjs";
 
 import { LedComponent } from "../led/led.component";
 
-import { getDefaultLanguage, ILanguage, languages } from "../../models/languages";
+import { ILanguage, languages } from "../../models/languages";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
 import { CommandCenterService } from "../../services/command-center/command-center.service";
 import { LanguageCommandsService } from "../../services/language-commands/language-commands.service";
+import { SpeechRecognitionService } from "../../services/speech-recognition/speech-recognition.service";
 import { TitleService } from "../../services/title/title.service";
 
 @Component({
@@ -41,8 +42,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 	public collapseChange = new EventEmitter<boolean>();
 
 	public username: string = "";
-	public currentLanguage: string = "";
-	public isMicOn: boolean = false;
 	public isLoggedIn: boolean = false;
 
 	public pageTitle = "";
@@ -53,40 +52,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
 	constructor (
 		public readonly commandCenterService: CommandCenterService,
-		private readonly titleService: TitleService,
+		public readonly speechRecognitionService: SpeechRecognitionService,
 		private readonly authenticationService: AuthenticationService,
-		private readonly languageCommandsService: LanguageCommandsService
+		private readonly languageCommandsService: LanguageCommandsService,
+		private readonly titleService: TitleService
 	) {
 		this.subscriptions.push(
 			this.authenticationService.$loggedUser.subscribe(user => {
 				this.isLoggedIn = this.authenticationService.isLoggedIn();
 
-				if (this.isLoggedIn && user) {
+				if (this.isLoggedIn && user)
 					this.username = this.getShortName(user.name);
-					this.currentLanguage = user.interfaceLanguage;
-					this.isMicOn = user.micOnByDefault;
-				} else {
+				else
 					this.username = "";
-					this.currentLanguage = getDefaultLanguage();
-					this.isMicOn = false;
-				}
-			})
-		);
+			}),
 
-		this.subscriptions.push(
 			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
 				const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
 				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
+			}),
 
-				if (this.spokenLanguages.length && !this.spokenLanguages.find(l => l.code === this.currentLanguage))
-					this.currentLanguage = this.spokenLanguages[0].code;
-			})
-		);
-
-		this.subscriptions.push(
-			this.titleService.$title.subscribe(title => {
-				this.pageTitle = title;
-			})
+			this.titleService.$title.subscribe(title => this.pageTitle = title)
 		);
 	}
 
@@ -107,13 +93,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 		this.authenticationService.signOut();
 	}
 
-	public toggleMic (): void {
-		this.isMicOn = !this.isMicOn;
-	}
-
 	public setLanguage (selected: ILanguage): void {
-		console.log("Set default language to:", selected);
-		this.currentLanguage = selected.code;
+		this.speechRecognitionService.currentLanguage = selected.code;
+		if (this.speechRecognitionService.isMicOn)
+			this.speechRecognitionService.listenLanguage();
 	}
 
 	private getShortName (name: string): string {

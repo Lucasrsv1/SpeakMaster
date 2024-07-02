@@ -1,4 +1,4 @@
-import { LanguageCode } from "./languages";
+import { LanguageCode } from "speakmaster-module-builder";
 
 import { LanguageCommandsService } from "../services/language-commands/language-commands.service";
 

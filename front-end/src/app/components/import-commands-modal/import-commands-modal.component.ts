@@ -8,12 +8,13 @@ import { BlockUI, NgBlockUI } from "ng-block-ui";
 
 import { Command } from "speakmaster-module-builder/default-commands-builder";
 import { Feature } from "speakmaster-module-builder/features-builder";
+import { LanguageCode } from "speakmaster-module-builder";
 
 import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../commands-table/commands-table.component";
 
 import { IModuleDefaultCommands } from "../../models/module-default-commands";
 import { IUserModule } from "../../models/user-module";
-import { ILanguage, LanguageCode, languages } from "../../models/languages";
+import { ILanguage, languages } from "../../models/languages";
 
 import { AlertsService } from "../../services/alerts/alerts.service";
 import { FeaturesService } from "../../services/features/features.service";

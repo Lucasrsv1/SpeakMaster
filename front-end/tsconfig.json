@@ -25,6 +25,7 @@
 		]
 	},
 	"angularCompilerOptions": {
+		"types": ["dom-speech-recognition"],
 		"enableI18nLegacyMessageIdFormat": false,
 		"strictInjectionParameters": true,
 		"strictInputAccessModifiers": true,

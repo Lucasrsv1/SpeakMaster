@@ -13,11 +13,12 @@ import { editor } from "monaco-editor";
 import { debounceTime, Subject, Subscription } from "rxjs";
 
 import { Automata } from "speakmaster-crl";
+import { LanguageCode } from "speakmaster-module-builder";
 import { Command, CommandParameter, CommandParameterTypes } from "speakmaster-module-builder/default-commands-builder";
 import { Feature, Parameter } from "speakmaster-module-builder/features-builder";
 
 import { IDataTableRow } from "../commands-table/commands-table.component";
-import { LanguageCode, languages } from "../../models/languages";
+import { languages } from "../../models/languages";
 
 import { FeaturesService } from "../../services/features/features.service";
 import { MonacoCrlService } from "../../services/monaco-crl/monaco-crl.service";

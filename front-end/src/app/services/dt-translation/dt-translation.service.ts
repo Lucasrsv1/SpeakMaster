@@ -2,8 +2,6 @@ import { Injectable } from "@angular/core";
 
 @Injectable({ providedIn: "root" })
 export class DtTranslationService {
-	constructor () { }
-
 	public getDataTablesPortugueseTranslation (emptyLabel: string = "Nenhum registro"): DataTables.LanguageSettings {
 		return {
 			emptyTable: emptyLabel,

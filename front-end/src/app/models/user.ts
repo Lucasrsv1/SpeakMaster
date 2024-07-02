@@ -1,4 +1,4 @@
-import { LanguageCode } from "./languages";
+import { LanguageCode } from "speakmaster-module-builder";
 
 export interface IUser {
 	idUser: number;

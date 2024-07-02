@@ -6,9 +6,10 @@ import { BsModalRef, BsModalService, ModalOptions } from "ngx-bootstrap/modal";
 
 import { Subscription } from "rxjs";
 
+import { LanguageCode } from "speakmaster-module-builder";
+
 import { IUserModule } from "../../models/user-module";
 import { IUserModuleCommands } from "../../models/user-module-commands";
-import { LanguageCode } from "../../models/languages";
 
 import { CommandEditorModalComponent } from "../../components/command-editor-modal/command-editor-modal.component";
 import { CommandsTableComponent, ICommandsTableSettings, IDataTableRow } from "../../components/commands-table/commands-table.component";

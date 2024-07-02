@@ -97,7 +97,7 @@
 			"warn",
 			"beside"
 		],
-		"no-useless-constructor": "off",
+		"no-useless-constructor": "warn",
 		"no-dupe-class-members": "warn",
 		"no-duplicate-imports": "warn",
 		"dot-notation": "warn",

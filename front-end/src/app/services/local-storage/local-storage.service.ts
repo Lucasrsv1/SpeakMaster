@@ -13,8 +13,6 @@ export enum LocalStorageKey {
 
 @Injectable({ providedIn: "root" })
 export class LocalStorageService {
-	constructor () { }
-
 	public hasKey (key: LocalStorageKey, suffix: string = ""): boolean {
 		return Boolean(this.get(key, null, suffix));
 	}

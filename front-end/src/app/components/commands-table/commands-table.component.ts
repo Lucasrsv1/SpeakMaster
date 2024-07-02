@@ -14,10 +14,12 @@ import { debounceTime, Subject, Subscription } from "rxjs";
 
 import deepEqual from "deep-equal";
 
+import { LanguageCode } from "speakmaster-module-builder";
+
 import { CheckboxComponent } from "../../components/checkbox/checkbox.component";
 
 import { IUser } from "../../models/user";
-import { ILanguage, LanguageCode, languages } from "../../models/languages";
+import { ILanguage, languages } from "../../models/languages";
 
 import { AuthenticationService } from "../../services/authentication/authentication.service";
 import { DtTranslationService } from "../../services/dt-translation/dt-translation.service";

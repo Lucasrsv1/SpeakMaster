@@ -2,6 +2,8 @@ import { Injectable, OnDestroy } from "@angular/core";
 
 import { BehaviorSubject, Subscription } from "rxjs";
 
+import { LanguageCode } from "speakmaster-module-builder";
+
 import { ICommandResult } from "../../models/command-result";
 import { CommandExecutionStatus, IExecutedCommand } from "../../models/executed-command";
 
@@ -11,7 +13,7 @@ import { CommandCenterService } from "../command-center/command-center.service";
 import { CommandMatchingService } from "../command-matching/command-matching.service";
 import { LocalStorageKey, LocalStorageService } from "../local-storage/local-storage.service";
 
-const MAX_HISTORY_LENGTH = 64;
+const MAX_HISTORY_LENGTH = 512;
 
 @Injectable({ providedIn: "root" })
 export class CommandsService implements OnDestroy {
@@ -67,6 +69,10 @@ export class CommandsService implements OnDestroy {
 
 	public get lastUniqueCommands (): string[] {
 		return this.$lastUniqueCommands.value;
+	}
+
+	public get $commandToChangeLanguage (): BehaviorSubject<LanguageCode | null> {
+		return this.commandMatchingService.$commandToChangeLanguage;
 	}
 
 	public ngOnDestroy (): void {
