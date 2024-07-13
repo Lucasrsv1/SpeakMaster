@@ -1,5 +1,11 @@
 <div class="p-3">
-	<form [formGroup]="form">
+	<div class="alert alert-info mb-0" role="alert" *ngIf="!preferenceGroups.length">
+		<div class="text-justify">
+			Este módulo não possui nenhuma preferência para ser configurada.
+		</div>
+	</div>
+
+	<form [formGroup]="form" *ngIf="preferenceGroups.length">
 		<div class="mt-3 mb-4" *ngFor="let group of preferenceGroups">
 			<h2 class="mb-3">{{ group | translation }}</h2>
 			<div class="row mt-2" *ngFor="let row of group.preferenceRows">
@@ -11,38 +17,154 @@
 					*ngFor="let preference of row"
 				>
 					@if (preference) {
-						<label class="form-label" [for]="preference.identifier">
-							{{ preference | translation }}:
-						</label>
+						@if (preference.type === PreferenceType.BOOLEAN) {
+							<div class="form-check form-switch">
+								<input
+									class="form-check-input"
+									type="checkbox"
+									role="switch"
+									[id]="preference.identifier"
+									[formControlName]="preference.identifier"
+								>
+								<label class="form-check-label" [for]="preference.identifier">
+									{{ (preference | translation) || preference.identifier }}
+								</label>
+							</div>
+						} @else if (preference.type === PreferenceType.ACTION_BUTTON) {
+							<div
+								class="d-flex"
+								[class.flex-column]="![ActionButtonPosition.LEFT, ActionButtonPosition.RIGHT].includes((preference | as:ActionButtonPreference).position)"
+								[class.align-items-start]="[ActionButtonPosition.TOP_LEFT, ActionButtonPosition.BOTTOM_LEFT].includes((preference | as:ActionButtonPreference).position)"
+								[class.align-items-center]="[ActionButtonPosition.TOP_CENTER, ActionButtonPosition.BOTTOM_CENTER, ActionButtonPosition.LEFT, ActionButtonPosition.RIGHT].includes((preference | as:ActionButtonPreference).position)"
+								[class.align-items-end]="[ActionButtonPosition.TOP_RIGHT, ActionButtonPosition.BOTTOM_RIGHT].includes((preference | as:ActionButtonPreference).position)"
+							>
+								@if (
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.BOTTOM_CENTER ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.BOTTOM_LEFT ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.BOTTOM_RIGHT ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.RIGHT
+								) {
+									<label
+										[class.me-3]="(preference | as:ActionButtonPreference).position === ActionButtonPosition.RIGHT"
+										[for]="preference.identifier"
+									>
+										{{ (preference | translation) || preference.identifier }}
+									</label>
+								}
 
-						<app-visual-validator [config]="validations" [field]="preference.identifier">
-							@switch (preference.type) {
-								@case (PreferenceType.FLOAT) {
-									<input
-										type="number"
-										class="form-control"
-										step="0.01"
-										[id]="preference.identifier"
-										[formControlName]="preference.identifier"
-										[placeholder]="preference | translation:'description'"
-										[max]="(preference | as:NumberPreference).max"
-										[min]="(preference | as:NumberPreference).min"
-									/>
+								<button
+									type="button"
+									class="btn d-flex"
+									[class]="(preference | as:ActionButtonPreference).color"
+									[id]="preference.identifier"
+									(click)="actionButtonClicked(preference)"
+								>
+									@if ((preference | as:ActionButtonPreference).buttonIcon) {
+										<mat-icon class="me-2" [fontIcon]="(preference | as:ActionButtonPreference).buttonIcon!"></mat-icon>
+									}
+
+									{{ (preference | as:ActionButtonPreference).buttonText }}
+								</button>
+
+								@if (
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.TOP_CENTER ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.TOP_LEFT ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.TOP_RIGHT ||
+									(preference | as:ActionButtonPreference).position === ActionButtonPosition.LEFT
+								) {
+									<label
+										[class.ms-3]="(preference | as:ActionButtonPreference).position === ActionButtonPosition.LEFT"
+										[for]="preference.identifier"
+									>
+										{{ (preference | translation) || preference.identifier }}
+									</label>
 								}
-								@case (PreferenceType.INTEGER) {
-									<input
-										type="number"
-										class="form-control"
-										step="1"
-										[id]="preference.identifier"
-										[formControlName]="preference.identifier"
-										[placeholder]="preference | translation:'description'"
-										[max]="(preference | as:NumberPreference).max"
-										[min]="(preference | as:NumberPreference).min"
-									/>
+							</div>
+						} @else {
+							<label class="form-label" [for]="preference.identifier">
+								{{ (preference | translation) || preference.identifier }}
+							</label>
+
+							<app-visual-validator [config]="validations" [field]="preference.identifier">
+								@switch (preference.type) {
+									@case (PreferenceType.FLOAT) {
+										<input
+											type="number"
+											class="form-control"
+											step="0.01"
+											[id]="preference.identifier"
+											[formControlName]="preference.identifier"
+											[placeholder]="preference | translation:'description'"
+											[max]="(preference | as:NumberPreference).max"
+											[min]="(preference | as:NumberPreference).min"
+										/>
+									}
+									@case (PreferenceType.INTEGER) {
+										<input
+											type="number"
+											class="form-control"
+											step="1"
+											[id]="preference.identifier"
+											[formControlName]="preference.identifier"
+											[placeholder]="preference | translation:'description'"
+											[max]="(preference | as:NumberPreference).max"
+											[min]="(preference | as:NumberPreference).min"
+										/>
+									}
+									@case (PreferenceType.SINGLE_SELECT) {
+										<ng-select
+											[items]="translatedPreferenceOptions[preference.identifier]"
+											[labelForId]="preference.identifier"
+											[formControlName]="preference.identifier"
+										></ng-select>
+									}
+									@case (PreferenceType.MULTI_SELECT) {
+										<ng-select
+											[items]="translatedPreferenceOptions[preference.identifier]"
+											[multiple]="true"
+											[closeOnSelect]="false"
+											[labelForId]="preference.identifier"
+											[formControlName]="preference.identifier"
+										></ng-select>
+									}
+									@case (PreferenceType.SORTED_LIST) {
+										<ng-template #itemTemplate let-item="item" let-index="index">
+											<div class="d-flex align-items-center fs-5">
+												<mat-icon fontIcon="drag_handle" class="rotate-90"></mat-icon>
+												<div class="ms-3 me-4">#{{index + 1}}</div>
+												<div>
+													<div>{{item.value.label}}</div>
+													<div *ngIf="item.value.description" class="fs-6">
+														{{item.value.description}}
+													</div>
+												</div>
+											</div>
+										</ng-template>
+										<bs-sortable
+											[id]="preference.identifier"
+											[formControlName]="preference.identifier"
+											[itemTemplate]="itemTemplate"
+											itemClass="sortable-item list-group-item"
+											itemActiveClass="sortable-item-active"
+											placeholderItem="Drag here"
+											placeholderClass="placeholderStyle text-center"
+											wrapperClass="sortable-wrapper list-group"
+										></bs-sortable>
+									}
+									@case (PreferenceType.STRING) {
+										<input
+											type="text"
+											class="form-control"
+											[id]="preference.identifier"
+											[formControlName]="preference.identifier"
+											[placeholder]="preference | translation:'description'"
+											[maxlength]="(preference | as:StringPreference).maxLength"
+											[minlength]="(preference | as:StringPreference).minLength"
+										/>
+									}
 								}
-							}
-						</app-visual-validator>
+							</app-visual-validator>
+						}
 					}
 				</div>
 			</div>

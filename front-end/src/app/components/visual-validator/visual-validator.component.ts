@@ -29,9 +29,11 @@ export class VisualValidatorComponent implements AfterContentInit {
 	@Input()
 	public fields?: string[];
 
-	private inputs: HTMLElement[] = [];
+	private inputs: HTMLElement[];
 
-	constructor (private readonly elementRef: ElementRef) { }
+	constructor (private readonly elementRef: ElementRef) {
+		this.inputs = [];
+	}
 
 	public get targetFields (): string[] {
 		return this.fields || (this.field && [this.field]) || [];
@@ -42,10 +44,15 @@ export class VisualValidatorComponent implements AfterContentInit {
 	}
 
 	public ngAfterContentInit () {
-		this.inputs = [
-			this.elementRef.nativeElement.childNodes[0],
-			...this.elementRef.nativeElement.querySelectorAll("input, .NgxEditor")
-		];
+		const firstInput = this.elementRef.nativeElement.childNodes[0];
+		if (firstInput && firstInput.tagName)
+			this.inputs.push(firstInput);
+
+		const monacoInputs = this.elementRef.nativeElement.querySelectorAll("input, .NgxEditor");
+		for (const monacoInput of monacoInputs) {
+			if (monacoInput && monacoInput.tagName)
+				this.inputs.push(...monacoInputs);
+		}
 
 		for (const input of this.inputs) {
 			if (!input.classList.contains("form-control"))
