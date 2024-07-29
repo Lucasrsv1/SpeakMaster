@@ -74,7 +74,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 
 		const idModule = Number(this.route.snapshot.paramMap.get("idModule"));
 		this.subscriptions.push(
-			this.ambiguityService.$moduleAmbiguousCommand(idModule).subscribe(ambiguousCommand => {
+			this.ambiguityService.moduleAmbiguousCommand$(idModule).subscribe(ambiguousCommand => {
 				this.ambiguousCommand = ambiguousCommand;
 
 				if (!ambiguousCommand || typeof ambiguousCommand.result === "boolean") {
@@ -85,7 +85,7 @@ export class AmbiguitiesComponent implements OnDestroy {
 				}
 			}),
 
-			this.commandsService.$lastUniqueCommands.subscribe(
+			this.commandsService.lastUniqueCommands$.subscribe(
 				commands => this.commandHistory = commands
 			)
 		);

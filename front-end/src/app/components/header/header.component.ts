@@ -58,7 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 		private readonly titleService: TitleService
 	) {
 		this.subscriptions.push(
-			this.authenticationService.$loggedUser.subscribe(user => {
+			this.authenticationService.loggedUser$.subscribe(user => {
 				this.isLoggedIn = this.authenticationService.isLoggedIn();
 
 				if (this.isLoggedIn && user)
@@ -67,12 +67,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
 					this.username = "";
 			}),
 
-			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+			this.languageCommandsService.languageCommands$.subscribe(languageCommands => {
 				const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
 				this.spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
 			}),
 
-			this.titleService.$title.subscribe(title => this.pageTitle = title)
+			this.titleService.title$.subscribe(title => this.pageTitle = title)
 		);
 	}
 

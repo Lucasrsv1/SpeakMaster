@@ -170,7 +170,7 @@
 							<div class="col-12 mt-3" *ngIf="form.controls[p.valueTypeControl].value === CommandParameterTypes.RESTRICTED_VARIABLE">
 								<p class="mb-1">Mapeie cada um dos possíveis valores da variável selecionada para o valor desejado do parâmetro:</p>
 								<div class="row">
-									<div class="col-12 col-md-6 mb-1" *ngFor="let opt of p.restrictedVariableOptions">
+									<div class="col-12 col-md-6 mb-2" *ngFor="let opt of p.restrictedVariableOptions">
 										<label [for]="opt.formControlName" class="form-label fw-medium">
 											{{ opt.automataOption }}
 										</label>
@@ -228,7 +228,7 @@
 			<div>
 				<p class="mb-2">
 					<span class="optional">[Termos opcionais]</span>:
-					colchetes são usados para denotar termos opcionais que podem ou não ser falados;
+					colchetes são usados para denotar termos opcionais que podem ou não serem falados;
 				</p>
 				<p class="mb-2">
 					<span class="list">(Opção 1, Opção 2)</span>:
@@ -248,7 +248,7 @@
 				</p>
 				<p class="mb-0">
 					<span class="source">Demais palavras</span>:
-					o restante são termos obrigatórios que terão de ser falados.
+					o restante são termos obrigatórios que deverão ser falados.
 				</p>
 			</div>
 

@@ -54,7 +54,7 @@ export class CommandsComponent implements OnDestroy {
 	private currentUserModuleCommands?: IUserModuleCommands;
 	private bsModalRef?: BsModalRef;
 	private subscriptions: Subscription[] = [];
-	private $saveTrigger: Subject<boolean> = new Subject();
+	private saveTrigger$: Subject<boolean> = new Subject();
 
 	constructor (
 		private readonly route: ActivatedRoute,
@@ -66,7 +66,7 @@ export class CommandsComponent implements OnDestroy {
 		this.idModule = Number(this.route.snapshot.paramMap.get("idModule"));
 
 		this.subscriptions.push(
-			this.$saveTrigger
+			this.saveTrigger$
 				.pipe(debounceTime(500))
 				.subscribe(skipRerender => this.savePendingCommands(skipRerender))
 		);
@@ -135,7 +135,7 @@ export class CommandsComponent implements OnDestroy {
 					// All changes are applied to objects referenced in this.currentUserModuleCommands.commands,
 					// therefore row.reference is in this.currentUserModuleCommands.commands
 					this.updatePendingChanges(this.currentUserModuleCommands!);
-					this.$saveTrigger.next(false);
+					this.saveTrigger$.next(false);
 
 					this.monacoCrlService.setEditorContent(row.editorUri!, row.command);
 				}
@@ -152,7 +152,7 @@ export class CommandsComponent implements OnDestroy {
 		// All changes are applied to objects referenced in this.currentUserModuleCommands.commands,
 		// therefore row.reference is in this.currentUserModuleCommands.commands
 		this.updatePendingChanges(this.currentUserModuleCommands!);
-		this.$saveTrigger.next(false);
+		this.saveTrigger$.next(false);
 	}
 
 	public deleteCommand (row: IDataTableRow<UserModuleCommand>): void {
@@ -163,10 +163,10 @@ export class CommandsComponent implements OnDestroy {
 
 		this.currentCommands.splice(rowIndex, 1);
 		this.currentUserModuleCommands!.commands.splice(index, 1);
-		this.commandsTable.$rerenderTrigger.next();
+		this.commandsTable.rerenderTrigger$.next();
 
 		this.updatePendingChanges(this.currentUserModuleCommands!);
-		this.$saveTrigger.next(true);
+		this.saveTrigger$.next(true);
 	}
 
 	public addCommand (): void {
@@ -217,7 +217,7 @@ export class CommandsComponent implements OnDestroy {
 					this.currentCommands = this.currentCommands.concat(newRow);
 
 					this.updatePendingChanges(this.currentUserModuleCommands);
-					this.$saveTrigger.next(true);
+					this.saveTrigger$.next(true);
 				}
 
 				this.bsModalRef = undefined;
@@ -272,7 +272,7 @@ export class CommandsComponent implements OnDestroy {
 					this.currentCommands = this.currentCommands.concat(...rows);
 
 					this.updatePendingChanges(this.currentUserModuleCommands);
-					this.$saveTrigger.next(true);
+					this.saveTrigger$.next(true);
 				}
 
 				this.bsModalRef = undefined;
@@ -293,7 +293,7 @@ export class CommandsComponent implements OnDestroy {
 
 				// When data changes, we need to re-render the data table in order to update sort and filter features.
 				if (!skipRerender)
-					this.commandsTable.$rerenderTrigger.next();
+					this.commandsTable.rerenderTrigger$.next();
 			},
 			error: () => {
 				this.errorSaving = true;

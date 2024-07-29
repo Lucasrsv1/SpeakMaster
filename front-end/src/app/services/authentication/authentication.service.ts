@@ -24,7 +24,7 @@ export interface IUserUpdate extends Omit<IUser, "idUser"> {
 
 @Injectable({ providedIn: "root" })
 export class AuthenticationService {
-	public $loggedUser = new BehaviorSubject<IUser | null>(null);
+	public loggedUser$ = new BehaviorSubject<IUser | null>(null);
 
 	constructor (
 		private readonly http: HttpClient,
@@ -35,11 +35,11 @@ export class AuthenticationService {
 	) {
 		// Usa usuário já logado por meio do token armazenado (caso exista)
 		const user = this.getLoggedUser();
-		this.$loggedUser.next(user);
+		this.loggedUser$.next(user);
 	}
 
 	public get loggedUser (): IUser | null {
-		return this.$loggedUser.value;
+		return this.loggedUser$.value;
 	}
 
 	public isLoggedIn (): boolean {
@@ -121,7 +121,7 @@ export class AuthenticationService {
 
 	public signOut (): void {
 		this.localStorage.delete(LocalStorageKey.USER);
-		this.$loggedUser.next(null);
+		this.loggedUser$.next(null);
 		this.router.navigate(["login"]);
 	}
 
@@ -136,7 +136,7 @@ export class AuthenticationService {
 
 	private updateUserToken (token: string): void {
 		this.localStorage.set(LocalStorageKey.USER, token);
-		this.$loggedUser.next(this.getLoggedUser());
+		this.loggedUser$.next(this.getLoggedUser());
 		this.router.navigate(["profile"]);
 	}
 }

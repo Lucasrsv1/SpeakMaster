@@ -149,7 +149,7 @@ export class InstalledModulesComponent implements OnDestroy {
 				this.updatePendingChanges(userModuleCommands, true);
 
 				// When data changes, we need to re-render the data table in order to update sort and filter features.
-				this.commandsTable.$rerenderTrigger.next();
+				this.commandsTable.rerenderTrigger$.next();
 			},
 			error: () => {
 				this.errorSaving = true;

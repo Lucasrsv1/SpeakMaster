@@ -52,11 +52,11 @@ export class SideMenuComponent {
 	}
 
 	public getModuleConnectionStatus (module: IUserModule): BehaviorSubject<boolean> {
-		return this.commandCenterService.$isModuleConnected(module.idModule);
+		return this.commandCenterService.isModuleConnected$(module.idModule);
 	}
 
 	public getModuleAmbiguityNotification (module: IUserModule): BehaviorSubject<boolean> {
-		return this.ambiguityService.$moduleAmbiguityNotification(module.idModule);
+		return this.ambiguityService.moduleAmbiguityNotification$(module.idModule);
 	}
 
 	public toggleModule (event: MouseEvent, module: IUserModule): void {

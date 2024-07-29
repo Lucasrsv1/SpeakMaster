@@ -24,9 +24,9 @@ enum CommandCenterEvents {
 
 @Injectable({ providedIn: "root" })
 export class CommandCenterService implements OnDestroy {
-	public $isConnected = new BehaviorSubject<boolean>(false);
+	public isConnected$ = new BehaviorSubject<boolean>(false);
 
-	private $moduleConnected = new Map<number, BehaviorSubject<boolean>>();
+	private moduleConnected$ = new Map<number, BehaviorSubject<boolean>>();
 	private subscriptions: Subscription[] = [];
 
 	constructor (
@@ -34,15 +34,15 @@ export class CommandCenterService implements OnDestroy {
 		private readonly userModulesService: UserModulesService
 	) {
 		this.subscriptions.push(
-			this.socket.fromEvent("connect").subscribe(() => this.$isConnected.next(true)),
+			this.socket.fromEvent("connect").subscribe(() => this.isConnected$.next(true)),
 
 			this.socket.fromEvent("disconnect").subscribe(() => {
-				this.$isConnected.next(false);
-				this.$moduleConnected.forEach(subject => subject.next(false));
+				this.isConnected$.next(false);
+				this.moduleConnected$.forEach(subject => subject.next(false));
 			}),
 
 			this.socket.fromEvent<{ idModule: number, isConnected: boolean }>(CommandCenterEvents.MODULE_CONNECTION).subscribe(data => {
-				const subject = this.$moduleConnected.get(data.idModule);
+				const subject = this.moduleConnected$.get(data.idModule);
 				subject?.next(data.isConnected);
 
 				if (data.isConnected) {
@@ -60,11 +60,11 @@ export class CommandCenterService implements OnDestroy {
 		);
 	}
 
-	public get $commandResult (): Observable<ICommandResult> {
+	public get commandResult$ (): Observable<ICommandResult> {
 		return this.socket.fromEvent<ICommandResult>(CommandCenterEvents.COMMAND_RESULT);
 	}
 
-	public $getPreferenceDynamicChanges<T extends PreferenceValue> (): Observable<IPreferenceDynamicChanges<T>> {
+	public getPreferenceDynamicChanges$<T extends PreferenceValue> (): Observable<IPreferenceDynamicChanges<T>> {
 		return this.socket.fromEvent<IPreferenceDynamicChanges<T>>(CommandCenterEvents.PREFERENCE_DYNAMIC_CHANGE);
 	}
 
@@ -72,11 +72,11 @@ export class CommandCenterService implements OnDestroy {
 		this.subscriptions.forEach(subscription => subscription.unsubscribe());
 	}
 
-	public $isModuleConnected (moduleId: number): BehaviorSubject<boolean> {
-		if (!this.$moduleConnected.has(moduleId))
-			this.$moduleConnected.set(moduleId, new BehaviorSubject<boolean>(false));
+	public isModuleConnected$ (moduleId: number): BehaviorSubject<boolean> {
+		if (!this.moduleConnected$.has(moduleId))
+			this.moduleConnected$.set(moduleId, new BehaviorSubject<boolean>(false));
 
-		return this.$moduleConnected.get(moduleId)!;
+		return this.moduleConnected$.get(moduleId)!;
 	}
 
 	public sendCommandToModule (idModule: number, featureIdentifier: string, parameters?: IFeatureParameters): number {

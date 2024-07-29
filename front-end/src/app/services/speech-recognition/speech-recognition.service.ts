@@ -57,7 +57,7 @@ export class SpeechRecognitionService implements OnDestroy {
 		};
 
 		this.subscriptions.push(
-			this.authenticationService.$loggedUser.subscribe(user => {
+			this.authenticationService.loggedUser$.subscribe(user => {
 				if (this.authenticationService.isLoggedIn() && user) {
 					this.currentLanguage = user.interfaceLanguage;
 
@@ -71,7 +71,7 @@ export class SpeechRecognitionService implements OnDestroy {
 				}
 			}),
 
-			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+			this.languageCommandsService.languageCommands$.subscribe(languageCommands => {
 				const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
 				const spokenLanguages = languages.filter(language => spokenLanguagesCodes.includes(language.code));
 
@@ -79,7 +79,7 @@ export class SpeechRecognitionService implements OnDestroy {
 					this.currentLanguage = spokenLanguages[0].code;
 			}),
 
-			this.commandsService.$commandToChangeLanguage.subscribe(language => {
+			this.commandsService.commandToChangeLanguage$.subscribe(language => {
 				if (language) {
 					this.currentLanguage = language;
 					this.listenLanguage();

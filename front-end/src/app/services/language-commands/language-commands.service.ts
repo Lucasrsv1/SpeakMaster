@@ -15,8 +15,8 @@ import { LocalStorageKey, LocalStorageService } from "../local-storage/local-sto
 
 @Injectable({ providedIn: "root" })
 export class LanguageCommandsService implements OnDestroy {
-	public $languageCommands = new BehaviorSubject<ILanguageCommands | null>(null);
-	public $updateFailed = new BehaviorSubject<boolean>(false);
+	public languageCommands$ = new BehaviorSubject<ILanguageCommands | null>(null);
+	public updateFailed$ = new BehaviorSubject<boolean>(false);
 
 	private subscription: Subscription;
 
@@ -34,12 +34,12 @@ export class LanguageCommandsService implements OnDestroy {
 			this.loadFromStorage();
 
 		// Ignore first value from BehaviorSubject
-		this.subscription = this.authenticationService.$loggedUser
+		this.subscription = this.authenticationService.loggedUser$
 			.pipe(skip(1))
 			.subscribe(user => {
 				if (!user) {
 					this.localStorage.delete(LocalStorageKey.LANGUAGE_COMMANDS);
-					this.$languageCommands.next(null);
+					this.languageCommands$.next(null);
 					return;
 				}
 
@@ -49,7 +49,7 @@ export class LanguageCommandsService implements OnDestroy {
 	}
 
 	public get languageCommands (): ILanguageCommands | null {
-		return this.$languageCommands.value;
+		return this.languageCommands$.value;
 	}
 
 	public ngOnDestroy (): void {
@@ -60,7 +60,7 @@ export class LanguageCommandsService implements OnDestroy {
 		if (!this.localStorage.hasKey(LocalStorageKey.LANGUAGE_COMMANDS))
 			return;
 
-		this.$languageCommands.next(
+		this.languageCommands$.next(
 			JSON.parse(this.localStorage.get(LocalStorageKey.LANGUAGE_COMMANDS))
 		);
 	}
@@ -97,14 +97,14 @@ export class LanguageCommandsService implements OnDestroy {
 		).pipe(tap({
 			next: _ => {
 				blockUI?.stop();
-				this.$updateFailed.next(false);
+				this.updateFailed$.next(false);
 				this.updateLanguageCommands(languageCommands);
 				this.toastr.success("Comandos de troca de idioma atualizados.", "Sucesso!");
 			},
 
 			error: (error: HttpErrorResponse) => {
 				blockUI?.stop();
-				this.$updateFailed.next(true);
+				this.updateFailed$.next(true);
 				this.alertsService.httpErrorAlert(
 					"Falha ao Atualizar Comandos",
 					"Não foi possível fazer a atualização dos comandos de troca de idioma, tente novamente.",
@@ -116,6 +116,6 @@ export class LanguageCommandsService implements OnDestroy {
 
 	private updateLanguageCommands (languageCommands: ILanguageCommands): void {
 		this.localStorage.set(LocalStorageKey.LANGUAGE_COMMANDS, JSON.stringify(languageCommands));
-		this.$languageCommands.next(languageCommands);
+		this.languageCommands$.next(languageCommands);
 	}
 }

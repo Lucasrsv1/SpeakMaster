@@ -133,11 +133,11 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 
 	@HostListener("window:resize")
 	public onResize () {
-		this.$rerenderTrigger.next();
+		this.rerenderTrigger$.next();
 	}
 
 	public isCardCollapsed: boolean = false;
-	public $rerenderTrigger: Subject<void> = new Subject();
+	public rerenderTrigger$: Subject<void> = new Subject();
 
 	protected dtTrigger: Subject<ADTSettings> = new Subject();
 	protected dtOptions!: ADTSettings;
@@ -202,7 +202,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 		this.selectedLanguageSignal.set(user.interfaceLanguage);
 
 		this.subscriptions.push(
-			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+			this.languageCommandsService.languageCommands$.subscribe(languageCommands => {
 				if (!this.languageOptions()) {
 					// Load spoken languages and use as language options, if no input was provided
 					const spokenLanguagesCodes = languageCommands?.languagesToListen || [];
@@ -215,7 +215,7 @@ export class CommandsTableComponent implements OnInit, AfterViewInit, OnDestroy 
 		);
 
 		this.subscriptions.push(
-			this.$rerenderTrigger
+			this.rerenderTrigger$
 				.pipe(debounceTime(500))
 				.subscribe(() => this.rerenderDataTables())
 		);

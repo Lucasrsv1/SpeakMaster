@@ -67,7 +67,7 @@ export class ProfileComponent implements OnDestroy {
 	private currentLanguage?: LanguageCode;
 	private bsModalRef?: BsModalRef;
 	private subscriptions: Subscription[] = [];
-	private $saveTrigger: Subject<void> = new Subject();
+	private saveTrigger$: Subject<void> = new Subject();
 
 	constructor (
 		public readonly languageCommandsService: LanguageCommandsService,
@@ -108,7 +108,7 @@ export class ProfileComponent implements OnDestroy {
 		this.resetForm();
 
 		this.subscriptions.push(
-			this.languageCommandsService.$languageCommands.subscribe(languageCommands => {
+			this.languageCommandsService.languageCommands$.subscribe(languageCommands => {
 				this.languageCommands = languageCommands;
 				this.form.get("languagesToListen")!.setValue(
 					languageCommands?.languagesToListen || []
@@ -119,7 +119,7 @@ export class ProfileComponent implements OnDestroy {
 		);
 
 		this.subscriptions.push(
-			this.$saveTrigger
+			this.saveTrigger$
 				.pipe(debounceTime(500))
 				.subscribe(() => this.saveLanguageCommands())
 		);
@@ -203,7 +203,7 @@ export class ProfileComponent implements OnDestroy {
 			this.bsModalRef.onHide!.subscribe(() => {
 				if (originalCommand !== row.command) {
 					row.reference.command = row.command;
-					this.$saveTrigger.next();
+					this.saveTrigger$.next();
 					this.monacoCrlService.setEditorContent(row.editorUri!, row.command);
 				}
 
@@ -215,7 +215,7 @@ export class ProfileComponent implements OnDestroy {
 	public toggleCommand (row: IDataTableRow<ILanguageCommand>): void {
 		row.isToggleActive = !row.isToggleActive;
 		row.reference.isActive = row.isToggleActive;
-		this.$saveTrigger.next();
+		this.saveTrigger$.next();
 	}
 
 	public saveLanguageCommands (): void {
@@ -225,7 +225,7 @@ export class ProfileComponent implements OnDestroy {
 		this.languageCommandsService.update(this.languageCommands).subscribe({
 			next: () => {
 				// When data changes, we need to re-render the data table in order to update sort and filter features.
-				this.commandsTable.$rerenderTrigger.next();
+				this.commandsTable.rerenderTrigger$.next();
 			}
 		});
 	}

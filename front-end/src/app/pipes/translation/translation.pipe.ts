@@ -15,7 +15,7 @@ export class TranslationPipe implements PipeTransform, OnDestroy {
 	private subscription: Subscription;
 
 	constructor (private readonly authenticationService: AuthenticationService) {
-		this.subscription = this.authenticationService.$loggedUser.subscribe(user => {
+		this.subscription = this.authenticationService.loggedUser$.subscribe(user => {
 			this.interfaceLanguage = user ? user.interfaceLanguage : LanguageCode.EN_US;
 		});
 	}

@@ -19,7 +19,7 @@ import { UserModulesService } from "../user-modules/user-modules.service";
 
 @Injectable({ providedIn: "root" })
 export class CommandMatchingService implements OnDestroy {
-	public $commandToChangeLanguage = new BehaviorSubject<LanguageCode | null>(null);
+	public commandToChangeLanguage$ = new BehaviorSubject<LanguageCode | null>(null);
 
 	private languageCommands = new Map<Automata, LanguageCode>();
 	private moduleCommands = new Map<Automata, { idModule: number, command: Command}>();
@@ -38,12 +38,12 @@ export class CommandMatchingService implements OnDestroy {
 
 		// Observa mudanças nos cadastros para reconstruir os comandos
 		this.subscriptions.push(
-			this.languageCommandsService.$languageCommands
+			this.languageCommandsService.languageCommands$
 				.pipe(skip(1))
 				.pipe(debounceTime(5000))
 				.subscribe(this.rebuildLanguageCommands.bind(this)),
 
-			this.userModulesService.$userModules
+			this.userModulesService.userModules$
 				.pipe(skip(1))
 				.pipe(debounceTime(5000))
 				.subscribe(this.rebuildModulesCommands.bind(this))
@@ -83,7 +83,7 @@ export class CommandMatchingService implements OnDestroy {
 			if (!result.match) continue;
 
 			// Altera o idioma do microfone para languageCode
-			this.$commandToChangeLanguage.next(languageCode);
+			this.commandToChangeLanguage$.next(languageCode);
 
 			return {
 				sentAt: Date.now(),

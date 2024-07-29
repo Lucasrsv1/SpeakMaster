@@ -94,7 +94,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	protected parameters: IFeatureParameter[] = [];
 	protected CommandParameterTypes = CommandParameterTypes;
 
-	private $valueChanged: Subject<void> = new Subject();
+	private valueChanged$: Subject<void> = new Subject();
 
 	private currentAutomata?: Automata;
 	private currentCommand: string = "";
@@ -109,7 +109,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	) {
 		this.monacoCrlService.registerCRL();
 		this.subscriptions.push(
-			this.$valueChanged
+			this.valueChanged$
 				.pipe(debounceTime(500))
 				.subscribe(() => this.getPossibleCommands())
 		);
@@ -186,7 +186,7 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 	protected onValueChanged (value: string): void {
 		this.currentCommand = value;
 		this.monacoCrlService.validate(this.codeModel.uri);
-		this.$valueChanged.next();
+		this.valueChanged$.next();
 	}
 
 	protected getParameterValueTypes (parameter: Parameter): ISelectOption[] {

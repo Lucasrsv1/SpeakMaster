@@ -16,7 +16,7 @@ import { LocalStorageKey, LocalStorageService } from "../local-storage/local-sto
 
 @Injectable({ providedIn: "root" })
 export class UserModulesService implements OnDestroy {
-	public $userModules = new BehaviorSubject<IUserModule[] | null>([]);
+	public userModules$ = new BehaviorSubject<IUserModule[] | null>([]);
 
 	private subscription: Subscription;
 
@@ -27,9 +27,9 @@ export class UserModulesService implements OnDestroy {
 		private readonly authenticationService: AuthenticationService,
 		private readonly localStorage: LocalStorageService
 	) {
-		this.subscription = this.authenticationService.$loggedUser.subscribe(user => {
+		this.subscription = this.authenticationService.loggedUser$.subscribe(user => {
 			if (!user) {
-				this.$userModules.next(null);
+				this.userModules$.next(null);
 				this.localStorage.delete(LocalStorageKey.USER_MODULES);
 				return;
 			}
@@ -42,7 +42,7 @@ export class UserModulesService implements OnDestroy {
 	}
 
 	public get userModules (): IUserModule[] | null {
-		return this.$userModules.value;
+		return this.userModules$.value;
 	}
 
 	public ngOnDestroy (): void {
@@ -53,7 +53,7 @@ export class UserModulesService implements OnDestroy {
 		if (!this.localStorage.hasKey(LocalStorageKey.USER_MODULES))
 			return;
 
-		this.$userModules.next(
+		this.userModules$.next(
 			JSON.parse(this.localStorage.get(LocalStorageKey.USER_MODULES))
 		);
 	}
@@ -217,6 +217,6 @@ export class UserModulesService implements OnDestroy {
 
 	private updateUserModules (userModules: IUserModule[]): void {
 		this.localStorage.set(LocalStorageKey.USER_MODULES, JSON.stringify(userModules));
-		this.$userModules.next(userModules);
+		this.userModules$.next(userModules);
 	}
 }

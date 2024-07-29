@@ -28,7 +28,7 @@
 		<div>
 			<ul class="navbar-nav flex-row align-items-center" *ngIf="isLoggedIn">
 				<li class="nav-item">
-					@if (commandCenterService.$isConnected | async) {
+					@if (commandCenterService.isConnected$ | async) {
 						<ng-template #tooltipTemplate>
 							Conectado à Central de Comandos.<br>
 							Você pode enviar comandos para os seus módulos.

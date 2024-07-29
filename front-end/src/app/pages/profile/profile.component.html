@@ -114,7 +114,7 @@
 			<app-commands-table
 				[settings]="{ canEdit: true }"
 				[currentCommands]="currentCommands"
-				[hasPendingChanges]="(languageCommandsService.$updateFailed | async) || false"
+				[hasPendingChanges]="(languageCommandsService.updateFailed$ | async) || false"
 				(toggle)="toggleCommand($event)"
 				(edit)="editCommand($event)"
 				(savePendingChanges)="saveLanguageCommands()"

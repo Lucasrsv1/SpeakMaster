@@ -17,8 +17,8 @@ const MAX_HISTORY_LENGTH = 512;
 
 @Injectable({ providedIn: "root" })
 export class CommandsService implements OnDestroy {
-	public $lastCommands = new BehaviorSubject<IExecutedCommand[]>([]);
-	public $lastUniqueCommands = new BehaviorSubject<string[]>([]);
+	public lastCommands$ = new BehaviorSubject<IExecutedCommand[]>([]);
+	public lastUniqueCommands$ = new BehaviorSubject<string[]>([]);
 
 	private idUser?: number;
 	private subscription: Subscription[] = [];
@@ -31,19 +31,19 @@ export class CommandsService implements OnDestroy {
 		private readonly localStorage: LocalStorageService
 	) {
 		this.subscription.push(
-			this.authenticationService.$loggedUser.subscribe(user => {
+			this.authenticationService.loggedUser$.subscribe(user => {
 				if (!user) {
 					this.idUser = undefined;
-					this.$lastCommands.next([]);
-					this.$lastUniqueCommands.next([]);
+					this.lastCommands$.next([]);
+					this.lastUniqueCommands$.next([]);
 					return;
 				}
 
 				this.idUser = user.idUser;
 				if (!this.localStorage.hasKey(LocalStorageKey.LAST_COMMANDS, user.idUser.toString())) {
 					this.localStorage.set(LocalStorageKey.LAST_COMMANDS, "[]", user.idUser.toString());
-					this.$lastCommands.next([]);
-					this.$lastUniqueCommands.next([]);
+					this.lastCommands$.next([]);
+					this.lastUniqueCommands$.next([]);
 					return;
 				}
 
@@ -53,26 +53,26 @@ export class CommandsService implements OnDestroy {
 						this.setCommandTimeout(command);
 				}
 
-				this.$lastCommands.next(commands);
-				this.$lastUniqueCommands.next(
+				this.lastCommands$.next(commands);
+				this.lastUniqueCommands$.next(
 					this.localStorage.parse<string[]>(LocalStorageKey.LAST_UNIQUE_COMMANDS, [], user.idUser.toString())
 				);
 			}),
 
-			this.commandCenterService.$commandResult.subscribe(this.gotResultForCommand.bind(this))
+			this.commandCenterService.commandResult$.subscribe(this.gotResultForCommand.bind(this))
 		);
 	}
 
 	public get lastCommands (): IExecutedCommand[] {
-		return this.$lastCommands.value;
+		return this.lastCommands$.value;
 	}
 
 	public get lastUniqueCommands (): string[] {
-		return this.$lastUniqueCommands.value;
+		return this.lastUniqueCommands$.value;
 	}
 
-	public get $commandToChangeLanguage (): BehaviorSubject<LanguageCode | null> {
-		return this.commandMatchingService.$commandToChangeLanguage;
+	public get commandToChangeLanguage$ (): BehaviorSubject<LanguageCode | null> {
+		return this.commandMatchingService.commandToChangeLanguage$;
 	}
 
 	public ngOnDestroy (): void {
@@ -128,7 +128,7 @@ export class CommandsService implements OnDestroy {
 		if (!this.idUser)
 			return;
 
-		this.$lastCommands.next(this.lastCommands);
+		this.lastCommands$.next(this.lastCommands);
 		this.localStorage.set(
 			LocalStorageKey.LAST_COMMANDS,
 			JSON.stringify(this.lastCommands.slice(0, MAX_HISTORY_LENGTH)),
@@ -140,7 +140,7 @@ export class CommandsService implements OnDestroy {
 		if (!this.idUser)
 			return;
 
-		this.$lastUniqueCommands.next(this.lastUniqueCommands);
+		this.lastUniqueCommands$.next(this.lastUniqueCommands);
 		this.localStorage.set(
 			LocalStorageKey.LAST_UNIQUE_COMMANDS,
 			JSON.stringify(this.lastUniqueCommands.slice(0, MAX_HISTORY_LENGTH)),

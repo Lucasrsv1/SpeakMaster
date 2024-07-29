@@ -26,7 +26,7 @@ export class LastCommandsComponent implements OnDestroy {
 	private subscription: Subscription;
 
 	constructor (private readonly commandsService: CommandsService) {
-		this.subscription = this.commandsService.$lastCommands.subscribe(commands => this.commands = commands);
+		this.subscription = this.commandsService.lastCommands$.subscribe(commands => this.commands = commands);
 	}
 
 	public ngOnDestroy (): void {

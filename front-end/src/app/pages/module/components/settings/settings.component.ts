@@ -205,7 +205,7 @@ export class SettingsComponent implements OnDestroy {
 
 		this.loadSavedPreferences();
 		this.subscriptions.push(
-			this.commandCenterService.$getPreferenceDynamicChanges().subscribe(changes => {
+			this.commandCenterService.getPreferenceDynamicChanges$().subscribe(changes => {
 				if (changes.idModule !== this.idModule)
 					return;
 
