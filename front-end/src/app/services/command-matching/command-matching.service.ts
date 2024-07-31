@@ -113,8 +113,12 @@ export class CommandMatchingService implements OnDestroy {
 				if (!languageCommand.isActive || !languageCommands.languagesToListen.includes(languageCommand.targetLanguageCode))
 					continue;
 
-				const automata = new Automata(languageCommand.command.trim());
-				this.languageCommands.set(automata, languageCommand.targetLanguageCode);
+				try {
+					const automata = new Automata(languageCommand.command.trim());
+					this.languageCommands.set(automata, languageCommand.targetLanguageCode);
+				} catch (error) {
+					console.warn(languageCommand.command.trim(), error);
+				}
 			}
 		}
 
@@ -142,8 +146,12 @@ export class CommandMatchingService implements OnDestroy {
 				}
 
 				for (const moduleCommand of userModuleCommand.commands || []) {
-					const automata = new Automata(`${prefix} ${moduleCommand.command}`.trim());
-					this.moduleCommands.set(automata, { idModule: userModule.idModule, command: moduleCommand });
+					try {
+						const automata = new Automata(`${prefix} ${moduleCommand.command}`.trim());
+						this.moduleCommands.set(automata, { idModule: userModule.idModule, command: moduleCommand });
+					} catch (error) {
+						console.warn(`${prefix} ${moduleCommand.command}`.trim(), error);
+					}
 				}
 			}
 		}

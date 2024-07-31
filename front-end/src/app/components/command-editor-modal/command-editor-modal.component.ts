@@ -191,7 +191,8 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 	protected getParameterValueTypes (parameter: Parameter): ISelectOption[] {
 		const options = [
-			{ label: "Valor constante", value: CommandParameterTypes.CONSTANT }
+			{ label: "Valor constante", value: CommandParameterTypes.CONSTANT },
+			{ label: "Variável restrita", value: CommandParameterTypes.RESTRICTED_VARIABLE }
 		];
 
 		if (parameter.optional)
@@ -199,8 +200,6 @@ export class CommandEditorModalComponent implements OnInit, OnDestroy {
 
 		if (!parameter.allowedValues.length)
 			options.push({ label: "Variável", value: CommandParameterTypes.VARIABLE });
-		else
-			options.push({ label: "Variável restrita", value: CommandParameterTypes.RESTRICTED_VARIABLE });
 
 		return options.sort((a, b) => a.label.localeCompare(b.label));
 	}
