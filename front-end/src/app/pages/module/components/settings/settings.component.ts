@@ -19,6 +19,7 @@ import {
 	PreferenceGroup,
 	PreferenceType,
 	PreferenceValue,
+	SelectOption,
 	SingleSelectPreference,
 	SortedListPreference,
 	StringPreference
@@ -35,6 +36,12 @@ import { TranslationPipe } from "../../../../pipes/translation/translation.pipe"
 import { AuthenticationService } from "../../../../services/authentication/authentication.service";
 import { CommandCenterService } from "../../../../services/command-center/command-center.service";
 import { UserModulesService } from "../../../../services/user-modules/user-modules.service";
+
+interface ITranslatedOption {
+	description: string;
+	label: string;
+	value: PreferenceValue;
+}
 
 @Component({
 	selector: "app-module-settings",
@@ -67,7 +74,7 @@ export class SettingsComponent implements OnDestroy {
 	public form: FormGroup;
 	public validations: IValidations;
 	public preferenceGroups: PreferenceGroup[];
-	public translatedPreferenceOptions: Record<string, Array<{ label: string; value: PreferenceValue; }>> = {};
+	public translatedPreferenceOptions: Record<string, ITranslatedOption[]> = {};
 
 	private idModule: number;
 	private currentPreferenceValues: Record<string, PreferenceValue> = {};
@@ -123,46 +130,19 @@ export class SettingsComponent implements OnDestroy {
 						case PreferenceType.SINGLE_SELECT: {
 							// ? MULTI_SELECT and SINGLE_SELECT have the same options structure
 							const selectPreference = preference as SingleSelectPreference<PreferenceValue>;
-
-							const options = [];
-							for (const option of selectPreference.options) {
-								let label = this.translationPipe.transform(option);
-								if (!label) {
-									if (typeof option.value === "object")
-										label = JSON.stringify(option.value);
-									else if (option.value)
-										label = option.value.toString();
-									else
-										label = "-";
-								}
-
-								options.push({ label, value: option.value });
-							}
-
-							this.translatedPreferenceOptions[selectPreference.identifier] = options;
+							this.translatedPreferenceOptions[selectPreference.identifier] = this.buildOptionsList(selectPreference.options);
 							break;
 						}
 						case PreferenceType.SORTED_LIST: {
 							const sortedListPreference = preference as SortedListPreference<PreferenceValue>;
 
-							// TODO: carregar ordenação inicial de acordo com o valor da preferência
-							const list = [];
-							for (const item of sortedListPreference.list) {
-								let label = this.translationPipe.transform(item);
-								if (!label) {
-									if (typeof item.value === "object")
-										label = JSON.stringify(item.value);
-									else if (item.value)
-										label = item.value.toString();
-									else
-										label = "-";
-								}
-
-								const description = this.translationPipe.transform(item, "description");
-								list.push({ description, label, value: item.value });
-							}
-
-							this.translatedPreferenceOptions[sortedListPreference.identifier] = list;
+							// Carrega ordenação inicial de acordo com o valor da preferência
+							const orderedValues = preference.value as PreferenceValue[] || [];
+							this.translatedPreferenceOptions[sortedListPreference.identifier] = this.buildOptionsList(sortedListPreference.list).sort((a, b) => {
+								const aIndex = orderedValues.includes(a.value) ? orderedValues.indexOf(a.value) : Infinity;
+								const bIndex = orderedValues.includes(b.value) ? orderedValues.indexOf(b.value) : Infinity;
+								return aIndex - bIndex;
+							});
 							break;
 						}
 						case PreferenceType.STRING: {
@@ -181,7 +161,7 @@ export class SettingsComponent implements OnDestroy {
 						}
 					}
 
-					if (!preference.isOptional) {
+					if (!preference.isOptional && ![PreferenceType.ACTION_BUTTON, PreferenceType.BOOLEAN, PreferenceType.SORTED_LIST].includes(preference.type)) {
 						validations.push(Validators.required);
 						visualValidations.push({ key: "required" });
 					}
@@ -224,8 +204,13 @@ export class SettingsComponent implements OnDestroy {
 	}
 
 	public actionButtonClicked (preference: Preference<PreferenceValue>): void {
-		// TODO: handle action button click event
-		console.log("TODO: handle action button click event", preference);
+		if (!this.userModule)
+			return;
+
+		this.commandCenterService.sendPreferenceValueUpdateToModule(
+			this.userModule.idModule,
+			[{ identifier: preference.identifier, value: { clickSignal: crypto.randomUUID() } }]
+		);
 	}
 
 	public updatePreferences (preferences: IPreferenceUpdate<PreferenceValue> | IPreferenceUpdate<PreferenceValue>[]): void {
@@ -245,17 +230,81 @@ export class SettingsComponent implements OnDestroy {
 			else
 				control.enable();
 
-			// TODO: handle other types of dynamic changes
+			if ("options" in preference && preference.options) {
+				this.translatedPreferenceOptions[preference.identifier] = this.buildOptionsList(preference.options);
+			} else if ("list" in preference && preference.list) {
+				const orderedValues = preference.value as PreferenceValue[] || [];
+				this.translatedPreferenceOptions[preference.identifier] = this.buildOptionsList(preference.list).sort((a, b) => {
+					const aIndex = orderedValues.includes(a.value) ? orderedValues.indexOf(a.value) : Infinity;
+					const bIndex = orderedValues.includes(b.value) ? orderedValues.indexOf(b.value) : Infinity;
+					return aIndex - bIndex;
+				});
+
+				this.form.patchValue({ [preference.identifier]: this.translatedPreferenceOptions[preference.identifier] });
+			}
+
+			if ("label" in preference) {
+				const preferenceDefinition = this.findPreference<ActionButtonPreference<PreferenceValue>>(preference.identifier);
+				if (!preferenceDefinition)
+					return;
+
+				if (preference.label)
+					preferenceDefinition.label = preference.label;
+
+				if (preference.buttonText)
+					preferenceDefinition.buttonText = preference.buttonText;
+
+				if (preference.buttonIcon)
+					preferenceDefinition.buttonIcon = preference.buttonIcon;
+			}
 		}
 	}
 
 	public loadSavedPreferences (): void {
 		const savedValues = this.userModule?.preferences || {};
 		this.form.patchValue(savedValues);
+
+		for (const group of this.preferenceGroups) {
+			for (const row of group.preferenceRows) {
+				for (const preference of row) {
+					if (preference?.type === PreferenceType.SORTED_LIST) {
+						const list = this.translatedPreferenceOptions[preference.identifier];
+						const orderedValues = savedValues[preference.identifier] as PreferenceValue[];
+
+						list.sort((a, b) => {
+							const aIndex = orderedValues.includes(a.value) ? orderedValues.indexOf(a.value) : Infinity;
+							const bIndex = orderedValues.includes(b.value) ? orderedValues.indexOf(b.value) : Infinity;
+							return aIndex - bIndex;
+						});
+
+						this.form.patchValue({ [preference.identifier]: list });
+					}
+				}
+			}
+		}
 	}
 
 	public loadCurrentValues (): void {
 		this.form.patchValue(this.currentPreferenceValues);
+
+		for (const group of this.preferenceGroups) {
+			for (const row of group.preferenceRows) {
+				for (const preference of row) {
+					if (preference?.type === PreferenceType.SORTED_LIST) {
+						const list = this.translatedPreferenceOptions[preference.identifier];
+						const orderedValues = this.currentPreferenceValues[preference.identifier] as PreferenceValue[];
+
+						list.sort((a, b) => {
+							const aIndex = orderedValues.includes(a.value) ? orderedValues.indexOf(a.value) : Infinity;
+							const bIndex = orderedValues.includes(b.value) ? orderedValues.indexOf(b.value) : Infinity;
+							return aIndex - bIndex;
+						});
+
+						this.form.patchValue({ [preference.identifier]: list });
+					}
+				}
+			}
+		}
 	}
 
 	public save (): void {
@@ -269,12 +318,52 @@ export class SettingsComponent implements OnDestroy {
 		const preferencesUpdate: IPreferenceValueUpdate[] = [];
 
 		for (const [key, value] of Object.entries(this.form.value)) {
-			preferences[key] = value as PreferenceValue;
-			preferencesUpdate.push({ identifier: key, value: value as PreferenceValue });
+			const preferenceDefinition = this.findPreference<Preference<PreferenceValue>>(key);
+			if (preferenceDefinition?.type !== PreferenceType.SORTED_LIST) {
+				preferences[key] = value as PreferenceValue;
+				preferencesUpdate.push({ identifier: key, value: value as PreferenceValue });
+			} else if (value && Array.isArray(value)) {
+				const orderedValues = (value as ITranslatedOption[]).map(option => option.value);
+				preferences[key] = orderedValues;
+				preferencesUpdate.push({ identifier: key, value: orderedValues });
+			}
 		}
 
 		module.preferences = preferences;
 		this.commandCenterService.sendPreferenceValueUpdateToModule(module.idModule, preferencesUpdate);
 		this.userModulesService.savePreferences(module, this.blockUI);
+	}
+
+	private findPreference<T extends Preference<PreferenceValue>> (identifier: string): T | undefined {
+		for (const group of this.preferenceGroups) {
+			for (const row of group.preferenceRows) {
+				for (const preference of row) {
+					if (preference?.identifier === identifier)
+						return preference as T;
+				}
+			}
+		}
+
+		return undefined;
+	}
+
+	private buildOptionsList (options: SelectOption<PreferenceValue>[]): ITranslatedOption[] {
+		const list: ITranslatedOption[] = [];
+		for (const option of options) {
+			let label = this.translationPipe.transform(option);
+			if (!label) {
+				if (typeof option.value === "object")
+					label = JSON.stringify(option.value);
+				else if (option.value)
+					label = option.value.toString();
+				else
+					label = "-";
+			}
+
+			const description = this.translationPipe.transform(option, "description");
+			list.push({ description, label, value: option.value });
+		}
+
+		return list;
 	}
 }

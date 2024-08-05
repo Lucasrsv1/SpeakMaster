@@ -65,8 +65,8 @@
 						>
 							<ng-template ng-option-tmp let-item="item">
 								<div>
-									<h6 class="mb-0">{{ item.label }}</h6>
-									<small>{{ item.description }}</small>
+									<h6 class="mb-0" [title]="item.label">{{ item.label }}</h6>
+									<small [title]="item.description">{{ item.description }}</small>
 								</div>
 							</ng-template>
 						</ng-select>
@@ -129,8 +129,8 @@
 											>
 												<ng-template ng-option-tmp let-item="item">
 													<div>
-														<h6 class="mb-0">{{ item.label }}</h6>
-														<small>{{ item.description }}</small>
+														<h6 class="mb-0" [title]="item.label">{{ item.label }}</h6>
+														<small [title]="item.description">{{ item.description }}</small>
 													</div>
 												</ng-template>
 											</ng-select>
@@ -183,8 +183,8 @@
 												>
 													<ng-template ng-option-tmp let-item="item">
 														<div>
-															<h6 class="mb-0">{{ item.label }}</h6>
-															<small>{{ item.description }}</small>
+															<h6 class="mb-0" [title]="item.label">{{ item.label }}</h6>
+															<small [title]="item.description">{{ item.description }}</small>
 														</div>
 													</ng-template>
 												</ng-select>

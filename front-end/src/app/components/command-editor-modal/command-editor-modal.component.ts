@@ -1,5 +1,4 @@
 import { MatIcon } from "@angular/material/icon";
-import { NgSelectModule } from "@ng-select/ng-select";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgFor, NgIf } from "@angular/common";
@@ -7,6 +6,7 @@ import { NgFor, NgIf } from "@angular/common";
 import { BsModalRef } from "ngx-bootstrap/modal";
 import { CollapseModule } from "ngx-bootstrap/collapse";
 import { NgScrollbarModule } from "ngx-scrollbar";
+import { NgSelectModule } from "@ng-select/ng-select";
 import { CodeEditorComponent, CodeEditorModule, CodeModel } from "@ngstack/code-editor";
 
 import { editor } from "monaco-editor";

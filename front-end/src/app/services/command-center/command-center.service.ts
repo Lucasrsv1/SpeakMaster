@@ -26,6 +26,7 @@ enum CommandCenterEvents {
 export class CommandCenterService implements OnDestroy {
 	public isConnected$ = new BehaviorSubject<boolean>(false);
 
+	private monitoringModulePreferences: Record<number, boolean> = {};
 	private moduleConnected$ = new Map<number, BehaviorSubject<boolean>>();
 	private subscriptions: Subscription[] = [];
 
@@ -55,6 +56,13 @@ export class CommandCenterService implements OnDestroy {
 						preferencesUpdate.push({ identifier: key, value });
 
 					this.sendPreferenceValueUpdateToModule(data.idModule, preferencesUpdate);
+
+					if (data.idModule in this.monitoringModulePreferences) {
+						// Aguarda 1 segundo para garantir que a mensagem será enviada depois da atualização das preferências
+						setTimeout(() => {
+							this.monitorModulePreferences(data.idModule, this.monitoringModulePreferences[data.idModule]);
+						}, 1000);
+					}
 				}
 			})
 		);
@@ -96,5 +104,6 @@ export class CommandCenterService implements OnDestroy {
 	public monitorModulePreferences (idModule: number, subscribe: boolean): void {
 		console.log("MONITOR MODULE PREFERENCES:", idModule, subscribe);
 		this.socket.emit(CommandCenterEvents.PREFERENCE_WATCH, { idModule, subscribe });
+		this.monitoringModulePreferences[idModule] = subscribe;
 	}
 }

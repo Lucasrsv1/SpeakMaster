@@ -48,7 +48,7 @@
 										[class.me-3]="(preference | as:ActionButtonPreference).position === ActionButtonPosition.RIGHT"
 										[for]="preference.identifier"
 									>
-										{{ (preference | translation) || preference.identifier }}
+										{{ (preference | as:ActionButtonPreference).label || preference.identifier }}
 									</label>
 								}
 
@@ -114,18 +114,34 @@
 									@case (PreferenceType.SINGLE_SELECT) {
 										<ng-select
 											[items]="translatedPreferenceOptions[preference.identifier]"
+											bindValue="value"
 											[labelForId]="preference.identifier"
 											[formControlName]="preference.identifier"
-										></ng-select>
+										>
+											<ng-template ng-option-tmp let-item="item">
+												<div>
+													<h6 class="mb-0" [title]="item.label">{{ item.label }}</h6>
+													<small [title]="item.description">{{ item.description }}</small>
+												</div>
+											</ng-template>
+										</ng-select>
 									}
 									@case (PreferenceType.MULTI_SELECT) {
 										<ng-select
 											[items]="translatedPreferenceOptions[preference.identifier]"
+											bindValue="value"
 											[multiple]="true"
 											[closeOnSelect]="false"
 											[labelForId]="preference.identifier"
 											[formControlName]="preference.identifier"
-										></ng-select>
+										>
+											<ng-template ng-option-tmp let-item="item">
+												<div>
+													<h6 class="mb-0" [title]="item.label">{{ item.label }}</h6>
+													<small [title]="item.description">{{ item.description }}</small>
+												</div>
+											</ng-template>
+										</ng-select>
 									}
 									@case (PreferenceType.SORTED_LIST) {
 										<ng-template #itemTemplate let-item="item" let-index="index">
@@ -133,9 +149,9 @@
 												<mat-icon fontIcon="drag_handle" class="rotate-90"></mat-icon>
 												<div class="ms-3 me-4">#{{index + 1}}</div>
 												<div>
-													<div>{{item.value.label}}</div>
+													<div>{{ item.value.label }}</div>
 													<div *ngIf="item.value.description" class="fs-6">
-														{{item.value.description}}
+														{{ item.value.description }}
 													</div>
 												</div>
 											</div>
@@ -146,8 +162,8 @@
 											[itemTemplate]="itemTemplate"
 											itemClass="sortable-item list-group-item"
 											itemActiveClass="sortable-item-active"
-											placeholderItem="Drag here"
-											placeholderClass="placeholderStyle text-center"
+											placeholderItem="Nenhuma opção para ordenar."
+											placeholderClass="placeholderStyle text-center text-muted"
 											wrapperClass="sortable-wrapper list-group"
 										></bs-sortable>
 									}
