@@ -4,9 +4,9 @@ import { ToastrService } from "ngx-toastr";
 
 import { BehaviorSubject, debounceTime, skip, Subscription } from "rxjs";
 
-import { Automata } from "speakmaster-crl";
 import { Command } from "speakmaster-module-builder/default-commands-builder";
 import { LanguageCode } from "speakmaster-module-builder";
+import { Automata, Match } from "speakmaster-crl";
 
 import { ILanguageCommands } from "../../models/language-command";
 import { IUserModule } from "../../models/user-module";
@@ -55,22 +55,33 @@ export class CommandMatchingService implements OnDestroy {
 	}
 
 	public matchCommand (command: string): IExecutedCommand {
+		let bestCommandMatch: {
+			result: Match;
+			moduleCommand: {
+				idModule: number;
+				command: Command;
+			}
+		} | null = null;
+
 		for (const [automata, moduleCommand] of this.moduleCommands) {
 			const result = automata.match(command);
-			if (!result.match) continue;
+			if (result.match && (!bestCommandMatch || result.variablesWordCount < bestCommandMatch.result.variablesWordCount))
+				bestCommandMatch = { result, moduleCommand };
+		}
 
+		if (bestCommandMatch) {
 			// Gera o objeto de parâmetros com base na funcionalidade associada ao comando
 			const parameters = this.commandParametersService.buildParametersObject(
-				result, moduleCommand.idModule, moduleCommand.command
+				bestCommandMatch.result, bestCommandMatch.moduleCommand.idModule, bestCommandMatch.moduleCommand.command
 			);
 
 			const sentAt = this.commandCenterService.sendCommandToModule(
-				moduleCommand.idModule, moduleCommand.command.featureIdentifier, parameters
+				bestCommandMatch.moduleCommand.idModule, bestCommandMatch.moduleCommand.command.featureIdentifier, parameters
 			);
 
 			return {
-				idModule: moduleCommand.idModule,
-				featureIdentifier: moduleCommand.command.featureIdentifier,
+				idModule: bestCommandMatch.moduleCommand.idModule,
+				featureIdentifier: bestCommandMatch.moduleCommand.command.featureIdentifier,
 				value: command,
 				status: CommandExecutionStatus.PENDING,
 				description: "Executando...",
@@ -78,12 +89,20 @@ export class CommandMatchingService implements OnDestroy {
 			};
 		}
 
+		let bestLanguageMatch: {
+			result: Match;
+			languageCode: LanguageCode;
+		} | null = null;
+
 		for (const [automata, languageCode] of this.languageCommands) {
 			const result = automata.match(command);
-			if (!result.match) continue;
+			if (result.match && (!bestLanguageMatch || result.variablesWordCount < bestLanguageMatch.result.variablesWordCount))
+				bestLanguageMatch = { result, languageCode };
+		}
 
+		if (bestLanguageMatch) {
 			// Altera o idioma do microfone para languageCode
-			this.commandToChangeLanguage$.next(languageCode);
+			this.commandToChangeLanguage$.next(bestLanguageMatch.languageCode);
 
 			return {
 				sentAt: Date.now(),
