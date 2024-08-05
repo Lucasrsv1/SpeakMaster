@@ -1,6 +1,6 @@
 {
 	"name": "speakmaster",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "SpeakMaster: realizando tarefas via comandos de voz em múltiplos idiomas",
 	"main": "index.js",
 	"scripts": {
